@@ -12,7 +12,6 @@ import android.content.ContentValues;
 import com.google.common.collect.Iterables;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
-
 public class PodcastHandlerTest extends TestCase {
 
 	public void testCreateContentValue() throws Exception {
@@ -41,7 +40,6 @@ public class PodcastHandlerTest extends TestCase {
 		//assertEquals("", values.getAsString(PodcastColumns.RICH_SCRIPT));
 		//assertEquals("", values.getAsString(PodcastColumns.TAGS));
 	}
-
 
 	public void testGetItemNodes() throws Exception {
 		InputStream inputStream = getClass().getResourceAsStream("/podcast.xml");

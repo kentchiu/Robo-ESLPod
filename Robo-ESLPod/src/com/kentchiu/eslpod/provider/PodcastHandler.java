@@ -31,7 +31,6 @@ import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
 public class PodcastHandler {
 
-
 	public List<Node> getItemNodes(InputStream inputStream) throws XPathExpressionException {
 		XPath xpath = XPathFactory.newInstance().newXPath();
 		InputSource inputSource = new InputSource(inputStream);

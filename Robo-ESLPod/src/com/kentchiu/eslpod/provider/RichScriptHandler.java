@@ -54,7 +54,6 @@ public class RichScriptHandler {
 		return ImmutableList.copyOf(result);
 	}
 
-
 	public void handleResponse(HttpResponse response, Uri uri) throws IOException {
 		InputStream is = response.getEntity().getContent();
 		List<String> lines = IOUtils.readLines(is, "iso-8859-1");

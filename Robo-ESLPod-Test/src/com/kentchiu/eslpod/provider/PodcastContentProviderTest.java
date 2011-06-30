@@ -3,6 +3,7 @@ package com.kentchiu.eslpod.provider;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
+import android.provider.BaseColumns;
 import android.test.ProviderTestCase2;
 
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
@@ -33,7 +34,7 @@ public class PodcastContentProviderTest extends ProviderTestCase2<PodcastContent
 		Integer id = 1;
 		Uri uri = Uri.withAppendedPath(Podcast.PODCAST_URI, id.toString());
 		ContentValues values = new ContentValues();
-		getProvider().update(uri, values , PodcastColumns._ID + "=" + id, null);
+		getProvider().update(uri, values, BaseColumns._ID + "=" + id, null);
 	}
 
 	@Override
