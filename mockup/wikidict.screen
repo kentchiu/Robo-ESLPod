@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model:Screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:model="http://wireframesketcher.com/1.0/model.ecore">
+  <widgets xsi:type="model:Master" x="304" y="40" measuredWidth="396" measuredHeight="790">
+    <screen xsi:type="model:WidgetGroup" href="assets/NexusOne.screen#Phone"/>
+  </widgets>
+  <widgets xsi:type="model:Text" x="352" y="160" width="300" height="495" text="Book&#xA;&#xA;* List&#xA;## Is created&#xA;## Like this" measuredWidth="300" measuredHeight="495">
+    <font/>
+  </widgets>
+  <hRuler/>
+  <vRuler/>
+  <font/>
+</model:Screen>

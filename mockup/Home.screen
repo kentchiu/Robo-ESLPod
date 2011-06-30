@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model:Screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:model="http://wireframesketcher.com/1.0/model.ecore">
+  <widgets xsi:type="model:Master" x="304" y="40" measuredWidth="396" measuredHeight="790">
+    <screen xsi:type="model:WidgetGroup" href="assets/NexusOne.screen#Phone"/>
+  </widgets>
+  <widgets xsi:type="model:Table" x="342" y="175" width="320" height="490" text="693 - Follwing a Dress Code&#xA;692 - Recommending Someone for a Job&#xA;691 - Dangerous Freeway Driving&#xA;690 - xxx&#xA;689 - xxx&#xA;687 - xxx&#xA;686 - xxx&#xA;685 - xxx&#xA;684 - xxx&#xA;683 - xxx&#xA;682 - xxx&#xA;681 - xxx&#xA;680 - xxx&#xA;679 - xxx&#xA;&#xA;&#xA;" measuredWidth="320" measuredHeight="490" background="#000000" rowHeight="53" horizontalLines="true" verticalLines="false" header="false">
+    <font bold="true"/>
+  </widgets>
+  <widgets xsi:type="model:Rectangle" x="342" y="156" width="320" height="20" text="Wireless &amp; network settings" measuredWidth="320" measuredHeight="20" background="#999999" border="none" textAlignment="Left">
+    <font size="9" bold="true"/>
+  </widgets>
+  <widgets xsi:type="model:Panel" x="342" y="175" width="320" height="50" measuredWidth="320" measuredHeight="50" alpha="0" link="player.screen"/>
+  <hRuler/>
+  <vRuler/>
+  <font/>
+</model:Screen>

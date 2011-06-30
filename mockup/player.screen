@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model:Screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:model="http://wireframesketcher.com/1.0/model.ecore">
+  <widgets xsi:type="model:Master" x="304" y="40" measuredWidth="396" measuredHeight="790">
+    <screen xsi:type="model:WidgetGroup" href="assets/NexusOne.screen#Phone"/>
+  </widgets>
+  <widgets xsi:type="model:Table" x="342" y="156" width="320" height="509" text="In a meeting room...&#xA;{user}  Kent :  Hi! Emmy\, do you *have a minute*.&#xA;{user}  Emmy: Yes.&#xA;{user}  Kent :  I need your *advice* about foobar project.&#xA;{user}  Emmy: Okay. blablabla.....&#xA;" measuredWidth="320" measuredHeight="509" background="#000000" rowHeight="53" horizontalLines="true" verticalLines="false" header="false">
+    <font bold="true"/>
+  </widgets>
+  <widgets xsi:type="model:Panel" x="347" y="320" width="310" height="49" measuredWidth="310" measuredHeight="49" alpha="0" link="words.screen"/>
+  <widgets xsi:type="model:HSlider" x="352" y="608" width="300" locked="true" measuredWidth="300" measuredHeight="17" value="44" state="disabled"/>
+  <widgets xsi:type="model:Button" x="472" y="629" width="57" measuredWidth="57" measuredHeight="26" icon="filled-arrow-right (small)">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Button" x="400" y="629" width="56" measuredWidth="56" measuredHeight="26" icon="rewind (small)">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Button" x="544" y="629" width="57" measuredWidth="57" measuredHeight="26" icon="fast-forward (small)">
+    <font/>
+  </widgets>
+  <hRuler/>
+  <vRuler/>
+  <font/>
+</model:Screen>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model:Screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:model="http://wireframesketcher.com/1.0/model.ecore">
+  <widgets xsi:type="model:Master" x="304" y="40" measuredWidth="396" measuredHeight="790">
+    <screen xsi:type="model:WidgetGroup" href="assets/NexusOne.screen#Phone"/>
+  </widgets>
+  <widgets xsi:type="model:Table" x="342" y="156" width="320" height="509" text="In a meeting room...&#xA;{user}  Kent :  Hi! Emmy, do you have a minute.&#xA;{user}  Emmy: Yes.&#xA;{user}  Kent :  I need your advice about foobar project.&#xA;{user}  Emmy: Okay. blablabla.....&#xA;" measuredWidth="320" measuredHeight="509" background="#000000" rowHeight="53" horizontalLines="true" verticalLines="false" header="false">
+    <font bold="true"/>
+  </widgets>
+  <widgets xsi:type="model:Panel" x="352" y="256" width="300" height="209" measuredWidth="300" measuredHeight="209"/>
+  <widgets xsi:type="model:Rectangle" x="352" y="256" width="300" height="49" text="Vibrate" measuredWidth="300" measuredHeight="49" background="#000000" border="none" textAlignment="Left">
+    <font bold="true"/>
+  </widgets>
+  <widgets xsi:type="model:Table" x="355" y="304" width="293" height="201" text="word1&#xD;&#xA;word2&#xD;&#xA;word3&#xD;&#xA;word4&#xD;&#xA;word5" measuredWidth="293" measuredHeight="201" border="false" rowHeight="38" horizontalLines="true" verticalLines="false" header="false">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Panel" x="356" y="304" width="292" height="41" measuredWidth="292" measuredHeight="41" alpha="0" link="wikidict.screen"/>
+  <hRuler/>
+  <vRuler/>
+  <font/>
+</model:Screen>
