@@ -30,15 +30,10 @@ public class PodcastHandlerTest extends TestCase {
 		//assertEquals("", values.getAsString(PodcastColumns.PARAGRAPH_INDEX));
 		assertEquals("Fri, 29 Apr 2011 03:00:13 -0400", values.getAsString(PodcastColumns.PUBLISHED));
 		String script = values.getAsString(PodcastColumns.SCRIPT);
-		System.out.println(script);
 		assertTrue(script.startsWith("Jim: "));
 		assertTrue(script.endsWith("Script by Dr. Lucy Tse"));
 		assertEquals("Talking about someone’s religion can sometimes cause controversy.  Learn what not to say in this episode.", values.getAsString(PodcastColumns.SUBTITLE));
 		assertEquals("681 - Disagreeing about Religion", values.getAsString(PodcastColumns.TITLE));
-
-		// remote
-		//assertEquals("", values.getAsString(PodcastColumns.RICH_SCRIPT));
-		//assertEquals("", values.getAsString(PodcastColumns.TAGS));
 	}
 
 	public void testGetItemNodes() throws Exception {

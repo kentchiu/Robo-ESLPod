@@ -30,7 +30,10 @@ public class PodcastContentProvider extends ContentProvider {
 
 	private UriMatcher			uriMatcher;
 	private DatabaseHelper		openHelper;
-	private SQLiteDatabase		db;
+
+	public DatabaseHelper getOpenHelper() {
+		return openHelper;
+	}
 
 	//@Override
 	//public int delete(Uri uri, String where, String[] whereArgs) {
@@ -79,7 +82,7 @@ public class PodcastContentProvider extends ContentProvider {
 
 	@Override
 	public Uri insert(Uri uri, ContentValues values) {
-		db = openHelper.getWritableDatabase();
+		SQLiteDatabase db = openHelper.getWritableDatabase();
 		int m = getUriMatcher().match(uri);
 		if (m != PODCASTS.getId()) {
 			throw new IllegalArgumentException("Unknown URI " + uri);
@@ -108,7 +111,7 @@ public class PodcastContentProvider extends ContentProvider {
 
 	@Override
 	public Cursor query(Uri uri, String[] projection, String where, String[] whereArgs, String sortOrder) {
-		db = openHelper.getWritableDatabase();
+		SQLiteDatabase db = openHelper.getWritableDatabase();
 		int match = getUriMatcher().match(uri);
 		ContentType type = getById(match);
 		Cursor queryCursor;
