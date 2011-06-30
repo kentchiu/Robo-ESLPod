@@ -1,15 +1,10 @@
 package com.kentchiu.eslpod.provider;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.endsWith;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertEquals;
-
 import java.io.InputStream;
 import java.util.List;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import junit.framework.TestCase;
+
 import org.w3c.dom.Node;
 
 import android.content.ContentValues;
@@ -17,13 +12,12 @@ import android.content.ContentValues;
 import com.google.common.collect.Iterables;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
-@RunWith(MyRobolectricTestRunner.class)
-public class PodcastHandlerTest {
 
-	@Test
-	public void createContentValue() throws Exception {
+public class PodcastHandlerTest extends TestCase {
+
+	public void testCreateContentValue() throws Exception {
 		InputStream inputStream = getClass().getResourceAsStream("/podcast.xml");
-		PodcastHandler h = new PodcastHandler(null);
+		PodcastHandler h = new PodcastHandler();
 		List<Node> items = h.getItemNodes(inputStream);
 		Node node = Iterables.get(items, 5);
 		ContentValues values = h.convert(node);
@@ -38,8 +32,8 @@ public class PodcastHandlerTest {
 		assertEquals("Fri, 29 Apr 2011 03:00:13 -0400", values.getAsString(PodcastColumns.PUBLISHED));
 		String script = values.getAsString(PodcastColumns.SCRIPT);
 		System.out.println(script);
-		assertThat(script, startsWith("Jim: "));
-		assertThat(script, endsWith("Script by Dr. Lucy Tse"));
+		assertTrue(script.startsWith("Jim: "));
+		assertTrue(script.endsWith("Script by Dr. Lucy Tse"));
 		assertEquals("Talking about someone’s religion can sometimes cause controversy.  Learn what not to say in this episode.", values.getAsString(PodcastColumns.SUBTITLE));
 		assertEquals("681 - Disagreeing about Religion", values.getAsString(PodcastColumns.TITLE));
 
@@ -48,10 +42,10 @@ public class PodcastHandlerTest {
 		//assertEquals("", values.getAsString(PodcastColumns.TAGS));
 	}
 
-	@Test
-	public void getItemNodes() throws Exception {
+
+	public void testGetItemNodes() throws Exception {
 		InputStream inputStream = getClass().getResourceAsStream("/podcast.xml");
-		PodcastHandler h = new PodcastHandler(null);
+		PodcastHandler h = new PodcastHandler();
 		assertEquals(86, Iterables.size(h.getItemNodes(inputStream)));
 	}
 }

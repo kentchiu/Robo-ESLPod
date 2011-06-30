@@ -21,8 +21,6 @@ import android.content.ContentValues;
 import android.net.Uri;
 import android.util.Log;
 
-import com.finchframework.finch.rest.RESTfulContentProvider;
-import com.finchframework.finch.rest.ResponseHandler;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
@@ -31,13 +29,8 @@ import com.google.common.collect.Lists;
 import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
-public class PodcastHandler implements ResponseHandler {
+public class PodcastHandler {
 
-	private RESTfulContentProvider	provider;
-
-	public PodcastHandler(RESTfulContentProvider provider) {
-		this.provider = provider;
-	}
 
 	public List<Node> getItemNodes(InputStream inputStream) throws XPathExpressionException {
 		XPath xpath = XPathFactory.newInstance().newXPath();
@@ -57,7 +50,6 @@ public class PodcastHandler implements ResponseHandler {
 		return results;
 	}
 
-	@Override
 	public void handleResponse(HttpResponse response, Uri uri) throws IOException {
 		//provider.getDatabase().execSQL("delete from podcast");
 		List<Node> items;
@@ -66,7 +58,7 @@ public class PodcastHandler implements ResponseHandler {
 			InputStream is = url.openStream();
 			items = getItemNodes(is);
 			for (Node item : items) {
-				provider.insert(Podcast.PODCAST_URI, convert(item), provider.getDatabase());
+				//provider.insert(Podcast.PODCAST_URI, convert(item), provider.getDatabase());
 			}
 		} catch (XPathExpressionException e) {
 			e.printStackTrace();

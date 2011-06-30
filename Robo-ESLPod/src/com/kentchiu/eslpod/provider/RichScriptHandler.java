@@ -11,7 +11,6 @@ import org.apache.http.HttpResponse;
 import android.content.ContentValues;
 import android.net.Uri;
 
-import com.finchframework.finch.rest.ResponseHandler;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
@@ -19,7 +18,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
-public class RichScriptHandler implements ResponseHandler {
+public class RichScriptHandler {
 
 	private class ContainPredicate implements Predicate<String> {
 
@@ -55,7 +54,7 @@ public class RichScriptHandler implements ResponseHandler {
 		return ImmutableList.copyOf(result);
 	}
 
-	@Override
+
 	public void handleResponse(HttpResponse response, Uri uri) throws IOException {
 		InputStream is = response.getEntity().getContent();
 		List<String> lines = IOUtils.readLines(is, "iso-8859-1");
