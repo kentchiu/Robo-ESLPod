@@ -1,8 +1,6 @@
 package com.kentchiu.eslpod.provider;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.List;
 
 import javax.xml.xpath.XPath;
@@ -11,14 +9,14 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.HttpResponse;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import android.content.ContentProvider;
+import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.net.Uri;
 import android.util.Log;
 
 import com.google.common.base.Joiner;
@@ -29,9 +27,14 @@ import com.google.common.collect.Lists;
 import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
-public class PodcastHandler {
+public class PodcastHandler implements Runnable {
 
-	public List<Node> getItemNodes(InputStream inputStream) throws XPathExpressionException {
+	private static final String	RSS_URI		= "http://feeds.feedburner.com/EnglishAsASecondLanguagePodcast";
+
+	private InputStream inputStream;
+	private ContentResolver resolver;
+
+	public List<Node> getItemNodes() throws XPathExpressionException {
 		XPath xpath = XPathFactory.newInstance().newXPath();
 		InputSource inputSource = new InputSource(inputStream);
 		NodeList nodes = (NodeList) xpath.evaluate("//channel/item/title", inputSource, XPathConstants.NODESET);
@@ -49,23 +52,6 @@ public class PodcastHandler {
 		return results;
 	}
 
-	public void handleResponse(HttpResponse response, Uri uri) throws IOException {
-		//provider.getDatabase().execSQL("delete from podcast");
-		List<Node> items;
-		try {
-			URL url = new URL(uri.toString());
-			InputStream is = url.openStream();
-			items = getItemNodes(is);
-			for (Node item : items) {
-				//provider.insert(Podcast.PODCAST_URI, convert(item), provider.getDatabase());
-			}
-		} catch (XPathExpressionException e) {
-			e.printStackTrace();
-		} catch (IllegalStateException e) {
-			e.printStackTrace();
-		}
-
-	}
 
 	ContentValues convert(Node item) {
 		NodeList children = item.getChildNodes();
@@ -114,6 +100,26 @@ public class PodcastHandler {
 		}
 		Log.d(EslPodApplication.LOG_TAG, result.toString());
 		return result;
+	}
+
+	@Override
+	public void run() {
+		try {
+			for (Node item : getItemNodes()) {
+				resolver.insert(Podcast.PODCAST_URI, convert(item));
+			}
+		} catch (XPathExpressionException e) {
+			e.printStackTrace();
+		} catch (IllegalStateException e) {
+			e.printStackTrace();
+		}
+	}
+
+
+	public PodcastHandler(ContentResolver resolver, InputStream inputStream) {
+		super();
+		this.resolver = resolver;
+		this.inputStream = inputStream;
 	}
 
 }

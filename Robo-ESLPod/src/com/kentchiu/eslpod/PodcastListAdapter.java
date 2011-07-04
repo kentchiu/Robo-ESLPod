@@ -18,13 +18,15 @@ public class PodcastListAdapter extends CursorAdapter {
 	@Override
 	public void bindView(View view, Context context, Cursor cursor) {
 		TextView textView = (TextView) view;
-		textView.setText(cursor.getString(PodcastColumns.INDEX_OF_TITLE));
+		int idx = cursor.getColumnIndex(PodcastColumns.TITLE);
+		textView.setText(cursor.getString(idx));
 	}
 
 	@Override
 	public View newView(Context context, Cursor cursor, ViewGroup parent) {
 		TextView textView = new TextView(context);
-		textView.setText(cursor.getString(PodcastColumns.INDEX_OF_TITLE));
+		int idx = cursor.getColumnIndex(PodcastColumns.TITLE);
+		textView.setText(cursor.getString(idx));
 		return textView;
 	}
 

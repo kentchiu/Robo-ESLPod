@@ -27,20 +27,20 @@ public class Podcast {
 		/*
 		 * column index
 		 */
-		public static final int		INDEX_OF_ID					= 0;
-		public static final int		INDEX_OF_TITLE				= 1;
-		public static final int		INDEX_OF_SUBTITLE			= 2;
-		public static final int		INDEX_OF_MEDIA_URI			= 3;
-		public static final int		INDEX_OF_MEDIA_ID			= 4;
-		public static final int		INDEX_OF_MEDIA_LENGTH		= 5;
-		public static final int		INDEX_OF_DATA				= 6;
-		public static final int		INDEX_OF_PUBLISHED			= 7;
-		public static final int		INDEX_OF_LINK				= 8;
-		public static final int		INDEX_OF_DURATION			= 9;
-		public static final int		INDEX_OF_SCRIPT				= 10;
-		public static final int		INDEX_OF_RICH_SCRIPT		= 11;
-		public static final int		INDEX_OF_TAGS				= 12;
-		public static final int		INDEX_OF_PARAGRAPH_INDEX	= 13;
+//		public static final int		INDEX_OF_ID					= 0;
+//		public static final int		INDEX_OF_TITLE				= 1;
+//		public static final int		INDEX_OF_SUBTITLE			= 2;
+//		public static final int		INDEX_OF_MEDIA_URI			= 3;
+//		public static final int		INDEX_OF_MEDIA_ID			= 4;
+//		public static final int		INDEX_OF_MEDIA_LENGTH		= 5;
+//		public static final int		INDEX_OF_DATA				= 6;
+//		public static final int		INDEX_OF_PUBLISHED			= 7;
+//		public static final int		INDEX_OF_LINK				= 8;
+//		public static final int		INDEX_OF_DURATION			= 9;
+//		public static final int		INDEX_OF_SCRIPT				= 10;
+//		public static final int		INDEX_OF_RICH_SCRIPT		= 11;
+//		public static final int		INDEX_OF_TAGS				= 12;
+//		public static final int		INDEX_OF_PARAGRAPH_INDEX	= 13;
 
 		// This class cannot be instantiated
 		private PodcastColumns() {

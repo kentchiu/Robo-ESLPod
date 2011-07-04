@@ -152,14 +152,20 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 		Log.i(EslPodApplication.LOG_TAG, "working uri:" + uri);
 		Cursor c = getContentResolver().query(uri, null, null, null, null);
 		c.moveToFirst();
-		String title = c.getString(PodcastColumns.INDEX_OF_TITLE);
+
+		int titleIdx = c.getColumnIndex(PodcastColumns.TITLE);
+		int richScriptIdx = c.getColumnIndex(PodcastColumns.SCRIPT);
+		int scriptIdx = c.getColumnIndex(PodcastColumns.RICH_SCRIPT);
+		int mediaUriIdx = c.getColumnIndex(PodcastColumns.MEDIA_URI);
+
+		String title = c.getString(titleIdx);
 		setTitle(title);
 		String script;
-		String richScript = c.getString(PodcastColumns.INDEX_OF_RICH_SCRIPT);
+		String richScript = c.getString(richScriptIdx);
 		if (StringUtils.isNotBlank(richScript)) {
 			script = richScript;
 		} else {
-			script = c.getString(PodcastColumns.INDEX_OF_SCRIPT);
+			script = c.getString(scriptIdx);
 		}
 		Log.d(EslPodApplication.LOG_TAG, "script:" + script);
 		Iterable<String> lines = Splitter.on("\n").trimResults().split(script);
@@ -168,7 +174,7 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 
 		player = new MediaPlayer();
 		//player.setDataSource(this, c.getString(PodcastColumns.INDEX_OF_MEDIA_ID));
-		String url = c.getString(PodcastColumns.INDEX_OF_MEDIA_URI);
+		String url = c.getString(mediaUriIdx);
 		try {
 			player.setDataSource(url);
 			player.prepareAsync();

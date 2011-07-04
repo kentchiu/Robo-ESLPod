@@ -2,12 +2,16 @@ package com.kentchiu.eslpod.provider;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
 
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.net.Uri;
 
@@ -18,7 +22,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
-public class RichScriptHandler {
+public class RichScriptHandler implements Runnable {
 
 	private class ContainPredicate implements Predicate<String> {
 
@@ -35,12 +39,11 @@ public class RichScriptHandler {
 		}
 	}
 
-	private PodcastContentProvider	provider;
-	private Uri						uri;
+	private URL						link;
+	private Iterable<String> script;
 
-	public RichScriptHandler(PodcastContentProvider provider, Uri uri) {
-		this.provider = provider;
-		this.uri = uri;
+	public RichScriptHandler(URL link) {
+		this.link = link;
 	}
 
 	public List<String> extractScript(List<String> lines) {
@@ -54,18 +57,33 @@ public class RichScriptHandler {
 		return ImmutableList.copyOf(result);
 	}
 
-	public void handleResponse(HttpResponse response, Uri uri) throws IOException {
-		InputStream is = response.getEntity().getContent();
-		List<String> lines = IOUtils.readLines(is, "iso-8859-1");
+
+
+	@Override
+	public void run() {
+		List<String> lines;
+		try {
+			InputStream is = link.openStream();
+			lines = IOUtils.readLines(is, "iso-8859-1");
+		} catch (MalformedURLException e) {
+			lines = ImmutableList.of();
+			e.printStackTrace();
+		} catch (IOException e) {
+			lines = ImmutableList.of();
+			e.printStackTrace();
+		}
 		Iterable<String> filter = Iterables.filter(extractScript(lines), new Predicate<String>() {
 			@Override
 			public boolean apply(String input) {
 				return StringUtils.isNotEmpty(input);
 			}
 		});
-		ContentValues values = new ContentValues();
-		values.put(PodcastColumns.RICH_SCRIPT, Joiner.on("\n").join(filter));
-		provider.update(this.uri, values, null, null);
+		script = filter;
 	}
+
+	public Iterable<String> getScript() {
+		return script;
+	}
+
 
 }
