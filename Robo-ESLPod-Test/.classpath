@@ -5,5 +5,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/Robo-ESLPod"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/3"/>
+	<classpathentry kind="lib" path="lib/hamcrest-core-1.3.RC2.jar"/>
+	<classpathentry kind="lib" path="lib/hamcrest-library-1.3.RC2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -20,12 +20,18 @@ import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 public class PodcastHandlerTest extends AndroidTestCase {
 
 
-	private ContentResolver mockResolver;
+	private MockContentResolver mockResolver;
 
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		mockResolver = new MockContentResolver();
+		mockResolver.addProvider("com.kentchiu.eslpod.provider.Podcast", new MockContentProvider(null) {
+			@Override
+			public Uri insert(Uri uri, ContentValues values) {
+				return uri;
+			}
+		});
 	}
 
 	public void testInsert() throws Exception {

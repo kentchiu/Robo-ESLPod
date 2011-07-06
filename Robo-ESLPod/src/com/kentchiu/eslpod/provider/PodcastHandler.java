@@ -14,7 +14,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.util.Log;
@@ -29,10 +28,16 @@ import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
 public class PodcastHandler implements Runnable {
 
-	private static final String	RSS_URI		= "http://feeds.feedburner.com/EnglishAsASecondLanguagePodcast";
+	private static final String	RSS_URI	= "http://feeds.feedburner.com/EnglishAsASecondLanguagePodcast";
 
-	private InputStream inputStream;
-	private ContentResolver resolver;
+	private InputStream			inputStream;
+	private ContentResolver		resolver;
+
+	public PodcastHandler(ContentResolver resolver, InputStream inputStream) {
+		super();
+		this.resolver = resolver;
+		this.inputStream = inputStream;
+	}
 
 	public List<Node> getItemNodes() throws XPathExpressionException {
 		XPath xpath = XPathFactory.newInstance().newXPath();
@@ -52,6 +57,18 @@ public class PodcastHandler implements Runnable {
 		return results;
 	}
 
+	@Override
+	public void run() {
+		try {
+			for (Node item : getItemNodes()) {
+				resolver.insert(Podcast.PODCAST_URI, convert(item));
+			}
+		} catch (XPathExpressionException e) {
+			e.printStackTrace();
+		} catch (IllegalStateException e) {
+			e.printStackTrace();
+		}
+	}
 
 	ContentValues convert(Node item) {
 		NodeList children = item.getChildNodes();
@@ -100,26 +117,6 @@ public class PodcastHandler implements Runnable {
 		}
 		Log.d(EslPodApplication.LOG_TAG, result.toString());
 		return result;
-	}
-
-	@Override
-	public void run() {
-		try {
-			for (Node item : getItemNodes()) {
-				resolver.insert(Podcast.PODCAST_URI, convert(item));
-			}
-		} catch (XPathExpressionException e) {
-			e.printStackTrace();
-		} catch (IllegalStateException e) {
-			e.printStackTrace();
-		}
-	}
-
-
-	public PodcastHandler(ContentResolver resolver, InputStream inputStream) {
-		super();
-		this.resolver = resolver;
-		this.inputStream = inputStream;
 	}
 
 }

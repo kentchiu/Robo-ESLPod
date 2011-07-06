@@ -2,18 +2,25 @@ package com.kentchiu.eslpod;
 
 import java.util.List;
 
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
+
 import android.content.Context;
-import android.text.Html;
+import android.graphics.Color;
+import android.text.SpannableStringBuilder;
 import android.text.Spanned;
-import android.util.Log;
+import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import com.google.common.collect.ImmutableList;
+
 public class ScriptListAdapter extends ArrayAdapter {
 
 	private List<String>	script;
+	private String			richScript;
 
 	public ScriptListAdapter(Context context, int resource, int textViewResourceId, List<String> script) {
 		super(context, resource, textViewResourceId, script);
@@ -21,27 +28,61 @@ public class ScriptListAdapter extends ArrayAdapter {
 
 	}
 
+	public String getRichScript() {
+		return richScript;
+	}
+
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		//		SpannableStringBuilder style = new SpannableStringBuilder("test the style");
-		//		style.setSpan(new ForegroundColorSpan(Color.RED), 1, 4, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-		//		System.out.println(style);
 		View view = super.getView(position, convertView, parent);
 		TextView textview = (TextView) view.findViewById(R.id.scriptLine);
 		String source = script.get(position);
-		String style = newStyle(source);
-		Log.d(EslPodApplication.LOG_TAG, style);
-		Spanned html = Html.fromHtml(style);
-		Log.d(EslPodApplication.LOG_TAG, html.toString());
+		CharSequence html = richText(source, extractWord());
 		textview.setText(html);
 		return view;
-
 	}
 
-	protected String newStyle(String html) {
-		String str1 = html.replaceAll("</b>", "</font>");
-		return str1.replaceAll("<b>", "<font color='red'>");
+	public void setRichScript(String richScript) {
+		this.richScript = richScript;
 	}
 
+	//	protected CharSequence richText(String html) {
+	//		SpannableStringBuilder style = new SpannableStringBuilder(html);
+	//		int start = StringUtils.indexOf(html, "<b>", 0);
+	//		int end = StringUtils.indexOf(html, "</b>", start);
+	//		style.setSpan(new ForegroundColorSpan(Color.RED), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+	//		return style;
+	//	}
+
+	//	protected String newStyle(String html) {
+	//		String str1 = html.replaceAll("</b>", "</font>");
+	//		return str1.replaceAll("<b>", "<font color='red'>");
+	//	}
+
+	protected Iterable<String> extractWord() {
+		if (StringUtils.isBlank(richScript)) {
+			return ImmutableList.of();
+		}
+		String[] words = StringUtils.substringsBetween(richScript, "<b>", "</b>");
+		if (ArrayUtils.isEmpty(words)) {
+			return ImmutableList.of();
+		} else {
+			return ImmutableList.copyOf(words);
+		}
+	}
+
+	protected CharSequence richText(String source, Iterable<String> words) {
+		SpannableStringBuilder style = new SpannableStringBuilder(source);
+		for (String each : words) {
+			int start = 0;
+			int idx = StringUtils.indexOfIgnoreCase(source, each, start);
+			if (idx == -1) {
+				start = idx;
+			} else {
+				style.setSpan(new ForegroundColorSpan(Color.RED), idx, idx + each.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+			}
+		}
+		return style;
+	}
 
 }

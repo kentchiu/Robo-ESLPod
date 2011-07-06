@@ -8,19 +8,12 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-
-import android.content.ContentResolver;
-import android.content.ContentValues;
-import android.net.Uri;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
 public class RichScriptHandler implements Runnable {
 
@@ -39,8 +32,8 @@ public class RichScriptHandler implements Runnable {
 		}
 	}
 
-	private URL						link;
-	private Iterable<String> script;
+	private URL					link;
+	private Iterable<String>	script;
 
 	public RichScriptHandler(URL link) {
 		this.link = link;
@@ -57,7 +50,9 @@ public class RichScriptHandler implements Runnable {
 		return ImmutableList.copyOf(result);
 	}
 
-
+	public Iterable<String> getScript() {
+		return script;
+	}
 
 	@Override
 	public void run() {
@@ -80,10 +75,5 @@ public class RichScriptHandler implements Runnable {
 		});
 		script = filter;
 	}
-
-	public Iterable<String> getScript() {
-		return script;
-	}
-
 
 }

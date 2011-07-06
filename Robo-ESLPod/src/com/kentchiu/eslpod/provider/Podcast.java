@@ -6,43 +6,64 @@ import android.provider.BaseColumns;
 public class Podcast {
 
 	public static final class PodcastColumns implements BaseColumns {
-		public static final String	DEFAULT_SORT_ORDER			= "modified DESC";
+		public static final String	DEFAULT_SORT_ORDER	= "modified DESC";
 
 		/*
 		 * column name
 		 */
-		public static final String	TITLE						= "title";
-		public static final String	SUBTITLE					= "subtitle";
-		public static final String	MEDIA_URI					= "media_uri";
-		public static final String	MEDIA_ID					= "media_id";
-		public static final String	MEDIA_LENGTH				= "media_length";
-		public static final String	_DATA						= "_data";
-		public static final String	PUBLISHED					= "published";
-		public static final String	LINK						= "link";
-		public static final String	DURATION					= "duration";
-		public static final String	SCRIPT						= "script";
-		public static final String	RICH_SCRIPT					= "rich_script";
-		public static final String	TAGS						= "tags";
-		public static final String	PARAGRAPH_INDEX				= "paragraph_index";
-		/*
-		 * column index
+		/**
+		 * <P>Type: TEXT</P>
 		 */
-//		public static final int		INDEX_OF_ID					= 0;
-//		public static final int		INDEX_OF_TITLE				= 1;
-//		public static final int		INDEX_OF_SUBTITLE			= 2;
-//		public static final int		INDEX_OF_MEDIA_URI			= 3;
-//		public static final int		INDEX_OF_MEDIA_ID			= 4;
-//		public static final int		INDEX_OF_MEDIA_LENGTH		= 5;
-//		public static final int		INDEX_OF_DATA				= 6;
-//		public static final int		INDEX_OF_PUBLISHED			= 7;
-//		public static final int		INDEX_OF_LINK				= 8;
-//		public static final int		INDEX_OF_DURATION			= 9;
-//		public static final int		INDEX_OF_SCRIPT				= 10;
-//		public static final int		INDEX_OF_RICH_SCRIPT		= 11;
-//		public static final int		INDEX_OF_TAGS				= 12;
-//		public static final int		INDEX_OF_PARAGRAPH_INDEX	= 13;
+		public static final String	TITLE				= "title";
+		/**
+		 * <P>Type: TEXT</P>
+		 */
+		public static final String	SUBTITLE			= "subtitle";
+		/**
+		 * <P>Type: TEXT</P>
+		 */
+		public static final String	MEDIA_URI			= "media_uri";
+		/**
+		 * <P>Type: INTEGER</P>
+		 */
+		public static final String	MEDIA_ID			= "media_id";
+		/**
+		 * <P>Type: INTEGER</P>
+		 */
+		public static final String	MEDIA_LENGTH		= "media_length";
+		/**
+		 * <P>Type: INTEGER</P>
+		 */
+		public static final String	_DATA				= "_data";
+		/**
+		 * <P>Type: TEXT (Date String)</P>
+		 */
+		public static final String	PUBLISHED			= "published";
+		/**
+		 * <P>Type: TEXT</P>
+		 */
+		public static final String	LINK				= "link";
+		/**
+		 * <P>Type: INTEGER</P>
+		 */
+		public static final String	DURATION			= "duration";
+		/**
+		 * <P>Type: TEXT</P>
+		 */
+		public static final String	SCRIPT				= "script";
+		/**
+		 * <P>Type: TEXT</P>
+		 */
+		public static final String	RICH_SCRIPT			= "rich_script";
+		/**
+		 * <P>Type: TEXT</P>
+		 */
+		public static final String	TAGS				= "tags";
+		/**
+		 * <P>Type: TEXT</P>
+		 */
+		public static final String	PARAGRAPH_INDEX		= "paragraph_index";
 
-		// This class cannot be instantiated
 		private PodcastColumns() {
 		}
 	}

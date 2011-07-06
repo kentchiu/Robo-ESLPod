@@ -6,10 +6,12 @@ import org.apache.commons.lang.StringUtils;
 
 import android.app.ListActivity;
 import android.content.Intent;
+import android.database.ContentObserver;
 import android.database.Cursor;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -25,8 +27,10 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Toast;
 
+import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.kentchiu.eslpod.provider.Dictionary;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
@@ -37,6 +41,7 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 	private GestureDetector		gd;
 	private MediaPlayer			player;
 	private SeekBar				seekBar;
+	private Handler				handler				= new Handler();
 
 	@Override
 	public void onClick(View v) {
@@ -70,20 +75,22 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-		//		super.onCreateContextMenu(menu, v, menuInfo);
-		//		MenuItem item = menu.getItem(0);
-		//		MenuInflater inflater = getMenuInflater();
-		//		inflater.inflate(R.menu.context_menu, menu);
-
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
+		ScriptListAdapter adapter = (ScriptListAdapter) getListAdapter();
+		final String item = (String) adapter.getItem(info.position);
+		Iterable<String> words = adapter.extractWord();
+		Iterable<String> filter = Iterables.filter(words, new Predicate<String>() {
 
-		System.out.println(info.targetView);
-		menu.setHeaderTitle("Action");
-		menu.add(0, 0, 0, "單字1");
-		menu.add(0, 1, 0, "單字2");
-		menu.add(0, 2, 0, "單字3");
-		menu.add(0, 3, 0, "單字4");
-
+			@Override
+			public boolean apply(String input) {
+				return StringUtils.indexOfIgnoreCase(item, input) != -1;
+			}
+		});
+		menu.setHeaderTitle("字典搜尋");
+		int i = 1;
+		for (String each : filter) {
+			menu.add(0, i++, 0, each);
+		}
 	}
 
 	@Override
@@ -99,8 +106,6 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 			// Fling left
 			Uri.withAppendedPath(Dictionary.DICTIONARY_URI, Long.toString(DICT_GOOGLE));
 			Intent intent = new Intent(Intent.ACTION_VIEW, Dictionary.DICTIONARY_URI);
-			System.out.println(getIntent().getData());
-			System.out.println(getIntent().toUri(0));
 			intent.putExtra("PODCAST_URI", getIntent().getDataString());
 			startActivity(intent);
 		} else if (e2.getX() - e1.getX() > FLING_MIN_DISTANCE && Math.abs(velocityX) > FLING_MIN_VELOCITY) {
@@ -143,39 +148,42 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 		super.onWindowFocusChanged(hasFocus);
 	}
 
+	ScriptListAdapter createAdapter(final Uri uri) {
+		Cursor c = getContentResolver().query(uri, null, null, null, null);
+		c.moveToFirst();
+		String script = c.getString(c.getColumnIndex(PodcastColumns.SCRIPT));
+		String richScript = c.getString(c.getColumnIndex(PodcastColumns.RICH_SCRIPT));
+		Iterable<String> lines = Splitter.on("\n").trimResults().split(script);
+		final ScriptListAdapter adapter = new ScriptListAdapter(this, R.layout.listitem, R.id.scriptLine, ImmutableList.copyOf(lines));
+		if (StringUtils.isNotBlank(richScript)) {
+			adapter.setRichScript(richScript);
+		}
+		return adapter;
+	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.player_activity);
 
-		Uri uri = getIntent().getData();
+		final Uri uri = getIntent().getData();
 		Log.i(EslPodApplication.LOG_TAG, "working uri:" + uri);
-		Cursor c = getContentResolver().query(uri, null, null, null, null);
-		c.moveToFirst();
-
-		int titleIdx = c.getColumnIndex(PodcastColumns.TITLE);
-		int richScriptIdx = c.getColumnIndex(PodcastColumns.SCRIPT);
-		int scriptIdx = c.getColumnIndex(PodcastColumns.RICH_SCRIPT);
-		int mediaUriIdx = c.getColumnIndex(PodcastColumns.MEDIA_URI);
-
-		String title = c.getString(titleIdx);
-		setTitle(title);
-		String script;
-		String richScript = c.getString(richScriptIdx);
-		if (StringUtils.isNotBlank(richScript)) {
-			script = richScript;
-		} else {
-			script = c.getString(scriptIdx);
-		}
-		Log.d(EslPodApplication.LOG_TAG, "script:" + script);
-		Iterable<String> lines = Splitter.on("\n").trimResults().split(script);
-		setListAdapter(new ScriptListAdapter(this, R.layout.listitem, R.id.scriptLine, ImmutableList.copyOf(lines)));
 		registerForContextMenu(getListView());
+		getContentResolver().registerContentObserver(uri, false, new ContentObserver(handler) {
+			@Override
+			public void onChange(boolean selfChange) {
+				Log.i(EslPodApplication.LOG_TAG, "reset adapter");
+				setListAdapter(createAdapter(uri));
+			}
+		});
+		final Cursor c = getContentResolver().query(uri, null, null, null, null);
+		c.moveToFirst();
+		setTitle(c.getString(c.getColumnIndex(PodcastColumns.TITLE)));
+		setListAdapter(createAdapter(uri));
 
 		player = new MediaPlayer();
-		//player.setDataSource(this, c.getString(PodcastColumns.INDEX_OF_MEDIA_ID));
-		String url = c.getString(mediaUriIdx);
 		try {
+			String url = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URI));
 			player.setDataSource(url);
 			player.prepareAsync();
 		} catch (IllegalArgumentException e1) {

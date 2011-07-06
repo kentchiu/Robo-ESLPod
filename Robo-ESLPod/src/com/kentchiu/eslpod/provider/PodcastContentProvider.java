@@ -37,10 +37,6 @@ public class PodcastContentProvider extends ContentProvider {
 	private UriMatcher			uriMatcher;
 	private DatabaseHelper		openHelper;
 
-	public DatabaseHelper getOpenHelper() {
-		return openHelper;
-	}
-
 	public PodcastContentProvider() {
 		super();
 		init();
@@ -50,6 +46,10 @@ public class PodcastContentProvider extends ContentProvider {
 	public int delete(Uri uri, String selection, String[] selectionArgs) {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	public DatabaseHelper getOpenHelper() {
+		return openHelper;
 	}
 
 	@Override
@@ -72,6 +72,7 @@ public class PodcastContentProvider extends ContentProvider {
 		long rowId = db.insert(DatabaseHelper.PODCAST_TABLE_NAME, null, values);
 		Log.d(EslPodApplication.LOG_TAG, "insert data : " + values.toString());
 		Uri url = ContentUris.withAppendedId(Podcast.PODCAST_URI, rowId);
+		getContext().getContentResolver().notifyChange(uri, null);
 		return url;
 	}
 
@@ -101,7 +102,7 @@ public class PodcastContentProvider extends ContentProvider {
 		case PODCASTS:
 			queryCursor = db.query(DatabaseHelper.PODCAST_TABLE_NAME, projection, where, whereArgs, null, null, sortOrder);
 			Log.i(EslPodApplication.LOG_TAG, "send uri" + uri);
-			queryCursor.setNotificationUri(getContext().getContentResolver(), uri);
+			getContext().getContentResolver().notifyChange(uri, null);
 			break;
 		case PODCAST:
 			final long podcastId = ContentUris.parseId(uri);
@@ -113,10 +114,9 @@ public class PodcastContentProvider extends ContentProvider {
 			String link = queryCursor.getString(linkIdx);
 			Log.i(EslPodApplication.LOG_TAG, "Retrive rich script content from :" + link);
 
-
 			if (StringUtils.isBlank(queryCursor.getString(richScriptIdx))) {
-				final Uri uri2= uri;
-				AsyncTask<String, Void, Iterable<String>> DownloadScriptTask = new AsyncTask<String, Void, Iterable<String>>() {
+				final Uri uri2 = uri;
+				new AsyncTask<String, Void, Iterable<String>>() {
 
 					@Override
 					protected Iterable<String> doInBackground(String... params) {
@@ -134,9 +134,10 @@ public class PodcastContentProvider extends ContentProvider {
 					@Override
 					protected void onPostExecute(Iterable<String> result) {
 						ContentValues values = new ContentValues();
-						values.put(PodcastColumns.RICH_SCRIPT, Joiner.on("\n").join(result));
-						update(uri2, values, "_ID=?", new String[] {Long.toString(podcastId)});
-						queryCursor.setNotificationUri(getContext().getContentResolver(), uri2);
+						String richScript = Joiner.on("\n").join(result);
+						values.put(PodcastColumns.RICH_SCRIPT, richScript);
+						Log.i(EslPodApplication.LOG_TAG, "update rich script");
+						update(uri2, values, "_ID=?", new String[] { Long.toString(podcastId) });
 					}
 				}.execute(link);
 			}
@@ -150,13 +151,11 @@ public class PodcastContentProvider extends ContentProvider {
 			int lastSlash = uriString.lastIndexOf("/");
 			String mediaID = uriString.substring(lastSlash + 1);
 			queryCursor = db.query(DatabaseHelper.PODCAST_TABLE_NAME, projection, Podcast.PodcastColumns.MEDIA_ID + " = " + mediaID, whereArgs, null, null, null);
-			queryCursor.setNotificationUri(getContext().getContentResolver(), uri);
 			break;
 
 		default:
 			throw new IllegalArgumentException("unsupported uri: " + uri);
 		}
-
 		return queryCursor;
 	}
 
@@ -166,15 +165,15 @@ public class PodcastContentProvider extends ContentProvider {
 
 	@Override
 	public int update(Uri uri, ContentValues values, String where, String[] whereArgs) {
-		getContext().getContentResolver().notifyChange(uri, null);
 		SQLiteDatabase db = openHelper.getWritableDatabase();
 		int match = getUriMatcher().match(uri);
 		ContentType type = getById(match);
 		Log.d(EslPodApplication.LOG_TAG, "type:" + type);
 		switch (type) {
-
 		case PODCAST:
-			return db.update(DatabaseHelper.PODCAST_TABLE_NAME, values, where, whereArgs);
+			int update = db.update(DatabaseHelper.PODCAST_TABLE_NAME, values, where, whereArgs);
+			getContext().getContentResolver().notifyChange(uri, null);
+			return update;
 		default:
 
 		}
@@ -188,8 +187,6 @@ public class PodcastContentProvider extends ContentProvider {
 		getUriMatcher().addURI(Podcast.AUTHORITY, "podcast" + "/#", PODCAST.getId());
 		getUriMatcher().addURI(Podcast.AUTHORITY, "media" + "/#", MEDIA.getId());
 	}
-
-
 
 }
 
