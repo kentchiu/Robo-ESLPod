@@ -120,6 +120,7 @@ public class SimpleWikiHelper {
 
 		// Query the API for content
 		String content = getUrlContent(String.format(WIKTIONARY_PAGE, encodedTitle, expandClause));
+		System.out.println(content);
 		try {
 			// Drill into the JSON response to find the content body
 			JSONObject response = new JSONObject(content);
@@ -144,8 +145,7 @@ public class SimpleWikiHelper {
 			// Read package name and version number from manifest
 			PackageManager manager = context.getPackageManager();
 			PackageInfo info = manager.getPackageInfo(context.getPackageName(), 0);
-			sUserAgent = String.format(context.getString(R.string.template_user_agent), info.packageName, info.versionName);
-
+			sUserAgent = String.format("%1$s/%2$s (Linux; Android)", info.packageName, info.versionName);
 		} catch (NameNotFoundException e) {
 			Log.e(TAG, "Couldn't find package information in PackageManager", e);
 		}

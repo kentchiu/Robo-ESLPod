@@ -251,14 +251,8 @@ public class WikiDictActivity extends Activity implements AnimationListener {
 			startNavigating(query, true);
 
 		} else if (Intent.ACTION_VIEW.equals(action)) {
-			intent.getStringExtra("query");
-			startNavigating("test", true);
-			//            if (data != null && ExtendedWikiHelper.WIKI_LOOKUP_HOST
-			//                    .equals(data.getHost())) {
-			//                String query = data.getPathSegments().get(0);
-			//                startNavigating(query, true);
-			//            }
-
+			String query =  intent.getStringExtra(SearchManager.QUERY);
+			startNavigating(query, true);
 		} else {
 			// If not recognized, then start showing random word
 			startNavigating("Hello", true);

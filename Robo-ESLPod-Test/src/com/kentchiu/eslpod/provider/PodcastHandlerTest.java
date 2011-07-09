@@ -5,9 +5,6 @@ import java.util.List;
 
 import org.w3c.dom.Node;
 
-import android.content.ContentProvider;
-import android.content.ContentResolver;
-import android.content.ContentUris;
 import android.content.ContentValues;
 import android.net.Uri;
 import android.test.AndroidTestCase;
@@ -19,27 +16,7 @@ import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
 public class PodcastHandlerTest extends AndroidTestCase {
 
-
-	private MockContentResolver mockResolver;
-
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-		mockResolver = new MockContentResolver();
-		mockResolver.addProvider("com.kentchiu.eslpod.provider.Podcast", new MockContentProvider(null) {
-			@Override
-			public Uri insert(Uri uri, ContentValues values) {
-				return uri;
-			}
-		});
-	}
-
-	public void testInsert() throws Exception {
-		InputStream inputStream = getClass().getResourceAsStream("/podcast.xml");
-		PodcastHandler h = new PodcastHandler(mockResolver, inputStream);
-		h.run();
-	}
-
+	private MockContentResolver	mockResolver;
 
 	public void testCreateContentValue() throws Exception {
 		InputStream inputStream = getClass().getResourceAsStream("/podcast.xml");
@@ -61,5 +38,23 @@ public class PodcastHandlerTest extends AndroidTestCase {
 		InputStream inputStream = getClass().getResourceAsStream("/podcast.xml");
 		PodcastHandler h = new PodcastHandler(mockResolver, inputStream);
 		assertEquals(86, Iterables.size(h.getItemNodes()));
+	}
+
+	public void testInsert() throws Exception {
+		InputStream inputStream = getClass().getResourceAsStream("/podcast.xml");
+		PodcastHandler h = new PodcastHandler(mockResolver, inputStream);
+		h.run();
+	}
+
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+		mockResolver = new MockContentResolver();
+		mockResolver.addProvider("com.kentchiu.eslpod.provider.Podcast", new MockContentProvider(null) {
+			@Override
+			public Uri insert(Uri uri, ContentValues values) {
+				return uri;
+			}
+		});
 	}
 }

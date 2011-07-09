@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.apache.commons.lang.StringUtils;
 
 import android.app.ListActivity;
+import android.app.SearchManager;
 import android.content.Intent;
 import android.database.ContentObserver;
 import android.database.Cursor;
@@ -66,9 +67,8 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
-		Toast.makeText(this, "您選擇的是" + item.getTitle(), Toast.LENGTH_SHORT).show();
 		Intent intent = new Intent(Intent.ACTION_VIEW, Dictionary.DICTIONARY_URI);
-		intent.putExtra("query", item.getTitle());
+		intent.putExtra(SearchManager.QUERY, item.getTitle());
 		startActivity(intent);
 		return super.onContextItemSelected(item);
 	}

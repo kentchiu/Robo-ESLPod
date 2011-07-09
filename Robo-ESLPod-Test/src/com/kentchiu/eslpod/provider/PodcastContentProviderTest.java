@@ -4,7 +4,6 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
-import android.provider.BaseColumns;
 import android.test.ProviderTestCase2;
 
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
@@ -38,7 +37,7 @@ public class PodcastContentProviderTest extends ProviderTestCase2<PodcastContent
 		Uri uri = Uri.withAppendedPath(Podcast.PODCAST_URI, id.toString());
 		ContentValues values = new ContentValues();
 		values.put(PodcastColumns.TITLE, "test");
-		getProvider().update(uri, values, "_ID=?"  , new String[] {"1"});
+		getProvider().update(uri, values, "_ID=?", new String[] { "1" });
 		Cursor c = db.rawQuery("select TITLE from podcast where _ID=1", null);
 		c.moveToFirst();
 		assertEquals("test", c.getString(0));
