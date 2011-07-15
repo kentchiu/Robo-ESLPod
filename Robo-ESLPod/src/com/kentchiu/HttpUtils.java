@@ -24,6 +24,17 @@ public class HttpUtils {
 
 	private static final int	HTTP_STATUS_OK	= 200;
 
+	public static String getContent(Context context, String url) {
+		String agent = prepareUserAgent(context);
+		try {
+			return getUrlContent(url, agent);
+		} catch (Exception e) {
+			Log.e(EslPodApplication.LOG_TAG, "get content from " + url + " fail", e);
+			return "";
+		}
+
+	}
+
 	/**
 	 * Pull the raw text content of the given URL. This call blocks until the
 	 * operation has completed, and is synchronized because it uses a shared
@@ -89,17 +100,6 @@ public class HttpUtils {
 			Log.e(EslPodApplication.LOG_TAG, "Couldn't find package information in PackageManager", e);
 			return null;
 		}
-	}
-
-	public String getContent(Context context, String url) {
-		String agent = prepareUserAgent(context);
-		try {
-			return getUrlContent(url, agent);
-		} catch (ApiException e) {
-			Log.e(EslPodApplication.LOG_TAG, "get content from " + url + " fail", e);
-			return "";
-		}
-
 	}
 
 }
