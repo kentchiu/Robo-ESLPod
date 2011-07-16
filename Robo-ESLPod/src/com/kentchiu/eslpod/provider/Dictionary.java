@@ -46,4 +46,6 @@ public class Dictionary {
 	public static final String	AUTHORITY		= Dictionary.class.getName();
 
 	public static final Uri		DICTIONARY_URI	= Uri.parse("content://" + AUTHORITY + "/dict");
+
+	public static final int	DICTIONARY_GOOGLE_SUGGESTION	= 1;
 }

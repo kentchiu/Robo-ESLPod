@@ -5,6 +5,7 @@ import java.io.InputStream;
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
+import android.app.SearchManager;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -15,6 +16,7 @@ import android.widget.ListView;
 
 import com.kentchiu.eslpod.provider.Podcast;
 import com.kentchiu.eslpod.provider.PodcastHandler;
+import com.kentchiu.eslpod.service.DictionService;
 
 public class HomeActivity extends ListActivity {
 	private static final int	DIALOG_INIT_LIST	= 0;
@@ -66,5 +68,11 @@ public class HomeActivity extends ListActivity {
 			}.execute(null);
 		}
 
+		String[] words  = {"alpha", "beta", "charli", "delta", "echo", "fox", "garmma", "hit", "idle", "jabco", "kindle", "love", "mama", "nana", "opp"};
+		for (String each : words) {
+			Intent intent = new Intent(HomeActivity.this, DictionService.class);
+			intent.putExtra(SearchManager.QUERY, each);
+			startService(intent);
+		}
 	}
 }
