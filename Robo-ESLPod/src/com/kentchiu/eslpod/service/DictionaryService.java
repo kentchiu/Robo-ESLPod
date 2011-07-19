@@ -8,8 +8,10 @@ import org.apache.commons.lang.StringUtils;
 
 import android.app.IntentService;
 import android.app.SearchManager;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.net.Uri;
 import android.util.Log;
 
 import com.google.common.base.Joiner;
@@ -25,11 +27,15 @@ public class DictionaryService extends IntentService {
 	@Override
 	protected void onHandleIntent(Intent intent) {
 		String query = intent.getStringExtra(SearchManager.QUERY);
-		ContentValues values = new ContentValues();
-		// FIXME refactory to Dictionary.Column.DICTIONARY_ID
-		values.put("diction_id", Dictionary.DICTIONARY_GOOGLE_SUGGESTION);
-		values.put("content", getContent(query));
-		getContentResolver().insert(Dictionary.DICTIONARY_URI, values);
+		ContentValues wordValues = new ContentValues();
+		wordValues.put(Dictionary.WORD, query);
+		Uri uri = getContentResolver().insert(Dictionary.WORDBANK_URI, wordValues);
+		long wordId = ContentUris.parseId(uri);
+		ContentValues dictValues = new ContentValues();
+		dictValues.put(Dictionary.WORD_ID, wordId);
+		dictValues.put(Dictionary.DICTIONARY_ID, Dictionary.DICTIONARY_GOOGLE_SUGGESTION);
+		dictValues.put("content", getContent(query));
+		getContentResolver().insert(Dictionary.DICTIONARY_URI, dictValues);
 	}
 
 	private String getContent(String query) {

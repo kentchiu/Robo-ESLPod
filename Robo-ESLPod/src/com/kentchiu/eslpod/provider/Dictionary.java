@@ -75,6 +75,7 @@ public class Dictionary {
 	public static final Uri		WORDBANK_URI					= Uri.parse("content://" + AUTHORITY + "/word");
 	public static final int		DICTIONARY_GOOGLE_SUGGESTION	= 1;
 	public static final String	WORD							= "word";
+	public static final String	WORD_ID							= "word_id";
 	public static final String	ID								= "_id";
 	public static final String	DICTIONARY_ID					= "dictionary_id";
 
