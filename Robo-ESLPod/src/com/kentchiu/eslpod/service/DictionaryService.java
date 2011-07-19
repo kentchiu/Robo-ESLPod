@@ -16,11 +16,9 @@ import com.google.common.base.Joiner;
 import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.provider.Dictionary;
 
-public class DictionService extends IntentService {
+public class DictionaryService extends IntentService {
 
-
-
-	public DictionService() {
+	public DictionaryService() {
 		super("Google Suggestion Service");
 	}
 
@@ -38,7 +36,7 @@ public class DictionService extends IntentService {
 		Log.d(EslPodApplication.LOG_TAG, "query " + query + " at Google Suggestion");
 		String urlStr = "http://suggestqueries.google.com/complete/search?ds=d&hl=zh-TW&jsonp=window.google.ac.hr&q=" + query;
 		//String content = HttpUtils.getContent(this, url + query);
-		String content ;
+		String content;
 		try {
 			URL url = new URL(urlStr);
 			List<String> lines = IOUtils.readLines(url.openStream(), "BIG5");
@@ -50,7 +48,7 @@ public class DictionService extends IntentService {
 
 		}
 
-		Log.d(EslPodApplication.LOG_TAG, query +  " : " + content);
+		Log.d(EslPodApplication.LOG_TAG, query + " : " + content);
 		return content;
 	}
 

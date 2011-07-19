@@ -1,6 +1,5 @@
 package com.kentchiu.eslpod;
 
-
 class DictionaryDictTask extends AbstractDictTask {
 
 	public DictionaryDictTask(DictFlipActivity activity) {

@@ -1,6 +1,5 @@
 package com.kentchiu.eslpod;
 
-
 class GoogleDictTask extends AbstractDictTask {
 
 	public GoogleDictTask(DictFlipActivity activity) {

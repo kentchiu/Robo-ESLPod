@@ -9,8 +9,7 @@ import android.widget.TextView;
 public abstract class AbstractDictTask extends AsyncTask<String, String, String> {
 
 	private final DictFlipActivity	activity;
-	private String	query;
-
+	private String					query;
 
 	public AbstractDictTask(DictFlipActivity activity) {
 		this.activity = activity;

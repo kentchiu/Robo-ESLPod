@@ -13,13 +13,9 @@ public class DatabaseHelperTest extends TestCase {
 		helper.close();
 	}
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-		db = SQLiteDatabase.create(null);
-		helper = new DatabaseHelper(null, "podcast.db", null);
-		helper.onOpen(db);
-		helper.onCreate(db);
+	public void testDictionaryBankTable() throws Exception {
+		Cursor c = db.query(DatabaseHelper.DICTIONARY_TABLE_NAME, null, null, null, null, null, null);
+		assertEquals(4, c.getColumnCount());
 	}
 
 	public void testPodcastTable() throws Exception {
@@ -31,9 +27,14 @@ public class DatabaseHelperTest extends TestCase {
 		Cursor c = db.query(DatabaseHelper.WORD_BANK_TABLE_NAME, null, null, null, null, null, null);
 		assertEquals(2, c.getColumnCount());
 	}
-	public void testDictionaryBankTable() throws Exception {
-		Cursor c = db.query(DatabaseHelper.DICTIONARY_TABLE_NAME, null, null, null, null, null, null);
-		assertEquals(4, c.getColumnCount());
+
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+		db = SQLiteDatabase.create(null);
+		helper = new DatabaseHelper(null, "podcast.db", null);
+		helper.onOpen(db);
+		helper.onCreate(db);
 	}
 
 }

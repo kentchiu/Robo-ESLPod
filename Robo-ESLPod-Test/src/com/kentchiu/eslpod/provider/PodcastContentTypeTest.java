@@ -7,9 +7,9 @@ import com.kentchiu.eslpod.provider.Podcast.ContentType;
 public class PodcastContentTypeTest extends TestCase {
 
 	public void testGetCode() {
-		assertEquals(1, ContentType.PODCASTS.getId());
-		assertEquals(2, ContentType.PODCAST.getId());
-		assertEquals(3, ContentType.MEDIA.getId());
+		assertEquals(1, ContentType.PODCASTS.getCode());
+		assertEquals(2, ContentType.PODCAST.getCode());
+		assertEquals(3, ContentType.MEDIA.getCode());
 	}
 
 	public void testGetIdentifier() throws Exception {

@@ -71,7 +71,7 @@ public class Podcast {
 	enum ContentType {
 		PODCASTS {
 			@Override
-			public int getId() {
+			public int getCode() {
 				return 1;
 			}
 
@@ -82,7 +82,7 @@ public class Podcast {
 		},
 		PODCAST {
 			@Override
-			public int getId() {
+			public int getCode() {
 				return 2;
 			}
 
@@ -93,7 +93,7 @@ public class Podcast {
 		},
 		MEDIA {
 			@Override
-			public int getId() {
+			public int getCode() {
 				return 3;
 			}
 
@@ -102,7 +102,7 @@ public class Podcast {
 				return "vnd.android.cursor.item/vnd.eslpod.media";
 			}
 		};
-		public static ContentType getById(int id) {
+		public static ContentType getByCode(int id) {
 			switch (id) {
 			case 1:
 				return PODCASTS;
@@ -115,7 +115,7 @@ public class Podcast {
 			}
 		}
 
-		public abstract int getId();
+		public abstract int getCode();
 
 		public abstract String getIdentifier();
 	}

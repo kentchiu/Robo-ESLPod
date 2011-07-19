@@ -4,23 +4,20 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.test.ServiceTestCase;
-import android.widget.RemoteViews.ActionException;
-import junit.framework.TestCase;
 
-public class DictionServiceTest extends ServiceTestCase<DictionService> {
+public class DictionaryServiceTest extends ServiceTestCase<DictionaryService> {
 
-	public DictionServiceTest() {
-		super(DictionService.class);
+	public DictionaryServiceTest() {
+		super(DictionaryService.class);
 	}
 
 	public void testQuery() throws Exception {
 		Context context = getContext();
-		Intent intent = new Intent(context, DictionService.class);
+		Intent intent = new Intent(context, DictionaryService.class);
 		intent.putExtra(SearchManager.QUERY, "book");
 		startService(intent);
 		assertNotNull(getService());
 		waitForServiceComplete();
-		
 
 	}
 
