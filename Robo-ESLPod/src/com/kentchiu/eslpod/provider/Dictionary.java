@@ -73,11 +73,12 @@ public class Dictionary {
 	public static final String	AUTHORITY						= Dictionary.class.getName();
 	public static final Uri		DICTIONARY_URI					= Uri.parse("content://" + AUTHORITY + "/dict");
 	public static final Uri		WORDBANK_URI					= Uri.parse("content://" + AUTHORITY + "/word");
-	public static final int		DICTIONARY_GOOGLE_SUGGESTION	= 1;
 	public static final String	WORD							= "word";
 	public static final String	WORD_ID							= "word_id";
 	public static final String	ID								= "_id";
 	public static final String	DICTIONARY_ID					= "dictionary_id";
-
 	public static final String	CONTENT							= "content";
+	public static final int		DICTIONARY_GOOGLE_SUGGESTION	= 1;
+	public static final int		DICTIONARY_WIKI_DICTIONARY		= 2;
+
 }

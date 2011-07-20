@@ -7,16 +7,11 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
 import android.app.IntentService;
-import android.app.SearchManager;
-import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.Intent;
-import android.net.Uri;
 import android.util.Log;
 
 import com.google.common.base.Joiner;
 import com.kentchiu.eslpod.EslPodApplication;
-import com.kentchiu.eslpod.provider.Dictionary;
 
 public class DictionaryService extends IntentService {
 
@@ -26,16 +21,16 @@ public class DictionaryService extends IntentService {
 
 	@Override
 	protected void onHandleIntent(Intent intent) {
-		String query = intent.getStringExtra(SearchManager.QUERY);
-		ContentValues wordValues = new ContentValues();
-		wordValues.put(Dictionary.WORD, query);
-		Uri uri = getContentResolver().insert(Dictionary.WORDBANK_URI, wordValues);
-		long wordId = ContentUris.parseId(uri);
-		ContentValues dictValues = new ContentValues();
-		dictValues.put(Dictionary.WORD_ID, wordId);
-		dictValues.put(Dictionary.DICTIONARY_ID, Dictionary.DICTIONARY_GOOGLE_SUGGESTION);
-		dictValues.put("content", getContent(query));
-		getContentResolver().insert(Dictionary.DICTIONARY_URI, dictValues);
+		//		String query = intent.getStringExtra(SearchManager.QUERY);
+		//		ContentValues wordValues = new ContentValues();
+		//		wordValues.put(Dictionary.WORD, query);
+		//		Uri uri = getContentResolver().insert(Dictionary.WORDBANK_URI, wordValues);
+		//		long wordId = ContentUris.parseId(uri);
+		//		ContentValues dictValues = new ContentValues();
+		//		dictValues.put(Dictionary.WORD_ID, wordId);
+		//		dictValues.put(Dictionary.DICTIONARY_ID, Dictionary.DICTIONARY_GOOGLE_SUGGESTION);
+		//		dictValues.put("content", getContent(query));
+		//		getContentResolver().insert(Dictionary.DICTIONARY_URI, dictValues);
 	}
 
 	private String getContent(String query) {

@@ -102,17 +102,6 @@ public class PodcastHandler implements Runnable {
 				result.put(PodcastColumns.PARAGRAPH_INDEX, Iterables.get(lines, 1));
 				List<String> scripts = Lists.newArrayList(lines).subList(2, Iterables.size(lines));
 				result.put(PodcastColumns.SCRIPT, Joiner.on("\n").join(scripts).trim());
-				//				Iterable<String> indexs = Iterables.transform(indexInfo, new Function<String, String>() {
-				//					public String apply(String input) {
-				//						return StringUtils.substringAfter(input, ":").trim();
-				//					}
-				//				});
-				//result.setParagraphIndex(Iterables.toArray(indexs, String.class));
-				// script
-				//String[] all = Iterables.toArray(lines, String.class);
-				//String[] script = (String[]) ArrayUtils.subarray(all, 2, all.length);
-				//result.setScript(script);
-
 			}
 		}
 		Log.d(EslPodApplication.LOG_TAG, result.toString());

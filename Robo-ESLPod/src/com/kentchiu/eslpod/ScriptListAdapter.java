@@ -46,19 +46,6 @@ public class ScriptListAdapter extends ArrayAdapter {
 		this.richScript = richScript;
 	}
 
-	//	protected CharSequence richText(String html) {
-	//		SpannableStringBuilder style = new SpannableStringBuilder(html);
-	//		int start = StringUtils.indexOf(html, "<b>", 0);
-	//		int end = StringUtils.indexOf(html, "</b>", start);
-	//		style.setSpan(new ForegroundColorSpan(Color.RED), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-	//		return style;
-	//	}
-
-	//	protected String newStyle(String html) {
-	//		String str1 = html.replaceAll("</b>", "</font>");
-	//		return str1.replaceAll("<b>", "<font color='red'>");
-	//	}
-
 	protected Iterable<String> extractWord() {
 		if (StringUtils.isBlank(richScript)) {
 			return ImmutableList.of();

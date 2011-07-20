@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-package com.kentchiu.eslpod;
+package com.kentchiu.eslpod.provider.task;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import android.net.Uri;
 import android.text.TextUtils;
@@ -34,7 +30,7 @@ import android.webkit.WebView;
  * Extended version of {@link SimpleWikiHelper}. This version adds methods to
  * pick a random word, and to format generic wiki-style text into HTML.
  */
-public class ExtendedWikiHelper extends SimpleWikiHelper {
+public class WikiHelper {
 	/**
 	 * Internal class to hold a wiki formatting rule. It's mostly a wrapper to
 	 * simplify {@link Matcher#replaceAll(String)}.
@@ -137,7 +133,7 @@ public class ExtendedWikiHelper extends SimpleWikiHelper {
 	 * This ensures that {@link #sSectionSplit} will always catch the last
 	 * section, as it uses section headers in its searching.
 	 */
-	private static final String				STUB_SECTION		= "\n=Stub section=";
+	public static final String				STUB_SECTION		= "\n=Stub section=";
 
 	/**
 	 * Number of times to try finding a random word in {@link #getRandomWord()}.
@@ -163,8 +159,10 @@ public class ExtendedWikiHelper extends SimpleWikiHelper {
 		sFormatRules.add(new FormatRule("^#+(.+?)$", "<li>$1</li>", Pattern.MULTILINE));
 
 		// Add internal links
-		sFormatRules.add(new FormatRule("\\[\\[([^:\\|\\]]+)\\]\\]", String.format("<a href=\"%s://%s/$1\">$1</a>", WIKI_AUTHORITY, WIKI_LOOKUP_HOST)));
-		sFormatRules.add(new FormatRule("\\[\\[([^:\\|\\]]+)\\|([^\\]]+)\\]\\]", String.format("<a href=\"%s://%s/$1\">$2</a>", WIKI_AUTHORITY, WIKI_LOOKUP_HOST)));
+		//		sFormatRules.add(new FormatRule("\\[\\[([^:\\|\\]]+)\\]\\]", String.format("<a href=\"%s://%s/$1\">$1</a>", WIKI_AUTHORITY, WIKI_LOOKUP_HOST)));
+		//		sFormatRules.add(new FormatRule("\\[\\[([^:\\|\\]]+)\\|([^\\]]+)\\]\\]", String.format("<a href=\"%s://%s/$1\">$2</a>", WIKI_AUTHORITY, WIKI_LOOKUP_HOST)));
+		sFormatRules.add(new FormatRule("\\[\\[([^:\\|\\]]+)\\]\\]", String.format("$1", WIKI_AUTHORITY, WIKI_LOOKUP_HOST)));
+		sFormatRules.add(new FormatRule("\\[\\[([^:\\|\\]]+)\\|([^\\]]+)\\]\\]", String.format("$2", WIKI_AUTHORITY, WIKI_LOOKUP_HOST)));
 
 		// Add bold and italic formatting
 		sFormatRules.add(new FormatRule("'''(.+?)'''", "<b>$1</b>"));
@@ -222,42 +220,6 @@ public class ExtendedWikiHelper extends SimpleWikiHelper {
 		} else {
 			return null;
 		}
-	}
-
-	/**
-	 * Query the Wiktionary API to pick a random dictionary word. Will try
-	 * multiple times to find a valid word before giving up.
-	 *
-	 * @return Random dictionary word, or null if no valid word was found.
-	 * @throws ApiException If any connection or server error occurs.
-	 * @throws ParseException If there are problems parsing the response.
-	 */
-	public static String getRandomWord() throws ApiException, ParseException {
-		// Keep trying a few times until we find a valid word
-		int tries = 0;
-		while (tries++ < RANDOM_TRIES) {
-			// Query the API for a random word
-			String content = getUrlContent(WIKTIONARY_RANDOM);
-			try {
-				// Drill into the JSON response to find the returned word
-				JSONObject response = new JSONObject(content);
-				JSONObject query = response.getJSONObject("query");
-				JSONArray random = query.getJSONArray("random");
-				JSONObject word = random.getJSONObject(0);
-				String foundWord = word.getString("title");
-
-				// If we found an actual word, and it wasn't rejected by our invalid
-				// filter, then accept and return it.
-				if (foundWord != null && !sInvalidWord.matcher(foundWord).find()) {
-					return foundWord;
-				}
-			} catch (JSONException e) {
-				throw new ParseException("Problem parsing API response", e);
-			}
-		}
-
-		// No valid word found in number of tries, so return null
-		return null;
 	}
 
 }

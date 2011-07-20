@@ -1,21 +1,33 @@
 package com.kentchiu.eslpod;
 
+import java.util.List;
+
 import android.app.Activity;
 import android.app.SearchManager;
+import android.database.ContentObserver;
+import android.database.Cursor;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.GestureDetector;
-import android.view.GestureDetector.OnDoubleTapListener;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
+import android.webkit.WebView;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 import android.widget.ViewFlipper;
 
-public class DictFlipActivity extends Activity implements OnGestureListener, OnDoubleTapListener, OnTouchListener {
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.kentchiu.eslpod.provider.Dictionary;
+import com.kentchiu.eslpod.provider.task.WikiHelper;
 
-	private ViewFlipper		flipper;
-	private GestureDetector	gestureDetector;
+public class DictFlipActivity extends Activity implements OnGestureListener, OnTouchListener {
+
+	private ViewFlipper			flipper;
+	private GestureDetector		gestureDetector;
+	private Iterable<WebView>	webViews;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -24,26 +36,17 @@ public class DictFlipActivity extends Activity implements OnGestureListener, OnD
 		setContentView(R.layout.dict_flip_activity);
 		flipper = (ViewFlipper) findViewById(R.id.viewFlipper);
 		gestureDetector = new GestureDetector(this, this);
-		SimpleWikiHelper.prepareUserAgent(this);
-		String query = getIntent().getStringExtra(SearchManager.QUERY);
-		new WikiDictTask(this).execute(query);
-		new GoogleDictTask(this).execute(query);
-		new DictionaryDictTask(this).execute(query);
-	}
 
-	@Override
-	public boolean onDoubleTap(MotionEvent e) {
-		if (flipper.isFlipping()) {
-			flipper.stopFlipping();
-		} else {
-			flipper.startFlipping();
-		}
-		return true;
-	}
+		createWebViews();
+		updateContent();
 
-	@Override
-	public boolean onDoubleTapEvent(MotionEvent e) {
-		return gestureDetector.onTouchEvent(e);
+		getContentResolver().registerContentObserver(Dictionary.DICTIONARY_URI, true, new ContentObserver(new Handler()) {
+			@Override
+			public void onChange(boolean selfChange) {
+				updateContent();
+
+			};
+		});
 	}
 
 	@Override
@@ -103,12 +106,6 @@ public class DictFlipActivity extends Activity implements OnGestureListener, OnD
 	}
 
 	@Override
-	public boolean onSingleTapConfirmed(MotionEvent e) {
-
-		return false;
-	}
-
-	@Override
 	public boolean onSingleTapUp(MotionEvent e) {
 
 		return false;
@@ -117,5 +114,43 @@ public class DictFlipActivity extends Activity implements OnGestureListener, OnD
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
 		return gestureDetector.onTouchEvent(event);
+	}
+
+	void updateContent() {
+		Cursor c = managedQuery(Dictionary.WORDBANK_URI, null, "word=?", new String[] { getIntent().getStringExtra(SearchManager.QUERY) }, null);
+		if (c.moveToFirst()) {
+			long wordId = c.getLong(c.getColumnIndex(Dictionary.ID));
+
+			Cursor c2 = managedQuery(Dictionary.DICTIONARY_URI, null, "word_id=?", new String[] { Long.toString(wordId) }, null);
+			while (c2.moveToNext()) {
+				int dictId = c2.getInt(c2.getColumnIndex(Dictionary.DICTIONARY_ID));
+				String content = c2.getString(c2.getColumnIndex(Dictionary.CONTENT));
+				String html = toHtml(dictId, content);
+				Iterables.get(webViews, dictId - 1).loadDataWithBaseURL("wiktionary", html, "text/html", "utf-8", null);
+			}
+		}
+	}
+
+	private void createWebViews() {
+		webViews = Lists.newArrayList();
+		for (int each : new int[] { R.id.dict1, R.id.dict2, R.id.dict3 }) {
+			View viewGroup = findViewById(each);
+			TextView textView = (TextView) viewGroup.findViewById(R.id.title);
+			textView.setText(getIntent().getStringExtra(SearchManager.QUERY));
+			final WebView webView = (WebView) viewGroup.findViewById(R.id.webview);
+			webView.loadDataWithBaseURL("wiktionary", "Waiting for retriveing content....", "text/html", "utf-8", null);
+			webView.setOnTouchListener(this);
+			webView.setLongClickable(true);
+			((List<WebView>) webViews).add(webView);
+		}
+	}
+
+	private String toHtml(int dictId, String content) {
+		switch (dictId) {
+		case Dictionary.DICTIONARY_WIKI_DICTIONARY:
+			return WikiHelper.formatWikiText(content);
+		default:
+			return content;
+		}
 	}
 }

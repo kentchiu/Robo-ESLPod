@@ -95,13 +95,11 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 
 	@Override
 	public boolean onDown(MotionEvent e) {
-		System.out.println("onDown...........");
 		return false;
 	}
 
 	@Override
 	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-		System.out.println("onFling..............");
 		if (e1.getX() - e2.getX() > FLING_MIN_DISTANCE && Math.abs(velocityX) > FLING_MIN_VELOCITY) {
 			// Fling left
 			Uri.withAppendedPath(Dictionary.DICTIONARY_URI, Long.toString(DICT_GOOGLE));
@@ -116,30 +114,24 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 
 	@Override
 	public void onLongPress(MotionEvent e) {
-		System.out.println("onLongPress............");
 	}
 
 	@Override
 	public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-		System.out.println("onScroll...............");
 		return false;
 	}
 
 	@Override
 	public void onShowPress(MotionEvent e) {
-		System.out.println("onShowPress.............");
-
 	}
 
 	@Override
 	public boolean onSingleTapUp(MotionEvent e) {
-		System.out.println("onSingleTapUp...............");
 		return false;
 	}
 
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
-		System.out.println("onTouch..............");
 		return gd.onTouchEvent(event);
 	}
 

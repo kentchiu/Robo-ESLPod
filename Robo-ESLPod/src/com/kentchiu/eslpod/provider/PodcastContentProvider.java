@@ -6,8 +6,6 @@ import static com.kentchiu.eslpod.provider.Podcast.ContentType.PODCASTS;
 import static com.kentchiu.eslpod.provider.Podcast.ContentType.getByCode;
 
 import java.io.FileNotFoundException;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -18,25 +16,21 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.ParcelFileDescriptor;
 import android.provider.BaseColumns;
 import android.util.Log;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableList;
 import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.provider.Podcast.ContentType;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
+import com.kentchiu.eslpod.provider.task.DownloadRichScriptTask;
 
 public class PodcastContentProvider extends ContentProvider {
-	private static final String	FILE_CACHE_DIR	= "/data/data/com.kentchiu.eslpod/file_cache";
-	private UriMatcher			uriMatcher;
-	private DatabaseHelper		databaseHelper;
+	private UriMatcher		uriMatcher;
+	private DatabaseHelper	databaseHelper;
 
 	@Override
 	public int delete(Uri uri, String selection, String[] selectionArgs) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
@@ -112,30 +106,7 @@ public class PodcastContentProvider extends ContentProvider {
 
 			if (StringUtils.isBlank(queryCursor.getString(richScriptIdx))) {
 				final Uri uri2 = uri;
-				new AsyncTask<String, Void, Iterable<String>>() {
-
-					@Override
-					protected Iterable<String> doInBackground(String... params) {
-						try {
-							URL url = new URL(params[0]);
-							RichScriptHandler h = new RichScriptHandler(url);
-							h.run();
-							return h.getScript();
-						} catch (MalformedURLException e) {
-							e.printStackTrace();
-						}
-						return ImmutableList.of();
-					}
-
-					@Override
-					protected void onPostExecute(Iterable<String> result) {
-						ContentValues values = new ContentValues();
-						String richScript = Joiner.on("\n").join(result);
-						values.put(PodcastColumns.RICH_SCRIPT, richScript);
-						Log.i(EslPodApplication.LOG_TAG, "update rich script");
-						update(uri2, values, "_ID=?", new String[] { Long.toString(podcastId) });
-					}
-				}.execute(link);
+				new DownloadRichScriptTask(getContext(), podcastId, uri2).execute(link);
 			}
 
 			Uri requestTag = ContentUris.withAppendedId(Podcast.PODCAST_URI, podcastId);
