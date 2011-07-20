@@ -6,3 +6,24 @@ It subscribes ESL podcast from http://www.eslpod.com and it can playing the poda
 on Android enableding device.
 
 It also provides a handy dictionary.
+
+關於 Robo ESLPod
+Robo ESLPod是語言學習軟體
+本應用程式
+是針對[[http://www.eslpod.com]]這個網站定期發佈的內容為主，方便離線閱讀、聆聽該網站的教學外，另外付上
+可以離線查詢的字典，讓在沒有網路的情況下，依舊可以享受學習的樂趣。
+
+
+關於 ESLPodcast (http://www.eslpod.com)
+
+ESL是English as a Second Language(英語為第二語言，非母語)的縮寫，ESLPodcast網站內容包含每個episode的mp3檔跟英文對話。
+mp3中第一段是片頭簡介跟慢速的對話，第二段是文章中生字跟片語的解說，第三段是正常速的英文對話。
+雖然整個podcast內容是全英文，但語速適中，咬字清楚，生字及片語也都會解說(當然也是用英文解說)，而且內容還都滿
+有趣，又是生活化，所以滿適合長期的學習。
+
+
+主要功能
+  * 離線 、聆聽對話內容
+  * 多個簡易字典(可離線使用)
+  * 快切定位到慢速對話、生詞解說、常速對話的段落  
+  
