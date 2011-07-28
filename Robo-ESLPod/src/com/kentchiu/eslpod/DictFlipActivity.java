@@ -8,6 +8,7 @@ import android.database.ContentObserver;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.BaseColumns;
 import android.view.GestureDetector;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
@@ -21,6 +22,8 @@ import android.widget.ViewFlipper;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.kentchiu.eslpod.provider.Dictionary;
+import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
+import com.kentchiu.eslpod.provider.Dictionary.WordBankColumns;
 import com.kentchiu.eslpod.provider.task.WikiHelper;
 
 public class DictFlipActivity extends Activity implements OnGestureListener, OnTouchListener {
@@ -40,7 +43,7 @@ public class DictFlipActivity extends Activity implements OnGestureListener, OnT
 		createWebViews();
 		updateContent();
 
-		getContentResolver().registerContentObserver(Dictionary.DICTIONARY_URI, true, new ContentObserver(new Handler()) {
+		getContentResolver().registerContentObserver(DictionaryColumns.DICTIONARY_URI, true, new ContentObserver(new Handler()) {
 			@Override
 			public void onChange(boolean selfChange) {
 				updateContent();
@@ -117,14 +120,13 @@ public class DictFlipActivity extends Activity implements OnGestureListener, OnT
 	}
 
 	void updateContent() {
-		Cursor c = managedQuery(Dictionary.WORDBANK_URI, null, "word=?", new String[] { getIntent().getStringExtra(SearchManager.QUERY) }, null);
+		Cursor c = managedQuery(WordBankColumns.WORDBANK_URI, null, "word=?", new String[] { getIntent().getStringExtra(SearchManager.QUERY) }, null);
 		if (c.moveToFirst()) {
-			long wordId = c.getLong(c.getColumnIndex(Dictionary.ID));
-
-			Cursor c2 = managedQuery(Dictionary.DICTIONARY_URI, null, "word_id=?", new String[] { Long.toString(wordId) }, null);
+			long wordId = c.getLong(c.getColumnIndex(BaseColumns._ID));
+			Cursor c2 = managedQuery(DictionaryColumns.DICTIONARY_URI, null, "word_id=?", new String[] { Long.toString(wordId) }, null);
 			while (c2.moveToNext()) {
-				int dictId = c2.getInt(c2.getColumnIndex(Dictionary.DICTIONARY_ID));
-				String content = c2.getString(c2.getColumnIndex(Dictionary.CONTENT));
+				int dictId = c2.getInt(c2.getColumnIndex(DictionaryColumns.DICTIONARY_ID));
+				String content = c2.getString(c2.getColumnIndex(DictionaryColumns.CONTENT));
 				String html = toHtml(dictId, content);
 				Iterables.get(webViews, dictId - 1).loadDataWithBaseURL("wiktionary", html, "text/html", "utf-8", null);
 			}

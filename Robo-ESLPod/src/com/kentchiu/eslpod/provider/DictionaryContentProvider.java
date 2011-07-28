@@ -20,12 +20,16 @@ import android.net.Uri;
 import android.os.AsyncTask;
 
 import com.google.common.base.Joiner;
-import com.kentchiu.eslpod.provider.Dictionary.ContentType;
+import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
+import com.kentchiu.eslpod.provider.Dictionary.WordBankColumns;
 
 public class DictionaryContentProvider extends ContentProvider {
-
-	private UriMatcher		uriMatcher;
-	private DatabaseHelper	databaseHelper;
+	private static final int	WORDS			= 1;
+	private static final int	WORD			= 2;
+	private static final int	DICTIONARIES	= 3;
+	private static final int	DICTIONARY		= 4;
+	private UriMatcher			uriMatcher;
+	private DatabaseHelper		databaseHelper;
 
 	@Override
 	public int delete(Uri uri, String selection, String[] selectionArgs) {
@@ -38,22 +42,31 @@ public class DictionaryContentProvider extends ContentProvider {
 
 	@Override
 	public String getType(Uri uri) {
-		int id = uriMatcher.match(uri);
-		return ContentType.getByCode(id).getIdentifier();
+		switch (uriMatcher.match(uri)) {
+		case WORDS:
+			return WordBankColumns.CONTENT_TYPE_WORDS;
+		case WORD:
+			return WordBankColumns.CONTENT_TYPE_WORD;
+		case DICTIONARIES:
+			return DictionaryColumns.CONTENT_TYPE_DICTIONARIES;
+		case DICTIONARY:
+			return DictionaryColumns.CONTENT_TYPE_DICTIONARY;
+		default:
+			throw new IllegalArgumentException("Unknow URI : " + uri);
+		}
 	}
 
 	@Override
 	public Uri insert(Uri uri, ContentValues values) {
 		final SQLiteDatabase db = databaseHelper.getWritableDatabase();
-		ContentType type = ContentType.getByCode(uriMatcher.match(uri));
 		final long id;
-		switch (type) {
+		switch (uriMatcher.match(uri)) {
 		case DICTIONARIES:
 			id = db.insert(DatabaseHelper.DICTIONARY_TABLE_NAME, null, values);
 			break;
 		case WORDS:
 			id = db.insert(DatabaseHelper.WORD_BANK_TABLE_NAME, null, values);
-			final String word = values.getAsString(Dictionary.WORD);
+			final String word = values.getAsString(WordBankColumns.WORD);
 			new AsyncTask<String, String, String>() {
 
 				@Override
@@ -76,11 +89,11 @@ public class DictionaryContentProvider extends ContentProvider {
 				@Override
 				protected void onPostExecute(String result) {
 					ContentValues vs = new ContentValues();
-					vs.put(Dictionary.DICTIONARY_ID, Dictionary.DICTIONARY_GOOGLE_SUGGESTION);
-					vs.put(Dictionary.WORD_ID, id);
-					vs.put(Dictionary.CONTENT, result);
+					vs.put(DictionaryColumns.DICTIONARY_ID, Dictionary.DICTIONARY_GOOGLE_SUGGESTION);
+					vs.put(DictionaryColumns.WORD_ID, id);
+					vs.put(DictionaryColumns.CONTENT, result);
 					db.insert(DatabaseHelper.DICTIONARY_TABLE_NAME, null, vs);
-					getContext().getContentResolver().notifyChange(Dictionary.DICTIONARY_URI, null);
+					getContext().getContentResolver().notifyChange(DictionaryColumns.DICTIONARY_URI, null);
 				};
 			}.execute(word);
 
@@ -103,11 +116,11 @@ public class DictionaryContentProvider extends ContentProvider {
 				@Override
 				protected void onPostExecute(String result) {
 					ContentValues vs = new ContentValues();
-					vs.put(Dictionary.DICTIONARY_ID, Dictionary.DICTIONARY_WIKI_DICTIONARY);
-					vs.put(Dictionary.WORD_ID, id);
-					vs.put(Dictionary.CONTENT, result);
+					vs.put(DictionaryColumns.DICTIONARY_ID, Dictionary.DICTIONARY_WIKI_DICTIONARY);
+					vs.put(DictionaryColumns.WORD_ID, id);
+					vs.put(DictionaryColumns.CONTENT, result);
 					db.insert(DatabaseHelper.DICTIONARY_TABLE_NAME, null, vs);
-					getContext().getContentResolver().notifyChange(Dictionary.DICTIONARY_URI, null);
+					getContext().getContentResolver().notifyChange(DictionaryColumns.DICTIONARY_URI, null);
 				}
 
 				private String extractContent(String content) {
@@ -138,23 +151,22 @@ public class DictionaryContentProvider extends ContentProvider {
 	public boolean onCreate() {
 		databaseHelper = new DatabaseHelper(getContext(), DatabaseHelper.DATABASE_NAME, null);
 		uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-		uriMatcher.addURI(Dictionary.AUTHORITY, "dict", ContentType.DICTIONARIES.getCode());
-		uriMatcher.addURI(Dictionary.AUTHORITY, "dict" + "/#", ContentType.DICTIONARY.getCode());
-		uriMatcher.addURI(Dictionary.AUTHORITY, "word", ContentType.WORDS.getCode());
-		uriMatcher.addURI(Dictionary.AUTHORITY, "word" + "/#", ContentType.WORD.getCode());
+		uriMatcher.addURI(Dictionary.AUTHORITY, "word", WORDS);
+		uriMatcher.addURI(Dictionary.AUTHORITY, "word" + "/#", WORD);
+		uriMatcher.addURI(Dictionary.AUTHORITY, "dict", DICTIONARIES);
+		uriMatcher.addURI(Dictionary.AUTHORITY, "dict" + "/#", DICTIONARY);
 		return true;
 	}
 
 	@Override
 	public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
 		SQLiteDatabase db = databaseHelper.getReadableDatabase();
-		ContentType type = ContentType.getByCode(uriMatcher.match(uri));
-		switch (type) {
+		switch (uriMatcher.match(uri)) {
 		case WORDS:
 			Cursor result = db.query(DatabaseHelper.WORD_BANK_TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
 			if (result.getCount() == 0) {
 				ContentValues values = new ContentValues();
-				values.put(Dictionary.WORD, selectionArgs[0]);
+				values.put(WordBankColumns.WORD, selectionArgs[0]);
 				insert(uri, values);
 			}
 			return result;

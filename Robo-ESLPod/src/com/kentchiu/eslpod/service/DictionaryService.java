@@ -16,7 +16,7 @@ import com.kentchiu.eslpod.EslPodApplication;
 public class DictionaryService extends IntentService {
 
 	public DictionaryService() {
-		super("Google Suggestion Service");
+		super(DictionaryService.class.getName());
 	}
 
 	@Override

@@ -20,7 +20,7 @@ public class DatabaseHelperTest extends TestCase {
 
 	public void testPodcastTable() throws Exception {
 		Cursor c = db.query(DatabaseHelper.PODCAST_TABLE_NAME, null, null, null, null, null, null);
-		assertEquals(14, c.getColumnCount());
+		assertEquals(13, c.getColumnCount());
 	}
 
 	public void testWordBankTable() throws Exception {

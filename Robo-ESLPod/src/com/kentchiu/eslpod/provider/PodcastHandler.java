@@ -61,7 +61,7 @@ public class PodcastHandler implements Runnable {
 	public void run() {
 		try {
 			for (Node item : getItemNodes()) {
-				resolver.insert(Podcast.PODCAST_URI, convert(item));
+				resolver.insert(PodcastColumns.PODCAST_URI, convert(item));
 			}
 		} catch (XPathExpressionException e) {
 			e.printStackTrace();
@@ -88,7 +88,7 @@ public class PodcastHandler implements Runnable {
 				NamedNodeMap attributes = node.getAttributes();
 				String url = attributes.getNamedItem("url").getNodeValue();
 				String length = attributes.getNamedItem("length").getNodeValue();
-				result.put(PodcastColumns.MEDIA_URI, url);
+				result.put(PodcastColumns.MEDIA_URL, url);
 				result.put(PodcastColumns.MEDIA_LENGTH, length);
 			} else if (StringUtils.equals("description", node.getNodeName())) {
 				String desc = node.getTextContent();

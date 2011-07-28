@@ -1,5 +1,7 @@
 package com.kentchiu.eslpod;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 
 import org.apache.commons.lang.StringUtils;
@@ -32,8 +34,9 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.kentchiu.eslpod.provider.Dictionary;
+import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
+import com.kentchiu.eslpod.service.MediaDownloadService;
 
 public class PlayerActivity extends ListActivity implements OnTouchListener, OnGestureListener, OnClickListener {
 	private static final int	DICT_GOOGLE			= 1;
@@ -67,7 +70,7 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
-		Intent intent = new Intent(Intent.ACTION_VIEW, Dictionary.DICTIONARY_URI);
+		Intent intent = new Intent(Intent.ACTION_VIEW, DictionaryColumns.DICTIONARY_URI);
 		intent.putExtra(SearchManager.QUERY, item.getTitle());
 		startActivity(intent);
 		return super.onContextItemSelected(item);
@@ -102,8 +105,8 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
 		if (e1.getX() - e2.getX() > FLING_MIN_DISTANCE && Math.abs(velocityX) > FLING_MIN_VELOCITY) {
 			// Fling left
-			Uri.withAppendedPath(Dictionary.DICTIONARY_URI, Long.toString(DICT_GOOGLE));
-			Intent intent = new Intent(Intent.ACTION_VIEW, Dictionary.DICTIONARY_URI);
+			Uri.withAppendedPath(DictionaryColumns.DICTIONARY_URI, Long.toString(DICT_GOOGLE));
+			Intent intent = new Intent(Intent.ACTION_VIEW, DictionaryColumns.DICTIONARY_URI);
 			intent.putExtra("PODCAST_URI", getIntent().getDataString());
 			startActivity(intent);
 		} else if (e2.getX() - e1.getX() > FLING_MIN_DISTANCE && Math.abs(velocityX) > FLING_MIN_VELOCITY) {
@@ -146,7 +149,7 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 		String script = c.getString(c.getColumnIndex(PodcastColumns.SCRIPT));
 		String richScript = c.getString(c.getColumnIndex(PodcastColumns.RICH_SCRIPT));
 		Iterable<String> lines = Splitter.on("\n").trimResults().split(script);
-		final ScriptListAdapter adapter = new ScriptListAdapter(this, R.layout.listitem, R.id.scriptLine, ImmutableList.copyOf(lines));
+		final ScriptListAdapter adapter = new ScriptListAdapter(this, R.layout.script_list_item, R.id.scriptLine, ImmutableList.copyOf(lines));
 		if (StringUtils.isNotBlank(richScript)) {
 			adapter.setRichScript(richScript);
 		}
@@ -175,9 +178,27 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 
 		player = new MediaPlayer();
 		try {
-			String url = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URI));
-			player.setDataSource(url);
-			player.prepareAsync();
+			String url = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URL_LOCAL));
+			String path = "";
+			if (StringUtils.isNotBlank(url)) {
+				File file = new File(url);
+				if (file.exists()) {
+					path = file.getAbsolutePath();
+					player.setDataSource(new FileInputStream(file).getFD());
+					player.prepareAsync();
+				} else {
+					path = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URL));
+					player.setDataSource(path);
+					player.prepareAsync();
+					sendDownloadIntent(uri);
+				}
+			} else {
+				path = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URL));
+				player.setDataSource(path);
+				player.prepareAsync();
+				sendDownloadIntent(uri);
+			}
+			Log.d(EslPodApplication.LOG_TAG, "media url : " + path);
 		} catch (IllegalArgumentException e1) {
 			e1.printStackTrace();
 		} catch (IllegalStateException e1) {
@@ -246,6 +267,12 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 	protected void onDestroy() {
 		player.release();
 		super.onDestroy();
+	}
+
+	private void sendDownloadIntent(Uri uri) {
+		Intent intent = new Intent(this, MediaDownloadService.class);
+		intent.setData(uri);
+		startService(intent);
 	}
 
 }
