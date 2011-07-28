@@ -14,8 +14,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ListView;
 
+import com.kentchiu.eslpod.helper.PodcastCommand;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
-import com.kentchiu.eslpod.provider.PodcastHandler;
 import com.kentchiu.eslpod.service.MediaDownloadService;
 
 public class HomeActivity extends ListActivity {
@@ -63,8 +63,9 @@ public class HomeActivity extends ListActivity {
 				@Override
 				protected Void doInBackground(Void... params) {
 					InputStream is = getResources().openRawResource(R.raw.podcast);
-					PodcastHandler podcastHandler = new PodcastHandler(getContentResolver(), is);
-					podcastHandler.run();
+					PodcastCommand podcastCommand = new PodcastCommand(HomeActivity.this, is);
+					// doInBackground is already in work thread, no need to using a new one
+					podcastCommand.run();
 					return null;
 				}
 

@@ -1,4 +1,4 @@
-package com.kentchiu.eslpod.provider;
+package com.kentchiu.eslpod.helper;
 
 import java.io.InputStream;
 import java.util.List;
@@ -14,8 +14,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.util.Log;
 
 import com.google.common.base.Joiner;
@@ -26,16 +26,16 @@ import com.google.common.collect.Lists;
 import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
-public class PodcastHandler implements Runnable {
+public class PodcastCommand implements Runnable {
 
 	private static final String	RSS_URI	= "http://feeds.feedburner.com/EnglishAsASecondLanguagePodcast";
 
 	private InputStream			inputStream;
-	private ContentResolver		resolver;
+	private Context				context;
 
-	public PodcastHandler(ContentResolver resolver, InputStream inputStream) {
+	public PodcastCommand(Context context, InputStream inputStream) {
 		super();
-		this.resolver = resolver;
+		this.context = context;
 		this.inputStream = inputStream;
 	}
 
@@ -61,7 +61,7 @@ public class PodcastHandler implements Runnable {
 	public void run() {
 		try {
 			for (Node item : getItemNodes()) {
-				resolver.insert(PodcastColumns.PODCAST_URI, convert(item));
+				context.getContentResolver().insert(PodcastColumns.PODCAST_URI, convert(item));
 			}
 		} catch (XPathExpressionException e) {
 			e.printStackTrace();

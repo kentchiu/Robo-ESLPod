@@ -1,4 +1,4 @@
-package com.kentchiu.eslpod.provider;
+package com.kentchiu.eslpod.helper;
 
 import java.io.InputStream;
 import java.util.List;
@@ -6,21 +6,16 @@ import java.util.List;
 import org.w3c.dom.Node;
 
 import android.content.ContentValues;
-import android.net.Uri;
 import android.test.AndroidTestCase;
-import android.test.mock.MockContentProvider;
-import android.test.mock.MockContentResolver;
 
 import com.google.common.collect.Iterables;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
 public class PodcastHandlerTest extends AndroidTestCase {
 
-	private MockContentResolver	mockResolver;
-
 	public void testCreateContentValue() throws Exception {
 		InputStream inputStream = getClass().getResourceAsStream("/podcast.xml");
-		PodcastHandler h = new PodcastHandler(mockResolver, inputStream);
+		PodcastCommand h = new PodcastCommand(mContext, inputStream);
 		List<Node> items = h.getItemNodes();
 		Node node = Iterables.get(items, 5);
 		ContentValues values = h.convert(node);
@@ -36,25 +31,18 @@ public class PodcastHandlerTest extends AndroidTestCase {
 
 	public void testGetItemNodes() throws Exception {
 		InputStream inputStream = getClass().getResourceAsStream("/podcast.xml");
-		PodcastHandler h = new PodcastHandler(mockResolver, inputStream);
+		PodcastCommand h = new PodcastCommand(mContext, inputStream);
 		assertEquals(86, Iterables.size(h.getItemNodes()));
 	}
 
 	public void testInsert() throws Exception {
 		InputStream inputStream = getClass().getResourceAsStream("/podcast.xml");
-		PodcastHandler h = new PodcastHandler(mockResolver, inputStream);
+		PodcastCommand h = new PodcastCommand(mContext, inputStream);
 		h.run();
 	}
 
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		mockResolver = new MockContentResolver();
-		mockResolver.addProvider("com.kentchiu.eslpod.provider.Podcast", new MockContentProvider(null) {
-			@Override
-			public Uri insert(Uri uri, ContentValues values) {
-				return uri;
-			}
-		});
 	}
 }

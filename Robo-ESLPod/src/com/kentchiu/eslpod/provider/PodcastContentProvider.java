@@ -1,5 +1,8 @@
 package com.kentchiu.eslpod.provider;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import org.apache.commons.lang.StringUtils;
 
 import android.content.ContentProvider;
@@ -13,8 +16,8 @@ import android.provider.BaseColumns;
 import android.util.Log;
 
 import com.kentchiu.eslpod.EslPodApplication;
+import com.kentchiu.eslpod.helper.DownloadRichScriptCommand;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
-import com.kentchiu.eslpod.provider.task.DownloadRichScriptTask;
 
 public class PodcastContentProvider extends ContentProvider {
 
@@ -36,7 +39,7 @@ public class PodcastContentProvider extends ContentProvider {
 
 	@Override
 	public String getType(Uri uri) {
-		switch (getUriMatcher().match(uri)) {
+		switch (uriMatcher.match(uri)) {
 		case PODCASTS:
 			return PodcastColumns.CONTENT_TYPE_PODCASTS;
 		case PODCAST:
@@ -46,14 +49,10 @@ public class PodcastContentProvider extends ContentProvider {
 		}
 	}
 
-	public UriMatcher getUriMatcher() {
-		return uriMatcher;
-	}
-
 	@Override
 	public Uri insert(Uri uri, ContentValues values) {
 		SQLiteDatabase db = databaseHelper.getWritableDatabase();
-		switch (getUriMatcher().match(uri)) {
+		switch (uriMatcher.match(uri)) {
 		case PODCASTS:
 			long rowId = db.insert(DatabaseHelper.PODCAST_TABLE_NAME, null, values);
 			Log.d(EslPodApplication.TAG, "insert pocast data");
@@ -69,51 +68,50 @@ public class PodcastContentProvider extends ContentProvider {
 	public boolean onCreate() {
 		databaseHelper = new DatabaseHelper(getContext(), DatabaseHelper.DATABASE_NAME, null);
 		uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-		getUriMatcher().addURI(Podcast.AUTHORITY, "podcast", PODCASTS);
-		getUriMatcher().addURI(Podcast.AUTHORITY, "podcast" + "/#", PODCAST);
-		getUriMatcher().addURI(Podcast.AUTHORITY, "media", MEDIA);
+		uriMatcher.addURI(Podcast.AUTHORITY, "podcast", PODCASTS);
+		uriMatcher.addURI(Podcast.AUTHORITY, "podcast" + "/#", PODCAST);
+		uriMatcher.addURI(Podcast.AUTHORITY, "media", MEDIA);
 		return true;
 	}
 
 	@Override
 	public Cursor query(Uri uri, String[] projection, String where, String[] whereArgs, String sortOrder) {
+		Log.d(EslPodApplication.TAG, "uri :" + uri);
 		SQLiteDatabase db = databaseHelper.getWritableDatabase();
-		final Cursor queryCursor;
-		switch (getUriMatcher().match(uri)) {
+		final Cursor c;
+		switch (uriMatcher.match(uri)) {
 		case PODCASTS:
-			queryCursor = db.query(DatabaseHelper.PODCAST_TABLE_NAME, projection, where, whereArgs, null, null, sortOrder);
+			c = db.query(DatabaseHelper.PODCAST_TABLE_NAME, projection, where, whereArgs, null, null, sortOrder);
 			Log.i(EslPodApplication.TAG, "send uri" + uri);
 			getContext().getContentResolver().notifyChange(uri, null);
 			break;
 		case PODCAST:
-			final long podcastId = ContentUris.parseId(uri);
-			queryCursor = db.query(DatabaseHelper.PODCAST_TABLE_NAME, projection, BaseColumns._ID + " = " + podcastId, whereArgs, null, null, null);
-			queryCursor.moveToFirst();
-			int linkIdx = queryCursor.getColumnIndex(PodcastColumns.LINK);
-			int richScriptIdx = queryCursor.getColumnIndex(PodcastColumns.RICH_SCRIPT);
-			queryCursor.setNotificationUri(getContext().getContentResolver(), uri);
-			String link = queryCursor.getString(linkIdx);
-			Log.i(EslPodApplication.TAG, "Retrive rich script content from :" + link);
-
-			if (StringUtils.isBlank(queryCursor.getString(richScriptIdx))) {
-				final Uri uri2 = uri;
-				new DownloadRichScriptTask(getContext(), podcastId, uri2).execute(link);
+			long id = ContentUris.parseId(uri);
+			c = db.query(DatabaseHelper.PODCAST_TABLE_NAME, projection, BaseColumns._ID + "=?", new String[] { Long.toString(id) }, null, null, null);
+			if (c.moveToFirst()) {
+				String link = c.getString(c.getColumnIndex(PodcastColumns.LINK));
+				Log.i(EslPodApplication.TAG, "Retrive rich script content from :" + link);
+				String rs = c.getString(c.getColumnIndex(PodcastColumns.RICH_SCRIPT));
+				if (StringUtils.isBlank(rs)) {
+					String url = c.getString(c.getColumnIndex(PodcastColumns.LINK));
+					try {
+						new Thread(new DownloadRichScriptCommand(getContext(), uri, new URL(url))).start();
+					} catch (MalformedURLException e) {
+						e.printStackTrace();
+					}
+				}
 			}
 			break;
 		default:
 			throw new IllegalArgumentException("unsupported uri: " + uri);
 		}
-		return queryCursor;
-	}
-
-	public void setUriMatcher(UriMatcher uriMatcher) {
-		this.uriMatcher = uriMatcher;
+		return c;
 	}
 
 	@Override
 	public int update(Uri uri, ContentValues values, String where, String[] whereArgs) {
 		SQLiteDatabase db = databaseHelper.getWritableDatabase();
-		switch (getUriMatcher().match(uri)) {
+		switch (uriMatcher.match(uri)) {
 		case PODCAST:
 			Long id = ContentUris.parseId(uri);
 			int update;

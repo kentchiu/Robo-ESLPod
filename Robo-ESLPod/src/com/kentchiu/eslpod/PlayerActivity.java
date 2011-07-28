@@ -145,15 +145,19 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 
 	ScriptListAdapter createAdapter(final Uri uri) {
 		Cursor c = getContentResolver().query(uri, null, null, null, null);
-		c.moveToFirst();
-		String script = c.getString(c.getColumnIndex(PodcastColumns.SCRIPT));
-		String richScript = c.getString(c.getColumnIndex(PodcastColumns.RICH_SCRIPT));
-		Iterable<String> lines = Splitter.on("\n").trimResults().split(script);
-		final ScriptListAdapter adapter = new ScriptListAdapter(this, R.layout.script_list_item, R.id.scriptLine, ImmutableList.copyOf(lines));
-		if (StringUtils.isNotBlank(richScript)) {
-			adapter.setRichScript(richScript);
+		if (c.moveToFirst()) {
+			String script = c.getString(c.getColumnIndex(PodcastColumns.SCRIPT));
+			String richScript = c.getString(c.getColumnIndex(PodcastColumns.RICH_SCRIPT));
+			Iterable<String> lines = Splitter.on("\n").trimResults().split(script);
+			ScriptListAdapter result = new ScriptListAdapter(this, R.layout.script_list_item, R.id.scriptLine, ImmutableList.copyOf(lines));
+			if (StringUtils.isNotBlank(richScript)) {
+				result.setRichScript(richScript);
+			}
+
+			return result;
+		} else {
+			return new ScriptListAdapter(this, R.layout.script_list_item, R.id.scriptLine, ImmutableList.<String> of());
 		}
-		return adapter;
 	}
 
 	@Override

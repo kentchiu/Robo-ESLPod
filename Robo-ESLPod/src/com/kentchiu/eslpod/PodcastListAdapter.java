@@ -24,23 +24,6 @@ public class PodcastListAdapter extends ResourceCursorAdapter {
 		Button button = (Button) view.findViewById(R.id.downloadButton);
 		int id = cursor.getInt(cursor.getColumnIndex(BaseColumns._ID));
 		button.setTag(id);
-
 	}
-
-	//	@Override
-	//	public void bindView(View view, Context context, Cursor cursor) {
-	////		TextView textView = (TextView) view;
-	////		int idx = cursor.getColumnIndex(PodcastColumns.TITLE);
-	////		textView.setText(cursor.getString(idx));
-	////		System.out.println(view);
-	//		TextView tv = (TextView) view.findViewById(R.id.PodcastTitle);
-	//		int idx = cursor.getColumnIndex(PodcastColumns.TITLE);
-	//		tv.setText(cursor.getString(idx));
-	//	}
-	//
-	//	@Override
-	//	public View newView(Context context, Cursor cursor, ViewGroup parent) {
-	//		return view;
-	//	}
 
 }

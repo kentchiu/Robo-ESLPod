@@ -1,4 +1,4 @@
-package com.kentchiu.eslpod.provider.task;
+package com.kentchiu.eslpod.helper;
 
 import java.net.URL;
 import java.util.List;
@@ -44,11 +44,11 @@ public class GoogleSuggestCommand implements Runnable {
 				} catch (Exception e) {
 					content = "[\"" + word + "\",[],{\"k\":1}]";
 				}
-				ContentValues vs = new ContentValues();
-				vs.put(DictionaryColumns.DICTIONARY_ID, Dictionary.DICTIONARY_GOOGLE_SUGGESTION);
-				vs.put(DictionaryColumns.WORD_ID, ContentUris.parseId(wordBankUri));
-				vs.put(DictionaryColumns.CONTENT, content);
-				getContext().getContentResolver().insert(DictionaryColumns.DICTIONARY_URI, vs);
+				ContentValues cv = new ContentValues();
+				cv.put(DictionaryColumns.DICTIONARY_ID, Dictionary.DICTIONARY_GOOGLE_SUGGESTION);
+				cv.put(DictionaryColumns.WORD_ID, ContentUris.parseId(wordBankUri));
+				cv.put(DictionaryColumns.CONTENT, content);
+				getContext().getContentResolver().insert(DictionaryColumns.DICTIONARY_URI, cv);
 			}
 		}
 	}

@@ -21,10 +21,10 @@ import android.widget.ViewFlipper;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.kentchiu.eslpod.helper.WikiHelper;
 import com.kentchiu.eslpod.provider.Dictionary;
 import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
 import com.kentchiu.eslpod.provider.Dictionary.WordBankColumns;
-import com.kentchiu.eslpod.provider.task.WikiHelper;
 
 public class DictFlipActivity extends Activity implements OnGestureListener, OnTouchListener {
 

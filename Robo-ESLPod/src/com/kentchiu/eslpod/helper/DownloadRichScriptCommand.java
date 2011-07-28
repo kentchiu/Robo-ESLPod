@@ -1,4 +1,4 @@
-package com.kentchiu.eslpod.provider.task;
+package com.kentchiu.eslpod.helper;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,7 +12,6 @@ import org.apache.commons.lang.StringUtils;
 import android.content.ContentValues;
 import android.content.Context;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.util.Log;
 
 import com.google.common.base.Joiner;
@@ -23,8 +22,8 @@ import com.google.common.collect.Iterables;
 import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
-public class DownloadRichScriptTask extends AsyncTask<String, Void, Iterable<String>> {
-	private class ContainPredicate implements Predicate<String> {
+public class DownloadRichScriptCommand implements Runnable {
+	private static class ContainPredicate implements Predicate<String> {
 
 		private String	token;
 
@@ -39,16 +38,21 @@ public class DownloadRichScriptTask extends AsyncTask<String, Void, Iterable<Str
 		}
 	}
 
-	private final Context	context;
-	private final long		podcastId;
+	private Context	context;
+	private Uri		podcastUri;
+	private URL		scriptUrl;
 
-	private final Uri		uri2;
-
-	public DownloadRichScriptTask(Context context, long podcastId, Uri uri2) {
+	public DownloadRichScriptCommand(Context context, Uri podcastUri, URL scriptUrl) {
+		super();
 		this.context = context;
-		this.podcastId = podcastId;
-		this.uri2 = uri2;
+		this.podcastUri = podcastUri;
+		this.scriptUrl = scriptUrl;
 	}
+
+	//	public DownloadRichScriptCommand(Context context, Uri podcastUri) {
+	//		this.context = context;
+	//		this.podcastUri = podcastUri;
+	//	}
 
 	public synchronized List<String> extractScript(List<String> lines) {
 		int index1 = Iterables.indexOf(lines, new ContainPredicate("Audio Index:"));
@@ -62,39 +66,29 @@ public class DownloadRichScriptTask extends AsyncTask<String, Void, Iterable<Str
 	}
 
 	@Override
-	protected Iterable<String> doInBackground(String... params) {
+	public void run() {
+		List<String> lines;
 		try {
-			URL url = new URL(params[0]);
-			List<String> lines;
-			try {
-				InputStream is = url.openStream();
-				lines = IOUtils.readLines(is, "iso-8859-1");
-			} catch (MalformedURLException e) {
-				lines = ImmutableList.of();
-				e.printStackTrace();
-			} catch (IOException e) {
-				lines = ImmutableList.of();
-				e.printStackTrace();
-			}
-			Iterable<String> filter = Iterables.filter(extractScript(lines), new Predicate<String>() {
-				@Override
-				public boolean apply(String input) {
-					return StringUtils.isNotEmpty(input);
-				}
-			});
-			return filter;
+			InputStream is = scriptUrl.openStream();
+			lines = IOUtils.readLines(is, "iso-8859-1");
 		} catch (MalformedURLException e) {
+			lines = ImmutableList.of();
+			e.printStackTrace();
+		} catch (IOException e) {
+			lines = ImmutableList.of();
 			e.printStackTrace();
 		}
-		return ImmutableList.of();
-	}
-
-	@Override
-	protected void onPostExecute(Iterable<String> result) {
+		Iterable<String> filter = Iterables.filter(extractScript(lines), new Predicate<String>() {
+			@Override
+			public boolean apply(String input) {
+				return StringUtils.isNotEmpty(input);
+			}
+		});
 		ContentValues values = new ContentValues();
-		String richScript = Joiner.on("\n").join(result);
+		String richScript = Joiner.on("\n").join(filter);
 		values.put(PodcastColumns.RICH_SCRIPT, richScript);
 		Log.i(EslPodApplication.TAG, "update rich script");
-		context.getContentResolver().update(uri2, values, "_ID=?", new String[] { Long.toString(podcastId) });
+		context.getContentResolver().update(podcastUri, values, null, null);
+
 	}
 }

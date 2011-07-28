@@ -10,9 +10,9 @@ import android.util.Log;
 
 import com.google.common.base.Preconditions;
 import com.kentchiu.eslpod.EslPodApplication;
+import com.kentchiu.eslpod.helper.GoogleSuggestCommand;
+import com.kentchiu.eslpod.helper.WikiCommand;
 import com.kentchiu.eslpod.provider.Dictionary.WordBankColumns;
-import com.kentchiu.eslpod.provider.task.GoogleSuggestCommand;
-import com.kentchiu.eslpod.provider.task.WikiCommand;
 
 public class DictionaryService extends IntentService {
 
