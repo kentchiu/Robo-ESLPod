@@ -94,7 +94,7 @@ public class DownloadRichScriptTask extends AsyncTask<String, Void, Iterable<Str
 		ContentValues values = new ContentValues();
 		String richScript = Joiner.on("\n").join(result);
 		values.put(PodcastColumns.RICH_SCRIPT, richScript);
-		Log.i(EslPodApplication.LOG_TAG, "update rich script");
+		Log.i(EslPodApplication.TAG, "update rich script");
 		context.getContentResolver().update(uri2, values, "_ID=?", new String[] { Long.toString(podcastId) });
 	}
 }

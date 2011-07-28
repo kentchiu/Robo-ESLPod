@@ -47,7 +47,6 @@ public class DictFlipActivity extends Activity implements OnGestureListener, OnT
 			@Override
 			public void onChange(boolean selfChange) {
 				updateContent();
-
 			};
 		});
 	}

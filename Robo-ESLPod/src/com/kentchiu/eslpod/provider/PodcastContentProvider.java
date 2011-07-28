@@ -56,22 +56,10 @@ public class PodcastContentProvider extends ContentProvider {
 		switch (getUriMatcher().match(uri)) {
 		case PODCASTS:
 			long rowId = db.insert(DatabaseHelper.PODCAST_TABLE_NAME, null, values);
-			Log.d(EslPodApplication.LOG_TAG, "insert pocast data");
+			Log.d(EslPodApplication.TAG, "insert pocast data");
 			Uri url = ContentUris.withAppendedId(PodcastColumns.PODCAST_URI, rowId);
 			getContext().getContentResolver().notifyChange(uri, null);
 			return url;
-			//		case MEDIA:
-			//			ContentValues mediaValues = new ContentValues();
-			//			mediaValues.put("_data", values.getAsString("_data"));
-			//			rowId = db.insert(DatabaseHelper.MEDIA_TABLE_NAME, null, mediaValues);
-			//			url = ContentUris.withAppendedId(MediaColumns.MEDIA_URI, rowId);
-			//			getContext().getContentResolver().notifyChange(uri, null);
-			//			if (rowId != -1) {
-			//				ContentValues podcastValues = new ContentValues();
-			//				podcastValues.put(PodcastColumns.MEDIA_ID, rowId);
-			//				update(Uri.parse(values.getAsString("podcastUri")), podcastValues, null, null);
-			//			}
-			//			return url;
 		default:
 			throw new IllegalArgumentException("Unknown URI " + uri);
 		}
@@ -94,7 +82,7 @@ public class PodcastContentProvider extends ContentProvider {
 		switch (getUriMatcher().match(uri)) {
 		case PODCASTS:
 			queryCursor = db.query(DatabaseHelper.PODCAST_TABLE_NAME, projection, where, whereArgs, null, null, sortOrder);
-			Log.i(EslPodApplication.LOG_TAG, "send uri" + uri);
+			Log.i(EslPodApplication.TAG, "send uri" + uri);
 			getContext().getContentResolver().notifyChange(uri, null);
 			break;
 		case PODCAST:
@@ -105,18 +93,13 @@ public class PodcastContentProvider extends ContentProvider {
 			int richScriptIdx = queryCursor.getColumnIndex(PodcastColumns.RICH_SCRIPT);
 			queryCursor.setNotificationUri(getContext().getContentResolver(), uri);
 			String link = queryCursor.getString(linkIdx);
-			Log.i(EslPodApplication.LOG_TAG, "Retrive rich script content from :" + link);
+			Log.i(EslPodApplication.TAG, "Retrive rich script content from :" + link);
 
 			if (StringUtils.isBlank(queryCursor.getString(richScriptIdx))) {
 				final Uri uri2 = uri;
 				new DownloadRichScriptTask(getContext(), podcastId, uri2).execute(link);
 			}
 			break;
-		//		case MEDIA:
-		//			mediaID =
-		//			queryCursor = db.query(DatabaseHelper.PODCAST_TABLE_NAME, projection, Podcast.PodcastColumns.MEDIA_ID + " = " + mediaID, whereArgs, null, null, null);
-		//			break;
-
 		default:
 			throw new IllegalArgumentException("unsupported uri: " + uri);
 		}

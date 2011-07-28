@@ -50,7 +50,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 //		"_data" + " TEXT  NOT NULL "
 //		+ ");";
 //		// @formatter:on
-	//		Log.i(EslPodApplication.LOG_TAG, sql);
+	//		Log.i(EslPodApplication.TAG, sql);
 	//		sqLiteDatabase.execSQL(sql);
 	//	}
 
@@ -63,7 +63,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		DictionaryColumns.CONTENT + " TEXT " +
 		");";
 		// @formatter:on
-		Log.i(EslPodApplication.LOG_TAG, sql);
+		Log.i(EslPodApplication.TAG, sql);
 		sqLiteDatabase.execSQL(sql);
 	}
 
@@ -85,7 +85,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		PodcastColumns.PARAGRAPH_INDEX + " TEXT " +
 		");";
 		// @formatter:on
-		Log.i(EslPodApplication.LOG_TAG, sql);
+		Log.i(EslPodApplication.TAG, sql);
 		sqLiteDatabase.execSQL(sql);
 	}
 
@@ -96,7 +96,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		WordBankColumns.WORD + " TEXT UNIQUE NOT NULL" +
 		");";
 		// @formatter:on
-		Log.i(EslPodApplication.LOG_TAG, sql);
+		Log.i(EslPodApplication.TAG, sql);
 		sqLiteDatabase.execSQL(sql);
 	}
 }

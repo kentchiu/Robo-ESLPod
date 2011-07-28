@@ -162,12 +162,12 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 		setContentView(R.layout.player_activity);
 
 		final Uri uri = getIntent().getData();
-		Log.i(EslPodApplication.LOG_TAG, "working uri:" + uri);
+		Log.i(EslPodApplication.TAG, "working uri:" + uri);
 		registerForContextMenu(getListView());
 		getContentResolver().registerContentObserver(uri, false, new ContentObserver(handler) {
 			@Override
 			public void onChange(boolean selfChange) {
-				Log.i(EslPodApplication.LOG_TAG, "reset adapter");
+				Log.i(EslPodApplication.TAG, "reset adapter");
 				setListAdapter(createAdapter(uri));
 			}
 		});
@@ -198,7 +198,7 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 				player.prepareAsync();
 				sendDownloadIntent(uri);
 			}
-			Log.d(EslPodApplication.LOG_TAG, "media url : " + path);
+			Log.d(EslPodApplication.TAG, "media url : " + path);
 		} catch (IllegalArgumentException e1) {
 			e1.printStackTrace();
 		} catch (IllegalStateException e1) {
@@ -214,7 +214,7 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 
 			@Override
 			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-				Log.d(EslPodApplication.LOG_TAG, "progress:" + progress + ", from User:" + fromUser);
+				Log.d(EslPodApplication.TAG, "progress:" + progress + ", from User:" + fromUser);
 				if (fromUser) {
 					player.seekTo(progress);
 				} else {
@@ -225,13 +225,13 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 
 			@Override
 			public void onStartTrackingTouch(SeekBar seekBar) {
-				Log.d(EslPodApplication.LOG_TAG, "onStartTrackingTouch");
+				Log.d(EslPodApplication.TAG, "onStartTrackingTouch");
 
 			}
 
 			@Override
 			public void onStopTrackingTouch(SeekBar seekBar) {
-				Log.d(EslPodApplication.LOG_TAG, "onStopTrackingTouch");
+				Log.d(EslPodApplication.TAG, "onStopTrackingTouch");
 
 			}
 		};

@@ -104,7 +104,7 @@ public class PodcastHandler implements Runnable {
 				result.put(PodcastColumns.SCRIPT, Joiner.on("\n").join(scripts).trim());
 			}
 		}
-		Log.d(EslPodApplication.LOG_TAG, result.toString());
+		Log.d(EslPodApplication.TAG, result.toString());
 		return result;
 	}
 

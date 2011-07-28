@@ -36,12 +36,12 @@ public class MediaDownloadService extends IntentService {
 					try {
 						URL url = new URL(urlStr);
 						File remoteFile = new File(url.getFile());
-						Log.i(EslPodApplication.LOG_TAG, "Downloading file from " + urlStr);
+						Log.i(EslPodApplication.TAG, "Downloading file from " + urlStr);
 						InputStream openStream = url.openStream();
 						File localFile = new File(getFilesDir(), remoteFile.getName());
 						localFile.createNewFile();
 						IOUtils.copyLarge(openStream, new FileOutputStream(localFile));
-						Log.i(EslPodApplication.LOG_TAG, "Downloaded file " + localFile.toString() + " completed");
+						Log.i(EslPodApplication.TAG, "Downloaded file " + localFile.toString() + " completed");
 						ContentValues cv = new ContentValues();
 						cv.put(PodcastColumns.MEDIA_URL_LOCAL, localFile.getPath());
 						getContentResolver().update(uri, cv, null, null);
