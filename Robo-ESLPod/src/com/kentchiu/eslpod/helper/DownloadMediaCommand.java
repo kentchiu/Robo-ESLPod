@@ -34,7 +34,6 @@ public class DownloadMediaCommand implements Runnable {
 	public void run() {
 		Cursor c = context.getContentResolver().query(podacstUri, null, null, null, null);
 		if (c.moveToFirst()) {
-			//String urlStr = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URL));
 			String localUrlStr = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URL_LOCAL));
 			String urlStr = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URL));
 			if (localUrlStr == null || !new File(localUrlStr).exists()) {

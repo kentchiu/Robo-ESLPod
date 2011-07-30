@@ -1,64 +1,39 @@
 package com.kentchiu.eslpod.helper;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.List;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
 import android.net.Uri;
 
-import com.google.common.base.Joiner;
 import com.kentchiu.eslpod.provider.Dictionary;
-import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
-import com.kentchiu.eslpod.provider.Dictionary.WordBankColumns;
 
-public class WikiCommand implements Runnable {
+public class WikiCommand extends DictionaryCommand {
 
-	private Uri		wordBankUri;
-	private Context	context;
+	private static final int	DICTIONARY_WIKI_DICTIONARY	= Dictionary.DICTIONARY_WIKI_DICTIONARY;
 
-	public WikiCommand(Context context, Uri workBankUri) {
-		this.context = context;
-		wordBankUri = workBankUri;
+	public WikiCommand(Context context, Uri wordBankUri) {
+		super(context, wordBankUri);
 	}
 
 	@Override
-	public void run() {
-		String type = getContext().getContentResolver().getType(wordBankUri);
-		if (StringUtils.equals(WordBankColumns.CONTENT_TYPE_WORD, type)) {
-			Cursor c = getContext().getContentResolver().query(wordBankUri, null, null, null, null);
-			if (c.moveToFirst()) {
-				String word = c.getString(c.getColumnIndex(WordBankColumns.WORD));
-				String urlStr = "http://en.wiktionary.org/w/api.php?action=query&prop=revisions&rvprop=content&format=json&rvexpandtemplates=true&titles=" + word;
-				try {
-					URL url = new URL(urlStr);
-					InputStream is = url.openStream();
-					List<String> lines = IOUtils.readLines(is);
-					String join = Joiner.on("").join(lines);
-					String content = extractContent(join);
-					ContentValues vs = new ContentValues();
-					vs.put(DictionaryColumns.DICTIONARY_ID, Dictionary.DICTIONARY_WIKI_DICTIONARY);
-					vs.put(DictionaryColumns.WORD_ID, ContentUris.parseId(wordBankUri));
-					vs.put(DictionaryColumns.CONTENT, content);
-					getContext().getContentResolver().insert(DictionaryColumns.DICTIONARY_URI, vs);
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
+	protected String getContent(String word) throws IOException {
+		String url = getQueryUrl(word);
+		String join = readAsOneLine(url);
+		return extractContent(join);
+	}
+
+	@Override
+	protected int getDictionaryId() {
+		return DICTIONARY_WIKI_DICTIONARY;
+	}
+
+	@Override
+	protected String getQueryUrl(String word) {
+		return "http://en.wiktionary.org/w/api.php?action=query&prop=revisions&rvprop=content&format=json&rvexpandtemplates=true&titles=" + word;
 	}
 
 	private synchronized String extractContent(String content) {
@@ -76,7 +51,4 @@ public class WikiCommand implements Runnable {
 		}
 	}
 
-	private Context getContext() {
-		return context;
-	}
 }

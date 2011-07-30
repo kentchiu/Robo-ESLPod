@@ -11,7 +11,7 @@ import android.test.AndroidTestCase;
 import com.google.common.collect.Iterables;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
-public class PodcastHandlerTest extends AndroidTestCase {
+public class PodcastCommandTest extends AndroidTestCase {
 
 	public void testCreateContentValue() throws Exception {
 		InputStream inputStream = getClass().getResourceAsStream("/podcast.xml");

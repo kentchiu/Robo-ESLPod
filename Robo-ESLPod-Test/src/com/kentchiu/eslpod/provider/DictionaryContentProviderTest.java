@@ -18,6 +18,12 @@ public class DictionaryContentProviderTest extends ProviderTestCase2<DictionaryC
 		super(DictionaryContentProvider.class, DictionaryContentProvider.class.getName());
 	}
 
+	public void testDelete_words() throws Exception {
+		getProvider().delete(WordBankColumns.WORDBANK_URI, null, null);
+		Cursor c = db.rawQuery("select * from word_bank", null);
+		assertThat(c.getCount(), is(0));
+	}
+
 	public void testInsert_dictionary() throws Exception {
 		ContentValues values = new ContentValues();
 		values.put(DictionaryColumns.DICTIONARY_ID, Dictionary.DICTIONARY_GOOGLE_SUGGESTION);

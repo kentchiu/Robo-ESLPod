@@ -26,7 +26,15 @@ public class DictionaryContentProvider extends ContentProvider {
 
 	@Override
 	public int delete(Uri uri, String selection, String[] selectionArgs) {
-		return 0;
+		switch (uriMatcher.match(uri)) {
+		case WORDS:
+			SQLiteDatabase db = databaseHelper.getWritableDatabase();
+			int result = db.delete(DatabaseHelper.WORD_BANK_TABLE_NAME, selection, selectionArgs);
+			getContext().getContentResolver().notifyChange(uri, null);
+			return result;
+		default:
+			return 0;
+		}
 	}
 
 	public DatabaseHelper getDatabaseHelper() {
@@ -56,10 +64,6 @@ public class DictionaryContentProvider extends ContentProvider {
 		switch (uriMatcher.match(uri)) {
 		case WORDS:
 			id = db.insert(DatabaseHelper.WORD_BANK_TABLE_NAME, null, values);
-			//			Intent intent = new Intent(this.getContext(), DictionaryService.class);
-			//			intent.putExtra(DictionaryService.COMMAND, DictionaryService.COMMAND_DOWNLOAD_DICTIONARIES);
-			//			intent.setData(ContentUris.withAppendedId(WordBankColumns.WORDBANK_URI, id));
-			//			getContext().startService(intent);
 			getContext().getContentResolver().notifyChange(WordBankColumns.WORDBANK_URI, null);
 			break;
 		case DICTIONARIES:
@@ -112,7 +116,6 @@ public class DictionaryContentProvider extends ContentProvider {
 
 	@Override
 	public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 }
