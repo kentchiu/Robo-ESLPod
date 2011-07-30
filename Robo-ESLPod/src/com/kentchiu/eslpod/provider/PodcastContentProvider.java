@@ -16,7 +16,7 @@ import android.provider.BaseColumns;
 import android.util.Log;
 
 import com.kentchiu.eslpod.EslPodApplication;
-import com.kentchiu.eslpod.helper.DownloadRichScriptCommand;
+import com.kentchiu.eslpod.cmd.RichScriptCommand;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
 public class PodcastContentProvider extends ContentProvider {
@@ -95,7 +95,7 @@ public class PodcastContentProvider extends ContentProvider {
 				if (StringUtils.isBlank(rs)) {
 					String url = c.getString(c.getColumnIndex(PodcastColumns.LINK));
 					try {
-						new Thread(new DownloadRichScriptCommand(getContext(), uri, new URL(url))).start();
+						new Thread(new RichScriptCommand(getContext(), uri, new URL(url))).start();
 					} catch (MalformedURLException e) {
 						e.printStackTrace();
 					}

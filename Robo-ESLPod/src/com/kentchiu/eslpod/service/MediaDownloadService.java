@@ -4,7 +4,7 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.net.Uri;
 
-import com.kentchiu.eslpod.helper.DownloadMediaCommand;
+import com.kentchiu.eslpod.cmd.MediaCommand;
 
 public class MediaDownloadService extends IntentService {
 
@@ -15,7 +15,7 @@ public class MediaDownloadService extends IntentService {
 	@Override
 	protected void onHandleIntent(Intent intent) {
 		final Uri podcastUri = intent.getData();
-		new Thread(new DownloadMediaCommand(this, podcastUri)).run();
+		new Thread(new MediaCommand(this, podcastUri)).run();
 	}
 
 }

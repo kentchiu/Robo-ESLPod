@@ -13,7 +13,7 @@ import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 	public static String	DATABASE_NAME			= "elspod.db";
-	public static int		DATABASE_VERSION		= 1;
+	public static int		DATABASE_VERSION		= 2;
 	public static String	PODCAST_TABLE_NAME		= "podcast";
 	public static String	MEDIA_TABLE_NAME		= "media";
 	public static String	WORD_BANK_TABLE_NAME	= "word_bank";
@@ -42,17 +42,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		createWordBankTable(sqLiteDatabase);
 		createDictionaryTable(sqLiteDatabase);
 	}
-
-	//	private void createMediaTable(SQLiteDatabase sqLiteDatabase) {
-//		// @formatter:off
-//		String sql = "CREATE TABLE " + MEDIA_TABLE_NAME + " (" +
-//		BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-//		"_data" + " TEXT  NOT NULL "
-//		+ ");";
-//		// @formatter:on
-	//		Log.i(EslPodApplication.TAG, sql);
-	//		sqLiteDatabase.execSQL(sql);
-	//	}
 
 	private void createDictionaryTable(SQLiteDatabase sqLiteDatabase) {
 		// @formatter:off

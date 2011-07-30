@@ -14,7 +14,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ListView;
 
-import com.kentchiu.eslpod.helper.PodcastCommand;
+import com.kentchiu.eslpod.cmd.PodcastCommand;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 import com.kentchiu.eslpod.service.MediaDownloadService;
 

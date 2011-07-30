@@ -21,7 +21,7 @@ import android.widget.ViewFlipper;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.kentchiu.eslpod.helper.WikiHelper;
+import com.kentchiu.eslpod.formatter.WikiFormater;
 import com.kentchiu.eslpod.provider.Dictionary;
 import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
 import com.kentchiu.eslpod.provider.Dictionary.WordBankColumns;
@@ -149,7 +149,7 @@ public class DictFlipActivity extends Activity implements OnGestureListener, OnT
 	private String toHtml(int dictId, String content) {
 		switch (dictId) {
 		case Dictionary.DICTIONARY_WIKI_DICTIONARY:
-			return WikiHelper.formatWikiText(content);
+			return WikiFormater.formatWikiText(content);
 		default:
 			return content;
 		}
