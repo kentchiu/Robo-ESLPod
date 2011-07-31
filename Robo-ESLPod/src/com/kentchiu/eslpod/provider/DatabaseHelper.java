@@ -26,7 +26,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	@Override
 	public void onCreate(SQLiteDatabase sqLiteDatabase) {
 		createPodcastTable(sqLiteDatabase);
-		//createMediaTable(sqLiteDatabase);
 		createWordBankTable(sqLiteDatabase);
 		createDictionaryTable(sqLiteDatabase);
 	}
@@ -34,11 +33,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	@Override
 	public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldv, int newv) {
 		sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + PODCAST_TABLE_NAME + ";");
-		//sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MEDIA_TABLE_NAME + ";");
 		sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + WORD_BANK_TABLE_NAME + ";");
 		sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + DICTIONARY_TABLE_NAME + ";");
 		createPodcastTable(sqLiteDatabase);
-		//createMediaTable(sqLiteDatabase);
 		createWordBankTable(sqLiteDatabase);
 		createDictionaryTable(sqLiteDatabase);
 	}

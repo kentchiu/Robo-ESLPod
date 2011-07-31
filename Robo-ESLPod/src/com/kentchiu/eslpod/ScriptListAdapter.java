@@ -1,11 +1,13 @@
 package com.kentchiu.eslpod;
 
+import java.util.HashSet;
 import java.util.List;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -15,17 +17,37 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Sets;
 
 public class ScriptListAdapter extends ArrayAdapter {
 
 	private List<String>	script;
 	private String			richScript;
 
+
 	public ScriptListAdapter(Context context, int resource, int textViewResourceId, List<String> script) {
 		super(context, resource, textViewResourceId, script);
 		this.script = script;
 
+	}
+
+	public boolean isBaseWord(String word) {
+		//ImmutableList<String> baseWords = ImmutableList.of("I", "you", "me", "of", "on", "of", "off", "it", "a", "an");
+		Resources res = getContext().getResources();
+		String[] baseWords = res.getStringArray(R.array.base_words);
+		// Using set to remove duplication
+		final HashSet<String> baseWordSet = Sets.newHashSet();
+		for (String each : baseWords) {
+			baseWordSet.add(each.toLowerCase());
+		}
+		for (String each : baseWordSet) {
+			if (StringUtils.equalsIgnoreCase(each, word)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public String getRichScript() {
@@ -70,6 +92,11 @@ public class ScriptListAdapter extends ArrayAdapter {
 			}
 		}
 		return style;
+	}
+
+	protected Iterable<String> splitPhaseVerbToWords(String words) {
+		Iterable<String> results = Splitter.on(' ').trimResults().split(words);
+		return results;
 	}
 
 }

@@ -81,18 +81,25 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
 		ScriptListAdapter adapter = (ScriptListAdapter) getListAdapter();
 		final String item = (String) adapter.getItem(info.position);
-		Iterable<String> words = adapter.extractWord();
-		Iterable<String> filter = Iterables.filter(words, new Predicate<String>() {
+		Iterable<String> filter = Iterables.filter(adapter.extractWord(), new Predicate<String>() {
 
 			@Override
 			public boolean apply(String input) {
 				return StringUtils.indexOfIgnoreCase(item, input) != -1;
 			}
 		});
+
+
+
 		menu.setHeaderTitle("字典搜尋");
 		int i = 1;
 		for (String each : filter) {
-			menu.add(0, i++, 0, each);
+			Iterable<String> words = adapter.splitPhaseVerbToWords(each);
+			for (String word : words) {
+				if (!adapter.isBaseWord(word)) {
+					menu.add(0, i++, 0, word);
+				}
+			}
 		}
 	}
 

@@ -41,11 +41,13 @@ public class RichScriptCommand implements Runnable {
 
 	private Context	context;
 	private Uri		podcastUri;
+	private URL		scriptUrl;
 
-	public RichScriptCommand(Context context, Uri podcastUri, URL scriptUrl) {
+	public RichScriptCommand(Context context, Uri podcastUri,URL scriptUrl) {
 		super();
 		this.context = context;
 		this.podcastUri = podcastUri;
+		this.scriptUrl = scriptUrl;
 	}
 
 	public synchronized List<String> extractScript(List<String> lines) {
@@ -67,16 +69,10 @@ public class RichScriptCommand implements Runnable {
 
 	protected String getScript() {
 		List<String> lines = ImmutableList.of();
+		Log.d(EslPodApplication.TAG, "Start fetching script form : " + scriptUrl);
 		try {
-			Cursor c = context.getContentResolver().query(podcastUri, null, null, null, null);
-			if (c.moveToFirst()) {
-				String link = c.getString(c.getColumnIndex(PodcastColumns.LINK));
-				Log.d(EslPodApplication.TAG, "Start fetching script form : " + link);
-				InputStream is = new URL(link).openStream();
-				lines = IOUtils.readLines(is, "iso-8859-1");
-			}
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
+			InputStream is = scriptUrl.openStream();
+			lines = IOUtils.readLines(is, "iso-8859-1");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

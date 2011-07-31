@@ -41,7 +41,7 @@ public class RichScriptCommandTest extends AndroidTestCase {
 		database = databaseHelper.getWritableDatabase();
 		database.execSQL("delete from podcast");
 		database.execSQL("insert into podcast(_id, link) values(1, '" + resource.toString() + "')");
-		command = new RichScriptCommand(mContext, ContentUris.withAppendedId(PodcastColumns.PODCAST_URI, 1), null);
+		command = new RichScriptCommand(mContext, ContentUris.withAppendedId(PodcastColumns.PODCAST_URI, 1), resource);
 	}
 
 }

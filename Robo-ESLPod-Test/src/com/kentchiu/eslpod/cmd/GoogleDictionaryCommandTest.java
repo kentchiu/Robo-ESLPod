@@ -12,8 +12,8 @@ import com.kentchiu.eslpod.provider.DatabaseHelper;
 import com.kentchiu.eslpod.provider.Dictionary;
 import com.kentchiu.eslpod.provider.Dictionary.WordBankColumns;
 
-public class GoogleSuggestCommandTest extends AndroidTestCase {
-	private GoogleSuggestCommand	command;
+public class GoogleDictionaryCommandTest extends AndroidTestCase {
+	private GoogleDictionaryCommand	command;
 	private SQLiteDatabase			database;
 
 	public void testGetContent() throws Exception {
@@ -21,11 +21,11 @@ public class GoogleSuggestCommandTest extends AndroidTestCase {
 	}
 
 	public void testGetDictionId() throws Exception {
-		assertThat(command.getDictionaryId(), is(Dictionary.DICTIONARY_GOOGLE_SUGGESTION));
+		assertThat(command.getDictionaryId(), is(Dictionary.DICTIONARY_GOOGLE_DICTIONARY));
 	}
 
 	public void testQueryUri() throws Exception {
-		assertThat(command.getQueryUrl("test"), is("http://suggestqueries.google.com/complete/search?ds=d&hl=zh-TW&jsonp=window.google.ac.hr&q=" + "test"));
+		assertThat(command.getQueryUrl("test"), is("http://www.google.com/dictionary/json?callback=dict_api.callbacks.id100&sl=en&tl=zh-TW&restrict=pr%2Cde&client=te&&q=" + "test"));
 	}
 
 	@Override
@@ -37,7 +37,7 @@ public class GoogleSuggestCommandTest extends AndroidTestCase {
 		database.execSQL("delete from dictionary");
 		database.execSQL("insert into word_bank(_id, word) values(1, 'test') ");
 		Uri wordBankUri = ContentUris.withAppendedId(WordBankColumns.WORDBANK_URI, 1);
-		command = new GoogleSuggestCommand(mContext, wordBankUri);
+		command = new GoogleDictionaryCommand(mContext, wordBankUri);
 	}
 
 }

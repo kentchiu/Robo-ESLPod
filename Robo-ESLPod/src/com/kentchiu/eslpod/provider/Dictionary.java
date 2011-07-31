@@ -28,9 +28,9 @@ public class Dictionary {
 	}
 
 	public static final String	AUTHORITY						= Dictionary.class.getName();
-
 	public static final int		DICTIONARY_GOOGLE_SUGGESTION	= 1;
+	public static final int		DICTIONARY_GOOGLE_DICTIONARY	= 2;
+	public static final int		DICTIONARY_WIKI_DICTIONARY		= 3;
 
-	public static final int		DICTIONARY_WIKI_DICTIONARY		= 2;
 
 }
