@@ -15,6 +15,17 @@ import com.google.common.collect.Iterables;
 
 public class ScriptListAdapterTest extends AndroidTestCase {
 
+	public void isBaseWord() throws Exception {
+		ScriptListAdapter adapter = new ScriptListAdapter(getContext(), R.layout.script_list_item, R.id.scriptLine, ImmutableList.<String> of());
+		assertTrue(adapter.isBaseWord("I"));
+		assertTrue(adapter.isBaseWord("You"));
+		assertTrue(adapter.isBaseWord("you"));
+		assertTrue(adapter.isBaseWord("on"));
+		assertTrue(adapter.isBaseWord("On"));
+		assertFalse(adapter.isBaseWord("foo"));
+		assertFalse(adapter.isBaseWord("Foo"));
+	}
+
 	public void testExtractWords_none_words() throws Exception {
 		ScriptListAdapter adapter = new ScriptListAdapter(getContext(), R.layout.script_list_item, R.id.scriptLine, ImmutableList.<String> of());
 		adapter.setRichScript("foo bar");
@@ -36,22 +47,9 @@ public class ScriptListAdapterTest extends AndroidTestCase {
 		assertThat(words, not(hasItem("bar")));
 	}
 
-	public void isBaseWord() throws Exception {
-		ScriptListAdapter adapter = new ScriptListAdapter(getContext(), R.layout.script_list_item, R.id.scriptLine, ImmutableList.<String> of());
-		assertTrue(adapter.isBaseWord("I"));
-		assertTrue(adapter.isBaseWord("You"));
-		assertTrue(adapter.isBaseWord("you"));
-		assertTrue(adapter.isBaseWord("on"));
-		assertTrue(adapter.isBaseWord("On"));
-		assertFalse(adapter.isBaseWord("foo"));
-		assertFalse(adapter.isBaseWord("Foo"));
-	}
-
 	public void testRichText() throws Exception {
 		ScriptListAdapter adapter = new ScriptListAdapter(getContext(), R.layout.script_list_item, R.id.scriptLine, ImmutableList.<String> of());
-		CharSequence text = adapter.richText("this is a foo bar string", ImmutableList.of("foo", "string"));
-		System.out.println(text);
-
+		adapter.richText("this is a foo bar string", ImmutableList.of("foo", "string"));
 	}
 
 	public void testSplitPhaseVerbToWords() throws Exception {

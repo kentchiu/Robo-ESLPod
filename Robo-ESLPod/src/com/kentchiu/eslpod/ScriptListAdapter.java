@@ -26,11 +26,24 @@ public class ScriptListAdapter extends ArrayAdapter {
 	private List<String>	script;
 	private String			richScript;
 
-
 	public ScriptListAdapter(Context context, int resource, int textViewResourceId, List<String> script) {
 		super(context, resource, textViewResourceId, script);
 		this.script = script;
 
+	}
+
+	public String getRichScript() {
+		return richScript;
+	}
+
+	@Override
+	public View getView(int position, View convertView, ViewGroup parent) {
+		View view = super.getView(position, convertView, parent);
+		TextView textview = (TextView) view.findViewById(R.id.scriptLine);
+		String source = script.get(position);
+		CharSequence html = richText(source, extractWord());
+		textview.setText(html);
+		return view;
 	}
 
 	public boolean isBaseWord(String word) {
@@ -48,20 +61,6 @@ public class ScriptListAdapter extends ArrayAdapter {
 			}
 		}
 		return false;
-	}
-
-	public String getRichScript() {
-		return richScript;
-	}
-
-	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
-		View view = super.getView(position, convertView, parent);
-		TextView textview = (TextView) view.findViewById(R.id.scriptLine);
-		String source = script.get(position);
-		CharSequence html = richText(source, extractWord());
-		textview.setText(html);
-		return view;
 	}
 
 	public void setRichScript(String richScript) {

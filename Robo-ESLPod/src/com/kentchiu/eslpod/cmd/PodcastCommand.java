@@ -16,6 +16,7 @@ import org.xml.sax.InputSource;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.util.Log;
 
 import com.google.common.base.Joiner;
@@ -28,7 +29,7 @@ import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
 public class PodcastCommand implements Runnable {
 
-	private static final String	RSS_URI	= "http://feeds.feedburner.com/EnglishAsASecondLanguagePodcast";
+	public static final String	RSS_URI	= "http://feeds.feedburner.com/EnglishAsASecondLanguagePodcast";
 
 	private InputStream			inputStream;
 	private Context				context;
@@ -61,7 +62,16 @@ public class PodcastCommand implements Runnable {
 	public void run() {
 		try {
 			for (Node item : getItemNodes()) {
-				context.getContentResolver().insert(PodcastColumns.PODCAST_URI, convert(item));
+				ContentValues cv = convert(item);
+				String title = cv.getAsString(PodcastColumns.TITLE);
+				if (StringUtils.isNotBlank(title)) {
+					Cursor c = context.getContentResolver().query(PodcastColumns.PODCAST_URI, new String[] { PodcastColumns.TITLE }, PodcastColumns.TITLE + "=?", new String[] { title }, null);
+					if (c.getCount() == 0) {
+						context.getContentResolver().insert(PodcastColumns.PODCAST_URI, cv);
+					}
+				} else {
+					context.getContentResolver().insert(PodcastColumns.PODCAST_URI, cv);
+				}
 			}
 		} catch (XPathExpressionException e) {
 			e.printStackTrace();

@@ -36,7 +36,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
-import com.kentchiu.eslpod.service.MediaDownloadService;
+import com.kentchiu.eslpod.service.PodcastService;
 
 public class PlayerActivity extends ListActivity implements OnTouchListener, OnGestureListener, OnClickListener {
 	private static final int	DICT_GOOGLE			= 1;
@@ -88,8 +88,6 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 				return StringUtils.indexOfIgnoreCase(item, input) != -1;
 			}
 		});
-
-
 
 		menu.setHeaderTitle("字典搜尋");
 		int i = 1;
@@ -281,7 +279,8 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 	}
 
 	private void sendDownloadIntent(Uri uri) {
-		Intent intent = new Intent(this, MediaDownloadService.class);
+		Intent intent = new Intent(this, PodcastService.class);
+		intent.putExtra(PodcastService.COMMAND, PodcastService.COMMAND_DOWNLOAD_MEDIA);
 		intent.setData(uri);
 		startService(intent);
 	}

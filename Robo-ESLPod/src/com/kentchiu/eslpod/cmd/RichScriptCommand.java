@@ -2,7 +2,6 @@ package com.kentchiu.eslpod.cmd;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
@@ -11,7 +10,6 @@ import org.apache.commons.lang.StringUtils;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
 
@@ -43,7 +41,7 @@ public class RichScriptCommand implements Runnable {
 	private Uri		podcastUri;
 	private URL		scriptUrl;
 
-	public RichScriptCommand(Context context, Uri podcastUri,URL scriptUrl) {
+	public RichScriptCommand(Context context, Uri podcastUri, URL scriptUrl) {
 		super();
 		this.context = context;
 		this.podcastUri = podcastUri;

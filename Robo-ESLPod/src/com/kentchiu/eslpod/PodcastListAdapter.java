@@ -1,5 +1,7 @@
 package com.kentchiu.eslpod;
 
+import org.apache.commons.lang.StringUtils;
+
 import android.content.Context;
 import android.database.Cursor;
 import android.provider.BaseColumns;
@@ -24,6 +26,12 @@ public class PodcastListAdapter extends ResourceCursorAdapter {
 		Button button = (Button) view.findViewById(R.id.downloadButton);
 		int id = cursor.getInt(cursor.getColumnIndex(BaseColumns._ID));
 		button.setTag(id);
+		String mediaCache = cursor.getString(cursor.getColumnIndex(PodcastColumns.MEDIA_URL_LOCAL));
+		if (StringUtils.isNotBlank(mediaCache)) {
+			button.setText("Clean");
+		} else {
+			button.setText("Download");
+		}
 	}
 
 }

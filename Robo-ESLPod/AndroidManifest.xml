@@ -27,11 +27,11 @@
 				<data android:mimeType="vnd.android.cursor.dir/vnd.eslpod.dict" />
 			</intent-filter>
 		</activity>
+		<service android:name=".service.PodcastService" />
 		<service android:name=".service.DictionaryService" />
-		<service android:name=".service.MediaDownloadService" />
-		<!-- <activity android:name=".WikiDictActivity" android:theme="@style/LookupTheme" android:launchMode="singleTop" android:configChanges="orientation|keyboardHidden"> 
-			<intent-filter> <action android:name="android.intent.action.VIEW" /> <category android:name="android.intent.category.DEFAULT"/> <data android:mimeType="vnd.android.cursor.item/vnd.eslpod.dict" 
-			/> </intent-filter> <intent-filter> <action android:name="android.intent.action.VIEW" /> <category android:name="android.intent.category.DEFAULT"/> <data android:mimeType="vnd.android.cursor.dir/vnd.eslpod.dict" 
+		<!-- <activity android:name=".WikiDictActivity" android:theme="@style/LookupTheme" android:launchMode="singleTop" android:configChanges="orientation|keyboardHidden">
+			<intent-filter> <action android:name="android.intent.action.VIEW" /> <category android:name="android.intent.category.DEFAULT"/> <data android:mimeType="vnd.android.cursor.item/vnd.eslpod.dict"
+			/> </intent-filter> <intent-filter> <action android:name="android.intent.action.VIEW" /> <category android:name="android.intent.category.DEFAULT"/> <data android:mimeType="vnd.android.cursor.dir/vnd.eslpod.dict"
 			/> </intent-filter> </activity> -->
 		<provider android:name=".provider.DictionaryContentProvider" android:authorities="com.kentchiu.eslpod.provider.Dictionary" />
 		<provider android:name=".provider.PodcastContentProvider" android:authorities="com.kentchiu.eslpod.provider.Podcast" />

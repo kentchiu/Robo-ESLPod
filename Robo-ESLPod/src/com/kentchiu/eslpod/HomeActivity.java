@@ -16,7 +16,7 @@ import android.widget.ListView;
 
 import com.kentchiu.eslpod.cmd.PodcastCommand;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
-import com.kentchiu.eslpod.service.MediaDownloadService;
+import com.kentchiu.eslpod.service.PodcastService;
 
 public class HomeActivity extends ListActivity {
 	private static final int	DIALOG_INIT_LIST	= 0;
@@ -24,8 +24,11 @@ public class HomeActivity extends ListActivity {
 	public void downloadClickHandler(View view) {
 		Integer id = (Integer) view.getTag();
 		Uri podcastUri = ContentUris.withAppendedId(PodcastColumns.PODCAST_URI, id);
-		Intent intent = new Intent(HomeActivity.this, MediaDownloadService.class);
+		Intent intent = new Intent(HomeActivity.this, PodcastService.class);
+		intent.putExtra(PodcastService.COMMAND, PodcastService.COMMAND_RICH_SCRIPT);
 		intent.setData(podcastUri);
+		startService(intent);
+		intent.putExtra(PodcastService.COMMAND, PodcastService.COMMAND_DOWNLOAD_MEDIA);
 		startService(intent);
 	}
 
@@ -33,15 +36,17 @@ public class HomeActivity extends ListActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		final Cursor cursor = managedQuery(PodcastColumns.PODCAST_URI, null, null, null, null);
+		final Cursor cursor = managedQuery(PodcastColumns.PODCAST_URI, null, null, null, PodcastColumns.TITLE + " DESC");
 		PodcastListAdapter adapter = new PodcastListAdapter(HomeActivity.this, R.layout.episode_list_item, cursor);
 		setListAdapter(adapter);
+		Intent intent = new Intent(this, PodcastService.class);
+		intent.putExtra(PodcastService.COMMAND, PodcastService.COMMAND_FETCH_NEW_PODCAST);
+		startService(intent);
 	}
 
 	@Override
 	protected Dialog onCreateDialog(int id, Bundle args) {
-		ProgressDialog dialog = ProgressDialog.show(HomeActivity.this, "", "Loading. Please wait...", true);
-		return dialog;
+		return ProgressDialog.show(HomeActivity.this, "", "Loading. Please wait...", true);
 	}
 
 	@Override

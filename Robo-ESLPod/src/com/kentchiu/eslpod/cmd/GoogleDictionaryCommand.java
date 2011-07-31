@@ -15,7 +15,6 @@ public class GoogleDictionaryCommand extends DictionaryCommand {
 		super(context, wordBankUri);
 	}
 
-
 	@Override
 	protected String getContent(String word) throws IOException {
 		String url = getQueryUrl(word);
@@ -34,6 +33,5 @@ public class GoogleDictionaryCommand extends DictionaryCommand {
 		return "http://www.google.com/dictionary/json?callback=dict_api.callbacks.id100&sl=en&tl=zh-TW&restrict=pr%2Cde&client=te&&q=" + word;
 
 	}
-
 
 }

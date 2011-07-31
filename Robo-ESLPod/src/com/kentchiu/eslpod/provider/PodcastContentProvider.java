@@ -1,13 +1,11 @@
 package com.kentchiu.eslpod.provider;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
 import org.apache.commons.lang.StringUtils;
 
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.Intent;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -16,8 +14,8 @@ import android.provider.BaseColumns;
 import android.util.Log;
 
 import com.kentchiu.eslpod.EslPodApplication;
-import com.kentchiu.eslpod.cmd.RichScriptCommand;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
+import com.kentchiu.eslpod.service.PodcastService;
 
 public class PodcastContentProvider extends ContentProvider {
 
@@ -93,12 +91,17 @@ public class PodcastContentProvider extends ContentProvider {
 				Log.i(EslPodApplication.TAG, "Retrive rich script content from :" + link);
 				String rs = c.getString(c.getColumnIndex(PodcastColumns.RICH_SCRIPT));
 				if (StringUtils.isBlank(rs)) {
-					String url = c.getString(c.getColumnIndex(PodcastColumns.LINK));
-					try {
-						new Thread(new RichScriptCommand(getContext(), uri, new URL(url))).start();
-					} catch (MalformedURLException e) {
-						e.printStackTrace();
-					}
+					Intent intent = new Intent(getContext(), PodcastService.class);
+					intent.putExtra(PodcastService.COMMAND, PodcastService.COMMAND_RICH_SCRIPT);
+					intent.setData(uri);
+					intent.putExtra(PodcastColumns.LINK, link);
+					getContext().startService(intent);
+					//					try {
+					//						// TODO remove url and careful about cycle called PodcastContentProvider.query()
+					//						new Thread(new RichScriptCommand(getContext(), uri, new URL(url))).start();
+					//					} catch (MalformedURLException e) {
+					//						e.printStackTrace();
+					//					}
 				}
 			}
 			break;
