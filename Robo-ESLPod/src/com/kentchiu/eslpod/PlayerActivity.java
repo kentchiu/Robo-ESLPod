@@ -3,6 +3,8 @@ package com.kentchiu.eslpod;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -34,6 +36,7 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.kentchiu.eslpod.cmd.RichScriptCommand;
 import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 import com.kentchiu.eslpod.service.PodcastService;
@@ -80,24 +83,22 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
 		ScriptListAdapter adapter = (ScriptListAdapter) getListAdapter();
+		menu.setHeaderTitle("字典搜尋");
 		final String item = (String) adapter.getItem(info.position);
-		Iterable<String> filter = Iterables.filter(adapter.extractWord(), new Predicate<String>() {
+		Iterable<String> words = RichScriptCommand.extractWord(adapter.getRichScript());
+
+		Iterable<String> filter = Iterables.filter(words, new Predicate<String>() {
 
 			@Override
 			public boolean apply(String input) {
-				return StringUtils.indexOfIgnoreCase(item, input) != -1;
+				Matcher matcher = Pattern.compile("\\b" + input + "\\b").matcher(item);
+				return matcher.find();
 			}
 		});
 
-		menu.setHeaderTitle("字典搜尋");
 		int i = 1;
-		for (String each : filter) {
-			Iterable<String> words = adapter.splitPhaseVerbToWords(each);
-			for (String word : words) {
-				if (!adapter.isBaseWord(word)) {
-					menu.add(0, i++, 0, word);
-				}
-			}
+		for (String each : RichScriptCommand.headword2(PlayerActivity.this, filter)) {
+			menu.add(0, i++, 0, each);
 		}
 	}
 
@@ -153,17 +154,26 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 		if (c.moveToFirst()) {
 			String script = c.getString(c.getColumnIndex(PodcastColumns.SCRIPT));
 			String richScript = c.getString(c.getColumnIndex(PodcastColumns.RICH_SCRIPT));
+			//String link = c.getString(c.getColumnIndex(PodcastColumns.LINK));
+			if (StringUtils.isBlank(richScript)) {
+				Intent intent = new Intent(this, PodcastService.class);
+				intent.putExtra(PodcastService.COMMAND, PodcastService.COMMAND_RICH_SCRIPT);
+				intent.setData(uri);
+				//intent.putExtra(PodcastColumns.LINK, link);
+				startService(intent);
+			}
 			Iterable<String> lines = Splitter.on("\n").trimResults().split(script);
 			ScriptListAdapter result = new ScriptListAdapter(this, R.layout.script_list_item, R.id.scriptLine, ImmutableList.copyOf(lines));
 			if (StringUtils.isNotBlank(richScript)) {
 				result.setRichScript(richScript);
 			}
-
 			return result;
 		} else {
 			return new ScriptListAdapter(this, R.layout.script_list_item, R.id.scriptLine, ImmutableList.<String> of());
 		}
 	}
+
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -184,6 +194,8 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 		c.moveToFirst();
 		setTitle(c.getString(c.getColumnIndex(PodcastColumns.TITLE)));
 		setListAdapter(createAdapter(uri));
+
+
 
 		player = new MediaPlayer();
 		try {
@@ -234,14 +246,10 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 
 			@Override
 			public void onStartTrackingTouch(SeekBar seekBar) {
-				Log.d(EslPodApplication.TAG, "onStartTrackingTouch");
-
 			}
 
 			@Override
 			public void onStopTrackingTouch(SeekBar seekBar) {
-				Log.d(EslPodApplication.TAG, "onStopTrackingTouch");
-
 			}
 		};
 		seekBar.setOnSeekBarChangeListener(sbcl);

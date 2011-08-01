@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ListView;
 
 import com.kentchiu.eslpod.cmd.PodcastCommand;
@@ -30,6 +31,9 @@ public class HomeActivity extends ListActivity {
 		startService(intent);
 		intent.putExtra(PodcastService.COMMAND, PodcastService.COMMAND_DOWNLOAD_MEDIA);
 		startService(intent);
+		Button button = (Button) view;
+		button.setText("Downloading...");
+		button.setEnabled(false);
 	}
 
 	/** Called when the activity is first created. */

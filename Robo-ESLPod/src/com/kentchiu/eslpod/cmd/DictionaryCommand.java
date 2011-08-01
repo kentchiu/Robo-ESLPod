@@ -13,8 +13,10 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.util.Log;
 
 import com.google.common.base.Joiner;
+import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
 import com.kentchiu.eslpod.provider.Dictionary.WordBankColumns;
 
@@ -41,6 +43,7 @@ public abstract class DictionaryCommand implements Runnable {
 			if (c.moveToFirst()) {
 				String word = c.getString(c.getColumnIndex(WordBankColumns.WORD));
 				try {
+					Log.v(EslPodApplication.TAG, "get word definition of [" + word + "] to dictionary " + getDictionaryId());
 					String content = getContent(word);
 					updateDatabase(content);
 				} catch (IOException e) {

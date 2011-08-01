@@ -53,7 +53,7 @@ public class PodcastContentProvider extends ContentProvider {
 		switch (uriMatcher.match(uri)) {
 		case PODCASTS:
 			long rowId = db.insert(DatabaseHelper.PODCAST_TABLE_NAME, null, values);
-			Log.d(EslPodApplication.TAG, "insert pocast data");
+			Log.d(EslPodApplication.TAG, "insert pocast data as id " + rowId);
 			Uri url = ContentUris.withAppendedId(PodcastColumns.PODCAST_URI, rowId);
 			getContext().getContentResolver().notifyChange(uri, null);
 			return url;
@@ -74,42 +74,23 @@ public class PodcastContentProvider extends ContentProvider {
 
 	@Override
 	public Cursor query(Uri uri, String[] projection, String where, String[] whereArgs, String sortOrder) {
-		Log.d(EslPodApplication.TAG, "uri :" + uri);
+		Log.d(EslPodApplication.TAG, "query uri :" + uri);
 		SQLiteDatabase db = databaseHelper.getWritableDatabase();
 		final Cursor c;
 		switch (uriMatcher.match(uri)) {
 		case PODCASTS:
 			c = db.query(DatabaseHelper.PODCAST_TABLE_NAME, projection, where, whereArgs, null, null, sortOrder);
-			Log.i(EslPodApplication.TAG, "send uri" + uri);
-			getContext().getContentResolver().notifyChange(uri, null);
 			break;
 		case PODCAST:
 			long id = ContentUris.parseId(uri);
 			c = db.query(DatabaseHelper.PODCAST_TABLE_NAME, projection, BaseColumns._ID + "=?", new String[] { Long.toString(id) }, null, null, null);
-			if (c.moveToFirst()) {
-				String link = c.getString(c.getColumnIndex(PodcastColumns.LINK));
-				Log.i(EslPodApplication.TAG, "Retrive rich script content from :" + link);
-				String rs = c.getString(c.getColumnIndex(PodcastColumns.RICH_SCRIPT));
-				if (StringUtils.isBlank(rs)) {
-					Intent intent = new Intent(getContext(), PodcastService.class);
-					intent.putExtra(PodcastService.COMMAND, PodcastService.COMMAND_RICH_SCRIPT);
-					intent.setData(uri);
-					intent.putExtra(PodcastColumns.LINK, link);
-					getContext().startService(intent);
-					//					try {
-					//						// TODO remove url and careful about cycle called PodcastContentProvider.query()
-					//						new Thread(new RichScriptCommand(getContext(), uri, new URL(url))).start();
-					//					} catch (MalformedURLException e) {
-					//						e.printStackTrace();
-					//					}
-				}
-			}
 			break;
 		default:
 			throw new IllegalArgumentException("unsupported uri: " + uri);
 		}
 		return c;
 	}
+
 
 	@Override
 	public int update(Uri uri, ContentValues values, String where, String[] whereArgs) {

@@ -6,6 +6,7 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.WorkSource;
 import android.util.Log;
 
 import com.google.common.base.Preconditions;
@@ -28,10 +29,10 @@ public class DictionaryService extends IntentService {
 	@Override
 	protected void onHandleIntent(Intent intent) {
 		int cmd = intent.getIntExtra(COMMAND, -1);
-		Log.i(EslPodApplication.TAG, "Execute command [" + cmd + "]");
 		switch (cmd) {
 		case COMMAND_DOWNLOAD_WORD:
 			String query = intent.getStringExtra(SearchManager.QUERY);
+			Log.v(EslPodApplication.TAG, "Downloading word " + query);
 			Preconditions.checkNotNull(query);
 			ContentValues cv = new ContentValues();
 			cv.put(WordBankColumns.WORD, query);
@@ -47,6 +48,7 @@ public class DictionaryService extends IntentService {
 			new Thread(new GoogleSuggestCommand(this, ContentUris.withAppendedId(WordBankColumns.WORDBANK_URI, wordId))).start();
 			new Thread(new GoogleDictionaryCommand(this, ContentUris.withAppendedId(WordBankColumns.WORDBANK_URI, wordId))).start();
 			new Thread(new WikiCommand(this, ContentUris.withAppendedId(WordBankColumns.WORDBANK_URI, wordId))).start();
+			break;
 		default:
 			break;
 		}
