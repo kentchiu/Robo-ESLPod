@@ -9,7 +9,7 @@ import android.net.Uri;
 
 import com.kentchiu.eslpod.provider.Dictionary;
 
-public class GoogleSuggestCommand extends DictionaryCommand  {
+public class GoogleSuggestCommand extends DictionaryCommand {
 
 	public GoogleSuggestCommand(Context context, Uri wordBankUri) {
 		super(context, wordBankUri);

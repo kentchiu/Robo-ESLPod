@@ -15,8 +15,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.cmd.MediaCommand;
@@ -62,11 +60,6 @@ public class PodcastService extends IntentService {
 						URL scriptUrl = new URL(link);
 						//new Thread(new RichScriptCommand(this, podcastUri, scriptUrl)).start();
 						new AsyncTask<URL, Void, Iterable<String>>() {
-							
-							@Override
-							protected void onPreExecute() {
-								
-							};
 
 							@Override
 							protected Iterable<String> doInBackground(URL... params) {
@@ -83,10 +76,15 @@ public class PodcastService extends IntentService {
 									startService(intent);
 								}
 								return result;
-							}
+							};
 
 							@Override
 							protected void onPostExecute(Iterable<String> result) {
+							}
+
+							@Override
+							protected void onPreExecute() {
+
 							};
 						}.execute(scriptUrl);
 

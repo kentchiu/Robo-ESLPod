@@ -18,7 +18,6 @@ import org.xml.sax.InputSource;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.util.Log;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
@@ -26,7 +25,6 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
 public class PodcastCommand implements Runnable {
@@ -65,7 +63,7 @@ public class PodcastCommand implements Runnable {
 		try {
 			Cursor c = context.getContentResolver().query(PodcastColumns.PODCAST_URI, new String[] { PodcastColumns.TITLE }, null, null, null);
 			Set<String> titles = Sets.newHashSet();
-			while(c.moveToNext()) {
+			while (c.moveToNext()) {
 				titles.add(c.getString(c.getColumnIndex(PodcastColumns.TITLE)));
 			}
 			for (Node item : getItemNodes()) {

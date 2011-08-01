@@ -1,11 +1,8 @@
 package com.kentchiu.eslpod.provider;
 
-import org.apache.commons.lang.StringUtils;
-
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
-import android.content.Intent;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -15,7 +12,6 @@ import android.util.Log;
 
 import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
-import com.kentchiu.eslpod.service.PodcastService;
 
 public class PodcastContentProvider extends ContentProvider {
 
@@ -90,7 +86,6 @@ public class PodcastContentProvider extends ContentProvider {
 		}
 		return c;
 	}
-
 
 	@Override
 	public int update(Uri uri, ContentValues values, String where, String[] whereArgs) {

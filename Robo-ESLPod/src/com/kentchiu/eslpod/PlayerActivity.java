@@ -173,8 +173,6 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 		}
 	}
 
-
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -194,8 +192,6 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 		c.moveToFirst();
 		setTitle(c.getString(c.getColumnIndex(PodcastColumns.TITLE)));
 		setListAdapter(createAdapter(uri));
-
-
 
 		player = new MediaPlayer();
 		try {

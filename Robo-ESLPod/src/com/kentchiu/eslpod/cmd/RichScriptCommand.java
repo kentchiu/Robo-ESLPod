@@ -90,14 +90,13 @@ public class RichScriptCommand implements Runnable {
 		return results;
 	}
 
-	private Context				context;
+	private Context	context;
 
-	private Uri					podcastUri;
+	private Uri		podcastUri;
 
-	private URL					scriptUrl;
+	private URL		scriptUrl;
 
-	private String				richScriptCache;
-
+	private String	richScriptCache;
 
 	public RichScriptCommand(Context context, Uri podcastUri, URL scriptUrl) {
 		super();
@@ -120,7 +119,6 @@ public class RichScriptCommand implements Runnable {
 	public Context getContext() {
 		return context;
 	}
-
 
 	/**
 	 * Get RichScript which fetch from web.
