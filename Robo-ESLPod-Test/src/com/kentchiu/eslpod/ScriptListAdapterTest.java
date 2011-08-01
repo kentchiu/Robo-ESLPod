@@ -29,20 +29,20 @@ public class ScriptListAdapterTest extends AndroidTestCase {
 	public void testExtractWords_none_words() throws Exception {
 		ScriptListAdapter adapter = new ScriptListAdapter(getContext(), R.layout.script_list_item, R.id.scriptLine, ImmutableList.<String> of());
 		adapter.setRichScript("foo bar");
-		assertThat(adapter.extractWord(), Matchers.<String> emptyIterable());
+		assertThat(adapter.extractWord(richScript), Matchers.<String> emptyIterable());
 	}
 
 	public void testExtractWords_one_word() throws Exception {
 		ScriptListAdapter adapter = new ScriptListAdapter(getContext(), R.layout.script_list_item, R.id.scriptLine, ImmutableList.<String> of());
 		adapter.setRichScript("foo <b>bar</b> baz");
-		Iterable<String> words = adapter.extractWord();
+		Iterable<String> words = adapter.extractWord(richScript);
 		assertThat(words, hasItem("bar"));
 	}
 
 	public void testExtractWords_two_words() throws Exception {
 		ScriptListAdapter adapter = new ScriptListAdapter(getContext(), R.layout.script_list_item, R.id.scriptLine, ImmutableList.<String> of());
 		adapter.setRichScript("<b>foo</b> bar <b>baz</b>");
-		Iterable<String> words = adapter.extractWord();
+		Iterable<String> words = adapter.extractWord(richScript);
 		assertThat(words, hasItems("foo", "baz"));
 		assertThat(words, not(hasItem("bar")));
 	}

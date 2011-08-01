@@ -29,7 +29,7 @@ public class RichScriptCommandTest extends AndroidTestCase {
 	}
 
 	public void testGetScript() throws Exception {
-		String script = command.getScript();
+		String script = command.fetchScript();
 		assertThat(script, startsWith("Cherise:  <b>Rise and shine</b>!"));
 	}
 
