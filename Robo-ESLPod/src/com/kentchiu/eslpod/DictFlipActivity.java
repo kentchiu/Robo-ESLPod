@@ -21,6 +21,7 @@ import android.widget.ViewFlipper;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.kentchiu.eslpod.formatter.GoogleDictionaryFormatter;
 import com.kentchiu.eslpod.formatter.GoogleSuggestFormatter;
 import com.kentchiu.eslpod.formatter.WikiFormater;
 import com.kentchiu.eslpod.provider.Dictionary;
@@ -151,6 +152,8 @@ public class DictFlipActivity extends Activity implements OnGestureListener, OnT
 		switch (dictId) {
 		case Dictionary.DICTIONARY_GOOGLE_SUGGESTION:
 			return GoogleSuggestFormatter.formatText(content);
+		case Dictionary.DICTIONARY_GOOGLE_DICTIONARY:
+			return GoogleDictionaryFormatter.formatText(content);
 		case Dictionary.DICTIONARY_WIKI_DICTIONARY:
 			return WikiFormater.formatWikiText(content);
 		default:
