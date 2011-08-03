@@ -98,6 +98,7 @@ public class DictionaryContentProvider extends ContentProvider {
 				Intent intent = new Intent(getContext(), DictionaryService.class);
 				intent.putExtra(DictionaryService.COMMAND, DictionaryService.COMMAND_DOWNLOAD_WORD);
 				intent.putExtra(SearchManager.QUERY, selectionArgs[0]);
+				intent.putExtra(DictionaryService.NO_WAIT, true);
 				getContext().startService(intent);
 			}
 			return c;

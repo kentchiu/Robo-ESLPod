@@ -22,7 +22,7 @@ public class MediaCommandTest extends AndroidTestCase {
 
 	public void testDownloadFrom() throws Exception {
 		URL resource = getClass().getResource("/ESLPod700.mp3");
-		File f = command.downloadFrom(resource.toString());
+		File f = command.downloadFrom(resource.toString(), 12345);
 		assertThat(f.exists(), is(true));
 		assertThat(f.isFile(), is(true));
 		assertThat(f.getAbsolutePath(), is("/data/data/com.kentchiu.eslpod/cache/ESLPod700.mp3"));

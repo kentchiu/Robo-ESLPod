@@ -71,6 +71,7 @@ public class PodcastService extends IntentService {
 								Log.v(EslPodApplication.TAG, "headword2 :" + Iterables.toString(result));
 								Intent intent = new Intent(PodcastService.this, DictionaryService.class);
 								intent.putExtra(DictionaryService.COMMAND, DictionaryService.COMMAND_DOWNLOAD_WORD);
+								intent.putExtra(DictionaryService.NO_WAIT, false);
 								for (String each : result) {
 									intent.putExtra(SearchManager.QUERY, each);
 									startService(intent);

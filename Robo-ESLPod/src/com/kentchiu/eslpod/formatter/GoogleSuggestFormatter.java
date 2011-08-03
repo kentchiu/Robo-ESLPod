@@ -18,7 +18,7 @@ public class GoogleSuggestFormatter {
 			return extractShowPart.getString(1);
 		} catch (JSONException e) {
 			e.printStackTrace();
-			return "";
+			return "查無資料";
 		}
 	}
 

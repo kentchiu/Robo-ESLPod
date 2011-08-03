@@ -36,9 +36,10 @@ public class MediaCommand implements Runnable {
 		if (c.moveToFirst()) {
 			String localUrlStr = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URL_LOCAL));
 			String urlStr = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URL));
+			long length = c.getLong(c.getColumnIndex(PodcastColumns.MEDIA_LENGTH));
 			if (localUrlStr == null || !new File(localUrlStr).exists()) {
 				try {
-					File localFile = downloadFrom(urlStr);
+					File localFile = downloadFrom(urlStr, length);
 					updateDatabase(localFile);
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
@@ -51,16 +52,21 @@ public class MediaCommand implements Runnable {
 		}
 	}
 
-	protected File downloadFrom(String urlStr) throws MalformedURLException, IOException, FileNotFoundException {
+	protected File downloadFrom(String urlStr, long length) throws MalformedURLException, IOException, FileNotFoundException {
 		URL url = new URL(urlStr);
 		File remoteFile = new File(url.getFile());
 		Log.i(EslPodApplication.TAG, "Downloading file from " + urlStr);
 		InputStream openStream = url.openStream();
 		// TODO move to sdcard
 		File localFile = new File(context.getCacheDir(), remoteFile.getName());
-		localFile.createNewFile();
-		IOUtils.copyLarge(openStream, new FileOutputStream(localFile));
-		Log.i(EslPodApplication.TAG, "Downloaded file " + localFile.toString() + " completed");
+		Log.v(EslPodApplication.TAG, "file length : " + localFile.length());
+		if (localFile.exists() && localFile.length() == length) {
+			Log.i(EslPodApplication.TAG, localFile.toString() + " exists");
+		} else {
+			localFile.createNewFile();
+			IOUtils.copyLarge(openStream, new FileOutputStream(localFile));
+			Log.i(EslPodApplication.TAG, "Downloaded file " + localFile.toString() + " completed");
+		}
 		return localFile;
 	}
 

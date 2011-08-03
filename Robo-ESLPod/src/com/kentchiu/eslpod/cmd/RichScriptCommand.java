@@ -132,7 +132,9 @@ public class RichScriptCommand implements Runnable {
 	@Override
 	public void run() {
 		richScriptCache = fetchScript();
-		updateDatabase(richScriptCache);
+		if (StringUtils.isNotBlank(richScriptCache)) {
+			updateDatabase(richScriptCache);
+		}
 	}
 
 	public void setContext(Context context) {
@@ -148,14 +150,18 @@ public class RichScriptCommand implements Runnable {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		Iterable<String> filter = Iterables.filter(extractScript(lines), new Predicate<String>() {
-			@Override
-			public boolean apply(String input) {
-				return StringUtils.isNotEmpty(input);
-			}
-		});
+		if (!lines.isEmpty()) {
+			Iterable<String> filter = Iterables.filter(extractScript(lines), new Predicate<String>() {
+				@Override
+				public boolean apply(String input) {
+					return StringUtils.isNotEmpty(input);
+				}
+			});
 
-		return Joiner.on("\n").join(filter);
+			return Joiner.on("\n").join(filter);
+		} else {
+			return "";
+		}
 	}
 
 	protected void updateDatabase(String richScript) {
