@@ -30,7 +30,6 @@ import android.view.View.OnTouchListener;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
-import android.widget.Toast;
 
 import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
@@ -109,15 +108,6 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 
 	@Override
 	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-		if (e1.getX() - e2.getX() > FLING_MIN_DISTANCE && Math.abs(velocityX) > FLING_MIN_VELOCITY) {
-			// Fling left
-			Uri.withAppendedPath(DictionaryColumns.DICTIONARY_URI, Long.toString(DICT_GOOGLE));
-			Intent intent = new Intent(Intent.ACTION_VIEW, DictionaryColumns.DICTIONARY_URI);
-			intent.putExtra("PODCAST_URI", getIntent().getDataString());
-			startActivity(intent);
-		} else if (e2.getX() - e1.getX() > FLING_MIN_DISTANCE && Math.abs(velocityX) > FLING_MIN_VELOCITY) {
-			Toast.makeText(this, "向右手势", Toast.LENGTH_SHORT).show();
-		}
 		return false;
 	}
 

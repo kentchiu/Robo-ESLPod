@@ -71,7 +71,8 @@ public class WikiFormater {
 		 */
 		public String apply(String input) {
 			Matcher m = mPattern.matcher(input);
-			return m.replaceAll(mReplaceWith);
+			String output = m.replaceAll(mReplaceWith);
+			return output;
 		}
 
 	}
@@ -89,19 +90,14 @@ public class WikiFormater {
 	 * extra sections that can clutter things up on a mobile screen.
 	 */
 	private static final Pattern			sValidSections		= Pattern.compile("(verb|noun|adjective|pronoun|interjection)", Pattern.CASE_INSENSITIVE);
+	private static final Pattern			sValidSections2		= Pattern.compile("Pronunciation", Pattern.CASE_INSENSITIVE);
+	private static final Pattern			sValidSections3		= Pattern.compile("Translations", Pattern.CASE_INSENSITIVE);
 
 	/**
 	 * Pattern that can be used to split a returned wiki page into its various
 	 * sections. Doesn't treat children sections differently.
 	 */
 	private static final Pattern			sSectionSplit		= Pattern.compile("^=+(.+?)=+.+?(?=^=)", Pattern.MULTILINE | Pattern.DOTALL);
-
-	/**
-	 * When picking random words in {@link #getRandomWord()}, we sometimes
-	 * encounter special articles or templates. This pattern ignores any words
-	 * like those, usually because they have ":" or other punctuation.
-	 */
-	private static final Pattern			sInvalidWord		= Pattern.compile("[^A-Za-z0-9 ]");
 
 	/**
 	 * {@link Uri} authority to use when creating internal links.
@@ -124,23 +120,11 @@ public class WikiFormater {
 	public static final String				ENCODING			= "utf-8";
 
 	/**
-	 * {@link Uri} to use when requesting a random page.
-	 */
-	private static final String				WIKTIONARY_RANDOM	= "http://en.wiktionary.org/w/api.php?action=query&list=random&format=json";
-
-	/**
 	 * Fake section to insert at the bottom of a wiki response before parsing.
 	 * This ensures that {@link #sSectionSplit} will always catch the last
 	 * section, as it uses section headers in its searching.
 	 */
 	public static final String				STUB_SECTION		= "\n=Stub section=";
-
-	/**
-	 * Number of times to try finding a random word in {@link #getRandomWord()}.
-	 * These failures are usually when the found word fails the
-	 * {@link #sInvalidWord} test, or when a network error happens.
-	 */
-	private static final int				RANDOM_TRIES		= 3;
 
 	/**
 	 * List of internal formatting rules to apply when parsing wiki text. These
@@ -199,7 +183,30 @@ public class WikiFormater {
 		Matcher sectionMatcher = sSectionSplit.matcher(wikiText);
 		while (sectionMatcher.find()) {
 			String title = sectionMatcher.group(1);
+			// Pronunciation
+			if (!foundSections.contains(title) && sValidSections2.matcher(title).matches()) {
+				String sectionContent = sectionMatcher.group();
+				foundSections.add(title);
+				builder.append(sectionContent);
+			}
+		}
+
+		sectionMatcher = sSectionSplit.matcher(wikiText);
+		while (sectionMatcher.find()) {
+			String title = sectionMatcher.group(1);
+			// part of speech
 			if (!foundSections.contains(title) && sValidSections.matcher(title).matches()) {
+				String sectionContent = sectionMatcher.group();
+				foundSections.add(title);
+				builder.append(sectionContent);
+			}
+		}
+
+		sectionMatcher = sSectionSplit.matcher(wikiText);
+		while (sectionMatcher.find()) {
+			String title = sectionMatcher.group(1);
+			// Translations
+			if (!foundSections.contains(title) && sValidSections3.matcher(title).matches()) {
 				String sectionContent = sectionMatcher.group();
 				foundSections.add(title);
 				builder.append(sectionContent);

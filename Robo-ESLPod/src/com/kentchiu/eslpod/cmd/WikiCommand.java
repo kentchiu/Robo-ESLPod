@@ -8,7 +8,9 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.net.Uri;
+import android.util.Log;
 
+import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.provider.Dictionary;
 
 public class WikiCommand extends DictionaryCommand {
@@ -20,7 +22,7 @@ public class WikiCommand extends DictionaryCommand {
 	}
 
 	@Override
-	protected String getContent(String word) throws IOException {
+	public String getContent(String word) throws IOException {
 		String url = getQueryUrl(word);
 		String join = readAsOneLine(url);
 		return extractContent(join);
@@ -33,7 +35,14 @@ public class WikiCommand extends DictionaryCommand {
 
 	@Override
 	protected String getQueryUrl(String word) {
-		return "http://en.wiktionary.org/w/api.php?action=query&prop=revisions&rvprop=content&format=json&rvexpandtemplates=true&titles=" + word;
+		// http://en.wiktionary.org/w/api.php?action=query&
+		// prop=revisions
+		// &rvprop=content
+		// &format=json
+		// &rvexpandtemplates=true
+		// &titles=
+		// http://zh.wiktionary.org/w/index.php?title=book&action=edit
+		return "http://en.wiktionary.org/w/api.php?action=query&prop=revisions&rvprop=content&format=json&rvexpandtemplates=true&alllinks=true&titles=" + word;
 	}
 
 	private synchronized String extractContent(String content) {
@@ -47,6 +56,7 @@ public class WikiCommand extends DictionaryCommand {
 			JSONObject revision = revisions.getJSONObject(0);
 			return revision.getString("*");
 		} catch (JSONException e) {
+			Log.w(EslPodApplication.TAG, "Extract json content fiil", e);
 			return "";
 		}
 	}

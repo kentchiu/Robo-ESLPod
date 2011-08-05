@@ -25,7 +25,7 @@ public class WikiCommandTest extends AndroidTestCase {
 	}
 
 	public void testQueryUri() throws Exception {
-		assertThat(command.getQueryUrl("test"), is("http://en.wiktionary.org/w/api.php?action=query&prop=revisions&rvprop=content&format=json&rvexpandtemplates=true&titles=" + "test"));
+		assertThat(command.getQueryUrl("test"), is("http://en.wiktionary.org/w/api.php?action=query&prop=revisions&rvprop=content&format=json&rvexpandtemplates=true&alllinks=true&titles=" + "test"));
 	}
 
 	@Override

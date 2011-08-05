@@ -93,11 +93,12 @@ public class DictionaryContentProvider extends ContentProvider {
 		SQLiteDatabase db = databaseHelper.getReadableDatabase();
 		switch (uriMatcher.match(uri)) {
 		case WORDS:
+			String query = selectionArgs[0];
 			Cursor c = db.query(DatabaseHelper.WORD_BANK_TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
 			if (c.getCount() == 0) {
 				Intent intent = new Intent(getContext(), DictionaryService.class);
 				intent.putExtra(DictionaryService.COMMAND, DictionaryService.COMMAND_DOWNLOAD_WORD);
-				intent.putExtra(SearchManager.QUERY, selectionArgs[0]);
+				intent.putExtra(SearchManager.QUERY, query);
 				intent.putExtra(DictionaryService.NO_WAIT, true);
 				getContext().startService(intent);
 			}
