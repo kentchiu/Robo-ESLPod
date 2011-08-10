@@ -27,9 +27,11 @@ public class Dictionary {
 		};
 	}
 
-	public static final String	AUTHORITY						= Dictionary.class.getName();
-	public static final int		DICTIONARY_GOOGLE_SUGGESTION	= 1;
-	public static final int		DICTIONARY_GOOGLE_DICTIONARY	= 2;
-	public static final int		DICTIONARY_WIKI_DICTIONARY		= 3;
+	public static final String	AUTHORITY							= Dictionary.class.getName();
+	public static final int		DICTIONARY_DREYE_DICTIONARY			= 1;
+	public static final int		DICTIONARY_DICTIONARY_DICTIONARY	= 2;
+	public static final int		DICTIONARY_WIKITIONARY				= 3;
+	public static final int		DICTIONARY_GOOGLE_DICTIONARY		= 4;
+	public static final int		DICTIONARY_GOOGLE_SUGGESTION		= 5;
 
 }

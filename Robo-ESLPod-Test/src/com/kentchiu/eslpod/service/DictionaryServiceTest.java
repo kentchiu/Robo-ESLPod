@@ -1,7 +1,5 @@
 package com.kentchiu.eslpod.service;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -13,12 +11,12 @@ public class DictionaryServiceTest extends ServiceTestCase<DictionaryService> {
 		super(DictionaryService.class);
 	}
 
-	public void testGetBasicForm() throws Exception {
-		assertThat(DictionaryService.getBasicForm("ran"), is("run"));
-		assertThat(DictionaryService.getBasicForm("running"), is("run"));
-		assertThat(DictionaryService.getBasicForm("books"), is("book"));
-
-	}
+	//	public void testGetBasicForm() throws Exception {
+	//		assertThat(DictionaryService.getBasicForm("ran"), is("run"));
+	//		assertThat(DictionaryService.getBasicForm("running"), is("run"));
+	//		assertThat(DictionaryService.getBasicForm("books"), is("book"));
+	//
+	//	}
 
 	public void testQuery() throws Exception {
 		Context context = getContext();

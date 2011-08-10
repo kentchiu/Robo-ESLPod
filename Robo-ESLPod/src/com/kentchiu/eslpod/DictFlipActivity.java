@@ -4,8 +4,11 @@ import java.util.List;
 
 import android.app.Activity;
 import android.app.SearchManager;
+import android.content.ContentUris;
+import android.content.Intent;
 import android.database.ContentObserver;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.BaseColumns;
@@ -21,12 +24,10 @@ import android.widget.ViewFlipper;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.kentchiu.eslpod.formatter.GoogleDictionaryFormatter;
-import com.kentchiu.eslpod.formatter.GoogleSuggestFormatter;
-import com.kentchiu.eslpod.formatter.WikiFormater;
-import com.kentchiu.eslpod.provider.Dictionary;
+import com.kentchiu.eslpod.cmd.AbstractDictionaryCommand;
 import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
 import com.kentchiu.eslpod.provider.Dictionary.WordBankColumns;
+import com.kentchiu.eslpod.service.DictionaryService;
 
 public class DictFlipActivity extends Activity implements OnGestureListener, OnTouchListener {
 
@@ -128,8 +129,9 @@ public class DictFlipActivity extends Activity implements OnGestureListener, OnT
 			while (c2.moveToNext()) {
 				int dictId = c2.getInt(c2.getColumnIndex(DictionaryColumns.DICTIONARY_ID));
 				String content = c2.getString(c2.getColumnIndex(DictionaryColumns.CONTENT));
-				String html = toHtml(dictId, content);
-				Iterables.get(webViews, dictId - 1).loadDataWithBaseURL("wiktionary", html, "text/html", "utf-8", null);
+				AbstractDictionaryCommand cmd = AbstractDictionaryCommand.newDictionaryCommand(this, ContentUris.withAppendedId(WordBankColumns.WORDBANK_URI, wordId), dictId);
+				String html = cmd.toHtml(content);
+				Iterables.get(webViews, dictId - 1).loadDataWithBaseURL("Dictionary", html, "text/html", "utf-8", null);
 			}
 		}
 	}
@@ -139,25 +141,25 @@ public class DictFlipActivity extends Activity implements OnGestureListener, OnT
 		for (int each : new int[] { R.id.dict1, R.id.dict2, R.id.dict3 }) {
 			View viewGroup = findViewById(each);
 			TextView textView = (TextView) viewGroup.findViewById(R.id.title);
-			textView.setText(getIntent().getStringExtra(SearchManager.QUERY));
+			String query = getIntent().getStringExtra(SearchManager.QUERY);
+			textView.setText(query);
 			final WebView webView = (WebView) viewGroup.findViewById(R.id.webview);
-			webView.loadDataWithBaseURL("wiktionary", "Waiting for retriveing content....", "text/html", "utf-8", null);
+			webView.loadDataWithBaseURL("Dictionary", "查無資料....", "text/html", "utf-8", null);
 			webView.setOnTouchListener(this);
 			webView.setLongClickable(true);
 			((List<WebView>) webViews).add(webView);
 		}
+		Cursor c = managedQuery(WordBankColumns.WORDBANK_URI, null, "word=?", new String[] { getIntent().getStringExtra(SearchManager.QUERY) }, null);
+		if (c.moveToFirst()) {
+			long wordId = c.getLong(c.getColumnIndex(BaseColumns._ID));
+			Uri workbankUri = ContentUris.withAppendedId(WordBankColumns.WORDBANK_URI, wordId);
+			Intent newIntent = new Intent(this, DictionaryService.class);
+			newIntent.putExtra(DictionaryService.COMMAND, DictionaryService.COMMAND_DOWNLOAD_DICTIONARIES);
+			newIntent.putExtra(DictionaryService.NO_WAIT, true);
+			newIntent.setData(workbankUri);
+			startService(newIntent);
+		}
+
 	}
 
-	private String toHtml(int dictId, String content) {
-		switch (dictId) {
-		case Dictionary.DICTIONARY_GOOGLE_SUGGESTION:
-			return GoogleSuggestFormatter.formatText(content);
-		case Dictionary.DICTIONARY_GOOGLE_DICTIONARY:
-			return GoogleDictionaryFormatter.formatText(content);
-		case Dictionary.DICTIONARY_WIKI_DICTIONARY:
-			return WikiFormater.formatWikiText(content);
-		default:
-			return content;
-		}
-	}
 }

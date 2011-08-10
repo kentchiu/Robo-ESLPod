@@ -13,19 +13,37 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.provider.BaseColumns;
 import android.util.Log;
 
 import com.google.common.base.Joiner;
 import com.kentchiu.eslpod.EslPodApplication;
+import com.kentchiu.eslpod.provider.Dictionary;
 import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
 import com.kentchiu.eslpod.provider.Dictionary.WordBankColumns;
 
-public abstract class DictionaryCommand implements Runnable {
+public abstract class AbstractDictionaryCommand implements Runnable {
+
+	// http://m.dictionary.com/?q=book&submit-result-SEARCHD=Search
+	// http://i.word.com/
+
+	public static AbstractDictionaryCommand newDictionaryCommand(Context context, Uri wordBankUri, int dictionaryId) {
+		switch (dictionaryId) {
+		case Dictionary.DICTIONARY_DREYE_DICTIONARY:
+			return new DreyeDictionaryCommand(context, wordBankUri);
+		case Dictionary.DICTIONARY_DICTIONARY_DICTIONARY:
+			return new DictionaryDictionaryCommand(context, wordBankUri);
+		case Dictionary.DICTIONARY_WIKITIONARY:
+			return new WiktionaryCommand(context, wordBankUri);
+		default:
+			throw new IllegalArgumentException("Unkonw dictionary id : " + dictionaryId);
+		}
+	}
 
 	private Uri		wordBankUri;
 	private Context	context;
 
-	public DictionaryCommand(Context context, Uri wordBankUri) {
+	protected AbstractDictionaryCommand(Context context, Uri wordBankUri) {
 		super();
 		this.context = context;
 		this.wordBankUri = wordBankUri;
@@ -42,15 +60,27 @@ public abstract class DictionaryCommand implements Runnable {
 			Cursor c = getContext().getContentResolver().query(wordBankUri, null, null, null, null);
 			if (c.moveToFirst()) {
 				String word = c.getString(c.getColumnIndex(WordBankColumns.WORD));
-				try {
-					Log.v(EslPodApplication.TAG, "get word definition of [" + word + "] to dictionary " + getDictionaryId());
-					String content = getContent(word);
-					updateDatabase(content);
-				} catch (IOException e) {
-					e.printStackTrace();
+				String wordId = c.getString(c.getColumnIndex(BaseColumns._ID));
+				String selection = DictionaryColumns.WORD_ID + "=? and " + DictionaryColumns.DICTIONARY_ID + "=?";
+				String[] projection = new String[] { BaseColumns._ID };
+				String[] selectionArgs = new String[] { wordId, Integer.toString(getDictionaryId()) };
+				if (getContext().getContentResolver().query(DictionaryColumns.DICTIONARY_URI, projection, selection, selectionArgs, null).getCount() == 0) {
+					try {
+						Log.v(EslPodApplication.TAG, "get word definition of [" + word + "] to dictionary " + getDictionaryId());
+						String content = getContent(word);
+						updateDatabase(content);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				} else {
+					Log.v(EslPodApplication.TAG, "word already exists in dictionary " + getDictionaryId());
 				}
 			}
 		}
+	}
+
+	public String toHtml(String input) {
+		return input;
 	}
 
 	protected abstract String getContent(String word) throws IOException;

@@ -1,10 +1,8 @@
 package com.kentchiu.eslpod.provider;
 
-import android.app.SearchManager;
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
-import android.content.Intent;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -13,7 +11,6 @@ import android.provider.BaseColumns;
 
 import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
 import com.kentchiu.eslpod.provider.Dictionary.WordBankColumns;
-import com.kentchiu.eslpod.service.DictionaryService;
 
 public class DictionaryContentProvider extends ContentProvider {
 
@@ -93,16 +90,7 @@ public class DictionaryContentProvider extends ContentProvider {
 		SQLiteDatabase db = databaseHelper.getReadableDatabase();
 		switch (uriMatcher.match(uri)) {
 		case WORDS:
-			String query = selectionArgs[0];
-			Cursor c = db.query(DatabaseHelper.WORD_BANK_TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
-			if (c.getCount() == 0) {
-				Intent intent = new Intent(getContext(), DictionaryService.class);
-				intent.putExtra(DictionaryService.COMMAND, DictionaryService.COMMAND_DOWNLOAD_WORD);
-				intent.putExtra(SearchManager.QUERY, query);
-				intent.putExtra(DictionaryService.NO_WAIT, true);
-				getContext().startService(intent);
-			}
-			return c;
+			return db.query(DatabaseHelper.WORD_BANK_TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
 		case WORD:
 			long id = ContentUris.parseId(uri);
 			return db.query(DatabaseHelper.WORD_BANK_TABLE_NAME, projection, BaseColumns._ID + "=?", new String[] { Long.toString(id) }, null, null, sortOrder);

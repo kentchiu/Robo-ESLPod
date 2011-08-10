@@ -55,7 +55,7 @@ public class RichScriptCommand implements Runnable {
 		}
 	}
 
-	public static Iterable<String> headword2(Context context, Iterable<String> filter) {
+	public static Iterable<String> headword(Context context, Iterable<String> filter) {
 		Set<String> menuStr = Sets.newLinkedHashSet();
 		for (String each : filter) {
 			Iterable<String> words2 = splitPhaseVerbToWords(each);

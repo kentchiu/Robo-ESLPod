@@ -13,15 +13,15 @@ import com.kentchiu.eslpod.provider.Dictionary;
 import com.kentchiu.eslpod.provider.Dictionary.WordBankColumns;
 
 public class WikiCommandTest extends AndroidTestCase {
-	private WikiCommand		command;
-	private SQLiteDatabase	database;
+	private WiktionaryCommand	command;
+	private SQLiteDatabase		database;
 
 	public void testGetContent() throws Exception {
 		assertThat(command.getContent("test"), containsString("test"));
 	}
 
 	public void testGetDictionId() throws Exception {
-		assertThat(command.getDictionaryId(), is(Dictionary.DICTIONARY_WIKI_DICTIONARY));
+		assertThat(command.getDictionaryId(), is(Dictionary.DICTIONARY_WIKITIONARY));
 	}
 
 	public void testQueryUri() throws Exception {
@@ -37,7 +37,7 @@ public class WikiCommandTest extends AndroidTestCase {
 		database.execSQL("delete from dictionary");
 		database.execSQL("insert into word_bank(_id, word) values(1, 'test') ");
 		Uri wordBankUri = ContentUris.withAppendedId(WordBankColumns.WORDBANK_URI, 1);
-		command = new WikiCommand(mContext, wordBankUri);
+		command = new WiktionaryCommand(mContext, wordBankUri);
 	}
 
 }

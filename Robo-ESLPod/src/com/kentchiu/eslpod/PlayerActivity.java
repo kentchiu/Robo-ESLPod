@@ -41,13 +41,11 @@ import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 import com.kentchiu.eslpod.service.PodcastService;
 
 public class PlayerActivity extends ListActivity implements OnTouchListener, OnGestureListener, OnClickListener {
-	private static final int	DICT_GOOGLE			= 1;
-	private static final int	FLING_MIN_DISTANCE	= 100;
-	private static final int	FLING_MIN_VELOCITY	= 200;
-	private GestureDetector		gd;
-	private MediaPlayer			player;
-	private SeekBar				seekBar;
-	private Handler				handler				= new Handler();
+
+	private GestureDetector	gd;
+	private MediaPlayer		player;
+	private SeekBar			seekBar;
+	private Handler			handler	= new Handler();
 
 	@Override
 	public void onClick(View v) {
@@ -96,7 +94,7 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 		});
 
 		int i = 1;
-		for (String each : RichScriptCommand.headword2(PlayerActivity.this, filter)) {
+		for (String each : RichScriptCommand.headword(PlayerActivity.this, filter)) {
 			menu.add(0, i++, 0, each);
 		}
 	}
@@ -149,7 +147,6 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 				Intent intent = new Intent(this, PodcastService.class);
 				intent.putExtra(PodcastService.COMMAND, PodcastService.COMMAND_RICH_SCRIPT);
 				intent.setData(uri);
-				//intent.putExtra(PodcastColumns.LINK, link);
 				startService(intent);
 			}
 			Iterable<String> lines = Splitter.on("\n").trimResults().split(script);

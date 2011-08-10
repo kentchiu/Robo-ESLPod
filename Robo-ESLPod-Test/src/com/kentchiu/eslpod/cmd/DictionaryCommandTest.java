@@ -55,7 +55,7 @@ public class DictionaryCommandTest extends AndroidTestCase {
 
 }
 
-class MyDictionaryCommand extends DictionaryCommand {
+class MyDictionaryCommand extends AbstractDictionaryCommand {
 
 	public MyDictionaryCommand(Context context, Uri wordBankUri) {
 		super(context, wordBankUri);

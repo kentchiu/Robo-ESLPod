@@ -67,11 +67,10 @@ public class PodcastService extends IntentService {
 								// doInBackground is already running in work thread, no need to execute command in another thread
 								cmd.run();
 								String richScriptCache = cmd.getRichScriptCache();
-								Iterable<String> result = RichScriptCommand.headword2(PodcastService.this, RichScriptCommand.extractWord(richScriptCache));
-								Log.v(EslPodApplication.TAG, "headword2 :" + Iterables.toString(result));
+								Iterable<String> result = RichScriptCommand.headword(PodcastService.this, RichScriptCommand.extractWord(richScriptCache));
+								Log.v(EslPodApplication.TAG, "headword :" + Iterables.toString(result));
 								Intent intent = new Intent(PodcastService.this, DictionaryService.class);
 								intent.putExtra(DictionaryService.COMMAND, DictionaryService.COMMAND_DOWNLOAD_WORD);
-								intent.putExtra(DictionaryService.NO_WAIT, false);
 								for (String each : result) {
 									intent.putExtra(SearchManager.QUERY, each);
 									startService(intent);
