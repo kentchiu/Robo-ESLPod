@@ -16,8 +16,11 @@ public class DreyeDictionaryCommand extends AbstractDictionaryCommand {
 	@Override
 	public String toHtml(String input) {
 		System.out.println(input);
-		input = input.replaceAll("images/", "http://www.dreye.com/ews/images/");
+		String base = "http://www.dreye.com/mws";
+		input = input.replaceAll("images/", base + "/images/");
 		input = input.replaceAll("\\<form.*?form\\>", "");
+		input = input.replaceAll("dict\\.php\\?", base + "/dict\\.php\\?");
+
 		return input;
 	}
 

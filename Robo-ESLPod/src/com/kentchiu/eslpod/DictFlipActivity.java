@@ -144,7 +144,7 @@ public class DictFlipActivity extends Activity implements OnGestureListener, OnT
 			String query = getIntent().getStringExtra(SearchManager.QUERY);
 			textView.setText(query);
 			final WebView webView = (WebView) viewGroup.findViewById(R.id.webview);
-			webView.loadDataWithBaseURL("Dictionary", "查無資料....", "text/html", "utf-8", null);
+			webView.loadDataWithBaseURL("Dictionary", "查詢中....", "text/html", "utf-8", null);
 			webView.setOnTouchListener(this);
 			webView.setLongClickable(true);
 			((List<WebView>) webViews).add(webView);
