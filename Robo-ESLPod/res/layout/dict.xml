@@ -11,25 +11,9 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical">
-
-        <ProgressBar
-            android:id="@+id/progress"
-            android:layout_width="18dip"
-            android:layout_height="18dip"
-            android:layout_marginLeft="10dip"
-            android:visibility="invisible"
-            android:indeterminateOnly="true"
-            android:indeterminateDrawable="@drawable/progress_spin"
-            android:indeterminateBehavior="repeat"
-            android:indeterminateDuration="3500" />
-
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="0dip"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:padding="10dip"
-            style="@style/LookupTitle" />
+        <EditText android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_weight="0.87" android:id="@+id/titleTxt">
+        </EditText>
+        <Button android:id="@+id/go" android:layout_height="wrap_content" android:layout_width="wrap_content" android:text="Go" android:onClick="onClick"></Button>
 
     </LinearLayout>
 

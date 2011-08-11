@@ -16,8 +16,10 @@ import android.view.GestureDetector;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.webkit.WebView;
+import android.widget.Button;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
@@ -29,11 +31,24 @@ import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
 import com.kentchiu.eslpod.provider.Dictionary.WordBankColumns;
 import com.kentchiu.eslpod.service.DictionaryService;
 
-public class DictFlipActivity extends Activity implements OnGestureListener, OnTouchListener {
+public class DictFlipActivity extends Activity implements OnGestureListener, OnTouchListener, OnClickListener {
 
 	private ViewFlipper			flipper;
 	private GestureDetector		gestureDetector;
 	private Iterable<WebView>	webViews;
+
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+		case R.id.go:
+			v.getTag(1);
+			v.getTag(2);
+
+			break;
+		default:
+			break;
+		}
+	}
 
 	/** Called when the activity is first created. */
 	@Override
@@ -138,18 +153,22 @@ public class DictFlipActivity extends Activity implements OnGestureListener, OnT
 
 	private void createWebViews() {
 		webViews = Lists.newArrayList();
+		String word = getIntent().getStringExtra(SearchManager.QUERY);
 		for (int each : new int[] { R.id.dict1, R.id.dict2, R.id.dict3 }) {
 			View viewGroup = findViewById(each);
-			TextView textView = (TextView) viewGroup.findViewById(R.id.title);
-			String query = getIntent().getStringExtra(SearchManager.QUERY);
+			TextView textView = (TextView) viewGroup.findViewById(R.id.titleTxt);
+			String query = word;
 			textView.setText(query);
+			Button go = (Button) viewGroup.findViewById(R.id.go);
+			go.setTag(1, each);
+			go.setTag(2, query);
 			final WebView webView = (WebView) viewGroup.findViewById(R.id.webview);
 			webView.loadDataWithBaseURL("Dictionary", "查詢中....", "text/html", "utf-8", null);
 			webView.setOnTouchListener(this);
 			webView.setLongClickable(true);
 			((List<WebView>) webViews).add(webView);
 		}
-		Cursor c = managedQuery(WordBankColumns.WORDBANK_URI, null, "word=?", new String[] { getIntent().getStringExtra(SearchManager.QUERY) }, null);
+		Cursor c = managedQuery(WordBankColumns.WORDBANK_URI, null, "word=?", new String[] { word }, null);
 		if (c.moveToFirst()) {
 			long wordId = c.getLong(c.getColumnIndex(BaseColumns._ID));
 			Uri workbankUri = ContentUris.withAppendedId(WordBankColumns.WORDBANK_URI, wordId);
