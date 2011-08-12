@@ -4,14 +4,10 @@ import java.util.List;
 
 import android.app.Activity;
 import android.app.SearchManager;
-import android.content.ContentUris;
-import android.content.Intent;
 import android.database.ContentObserver;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.BaseColumns;
 import android.view.GestureDetector;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
@@ -19,7 +15,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.webkit.WebView;
-import android.widget.Button;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
@@ -28,8 +23,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.kentchiu.eslpod.cmd.AbstractDictionaryCommand;
 import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
-import com.kentchiu.eslpod.provider.Dictionary.WordBankColumns;
-import com.kentchiu.eslpod.service.DictionaryService;
 
 public class DictFlipActivity extends Activity implements OnGestureListener, OnTouchListener, OnClickListener {
 
@@ -137,17 +130,14 @@ public class DictFlipActivity extends Activity implements OnGestureListener, OnT
 	}
 
 	void updateContent() {
-		Cursor c = managedQuery(WordBankColumns.WORDBANK_URI, null, "word=?", new String[] { getIntent().getStringExtra(SearchManager.QUERY) }, null);
-		if (c.moveToFirst()) {
-			long wordId = c.getLong(c.getColumnIndex(BaseColumns._ID));
-			Cursor c2 = managedQuery(DictionaryColumns.DICTIONARY_URI, null, "word_id=?", new String[] { Long.toString(wordId) }, null);
-			while (c2.moveToNext()) {
-				int dictId = c2.getInt(c2.getColumnIndex(DictionaryColumns.DICTIONARY_ID));
-				String content = c2.getString(c2.getColumnIndex(DictionaryColumns.CONTENT));
-				AbstractDictionaryCommand cmd = AbstractDictionaryCommand.newDictionaryCommand(this, ContentUris.withAppendedId(WordBankColumns.WORDBANK_URI, wordId), dictId);
-				String html = cmd.toHtml(content);
-				Iterables.get(webViews, dictId - 1).loadDataWithBaseURL("Dictionary", html, "text/html", "utf-8", null);
-			}
+		String query = getIntent().getStringExtra(SearchManager.QUERY);
+		Cursor c = managedQuery(DictionaryColumns.DICTIONARY_URI, null, DictionaryColumns.WORD + "=?", new String[] { query }, null);
+		while (c.moveToNext()) {
+			int dictId = c.getInt(c.getColumnIndex(DictionaryColumns.DICTIONARY_ID));
+			String content = c.getString(c.getColumnIndex(DictionaryColumns.CONTENT));
+			AbstractDictionaryCommand cmd = AbstractDictionaryCommand.newDictionaryCommand(null, query, dictId);
+			String html = cmd.toHtml(content);
+			Iterables.get(webViews, dictId - 1).loadDataWithBaseURL("Dictionary", html, "text/html", "utf-8", null);
 		}
 	}
 
@@ -159,26 +149,15 @@ public class DictFlipActivity extends Activity implements OnGestureListener, OnT
 			TextView textView = (TextView) viewGroup.findViewById(R.id.titleTxt);
 			String query = word;
 			textView.setText(query);
-			Button go = (Button) viewGroup.findViewById(R.id.go);
-			go.setTag(1, each);
-			go.setTag(2, query);
+			//			Button go = (Button) viewGroup.findViewById(R.id.go);
+			//			go.setTag(1, each);
+			//			go.setTag(2, query);
 			final WebView webView = (WebView) viewGroup.findViewById(R.id.webview);
 			webView.loadDataWithBaseURL("Dictionary", "查詢中....", "text/html", "utf-8", null);
 			webView.setOnTouchListener(this);
 			webView.setLongClickable(true);
 			((List<WebView>) webViews).add(webView);
 		}
-		Cursor c = managedQuery(WordBankColumns.WORDBANK_URI, null, "word=?", new String[] { word }, null);
-		if (c.moveToFirst()) {
-			long wordId = c.getLong(c.getColumnIndex(BaseColumns._ID));
-			Uri workbankUri = ContentUris.withAppendedId(WordBankColumns.WORDBANK_URI, wordId);
-			Intent newIntent = new Intent(this, DictionaryService.class);
-			newIntent.putExtra(DictionaryService.COMMAND, DictionaryService.COMMAND_DOWNLOAD_DICTIONARIES);
-			newIntent.putExtra(DictionaryService.NO_WAIT, true);
-			newIntent.setData(workbankUri);
-			startService(newIntent);
-		}
-
 	}
 
 }

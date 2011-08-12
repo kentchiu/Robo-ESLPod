@@ -126,7 +126,8 @@ public class HomeActivity extends ListActivity {
 		PodcastListAdapter adapter = new PodcastListAdapter(HomeActivity.this, R.layout.episode_list_item, cursor);
 		setListAdapter(adapter);
 		Intent intent = new Intent(this, PodcastService.class);
-		intent.putExtra(PodcastService.COMMAND, PodcastService.COMMAND_FETCH_NEW_PODCAST);
+		intent.setAction(PodcastService.FETCH_NEW_PODCAST);
+		//intent.putExtra(PodcastService.COMMAND, PodcastService.COMMAND_FETCH_NEW_PODCAST);
 		startService(intent);
 	}
 

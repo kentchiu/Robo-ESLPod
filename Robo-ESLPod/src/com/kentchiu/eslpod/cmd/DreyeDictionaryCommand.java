@@ -2,15 +2,14 @@ package com.kentchiu.eslpod.cmd;
 
 import java.io.IOException;
 
-import android.content.Context;
-import android.net.Uri;
+import android.os.Handler;
 
 import com.kentchiu.eslpod.provider.Dictionary;
 
 public class DreyeDictionaryCommand extends AbstractDictionaryCommand {
 
-	public DreyeDictionaryCommand(Context context, Uri wordBankUri) {
-		super(context, wordBankUri);
+	public DreyeDictionaryCommand(Handler handler, String query) {
+		super(handler, query);
 	}
 
 	@Override

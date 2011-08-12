@@ -9,7 +9,6 @@ import android.provider.BaseColumns;
 import android.test.ProviderTestCase2;
 
 import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
-import com.kentchiu.eslpod.provider.Dictionary.WordBankColumns;
 
 public class DictionaryContentProviderTest extends ProviderTestCase2<DictionaryContentProvider> {
 	private SQLiteDatabase	db;
@@ -19,15 +18,15 @@ public class DictionaryContentProviderTest extends ProviderTestCase2<DictionaryC
 	}
 
 	public void testDelete_words() throws Exception {
-		getProvider().delete(WordBankColumns.WORDBANK_URI, null, null);
+		getProvider().delete(DictionaryColumns.DICTIONARY_URI, null, null);
 		Cursor c = db.rawQuery("select * from word_bank", null);
 		assertThat(c.getCount(), is(0));
 	}
 
 	public void testInsert_dictionary() throws Exception {
 		ContentValues values = new ContentValues();
-		values.put(DictionaryColumns.DICTIONARY_ID, Dictionary.DICTIONARY_GOOGLE_SUGGESTION);
-		values.put(DictionaryColumns.WORD_ID, 1);
+		values.put(DictionaryColumns.DICTIONARY_ID, Dictionary.DICTIONARY_DREYE_DICTIONARY);
+		values.put(DictionaryColumns.WORD, "foo");
 		values.put(DictionaryColumns.CONTENT, "foobar");
 		getProvider().insert(DictionaryColumns.DICTIONARY_URI, values);
 		Cursor c = db.rawQuery("select * from dictionary where content='foobar' ", null);
@@ -36,28 +35,18 @@ public class DictionaryContentProviderTest extends ProviderTestCase2<DictionaryC
 		assertThat(c.getString(c.getColumnIndex(DictionaryColumns.CONTENT)), is("foobar"));
 	}
 
-	public void testInsert_word() throws Exception {
-		ContentValues values = new ContentValues();
-		values.put(WordBankColumns.WORD, "foo");
-		getProvider().insert(WordBankColumns.WORDBANK_URI, values);
-		Cursor c = db.rawQuery("select * from word_bank where word='foo'", null);
-		assertThat(c.getCount(), is(1));
-		c.moveToFirst();
-		assertThat(c.getString(c.getColumnIndex(WordBankColumns.WORD)), is("foo"));
-	}
-
-	public void testQuery_dictionary() throws Exception {
-		Cursor c = getProvider().query(DictionaryColumns.DICTIONARY_URI, null, "word_id=?", new String[] { "1" }, null);
-		c.moveToFirst();
-		assertThat(c.getCount(), is(1));
-		assertThat(c.getString(c.getColumnIndex(DictionaryColumns.CONTENT)), is("book content"));
-	}
-
 	public void testQuery_word() throws Exception {
-		Cursor c = getProvider().query(WordBankColumns.WORDBANK_URI, null, "word=?", new String[] { "book" }, null);
+		Cursor c = getProvider().query(DictionaryColumns.DICTIONARY_URI, null, "word='book' and dictionary_id=1", null, null);
 		c.moveToFirst();
 		assertThat(c.getCount(), is(1));
 		assertThat(c.getInt(c.getColumnIndex(BaseColumns._ID)), is(1));
+	}
+
+	public void testQuery_words() throws Exception {
+		Cursor c = getProvider().query(DictionaryColumns.DICTIONARY_URI, null, "word='book'", null, null);
+		c.moveToFirst();
+		assertThat(c.getCount(), is(3));
+		assertThat(c.getInt(c.getColumnIndex(BaseColumns._ID)), is(3));
 	}
 
 	@Override

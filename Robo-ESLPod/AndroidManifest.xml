@@ -19,12 +19,12 @@
 			<intent-filter>
 				<action android:name="android.intent.action.VIEW" />
 				<category android:name="android.intent.category.DEFAULT" />
-				<data android:mimeType="vnd.android.cursor.item/vnd.eslpod.dict" />
+				<data android:mimeType="vnd.android.cursor.item/vnd.eslpod.word" />
 			</intent-filter>
 			<intent-filter>
 				<action android:name="android.intent.action.VIEW" />
 				<category android:name="android.intent.category.DEFAULT" />
-				<data android:mimeType="vnd.android.cursor.dir/vnd.eslpod.dict" />
+				<data android:mimeType="vnd.android.cursor.dir/vnd.eslpod.word" />
 			</intent-filter>
 		</activity>
 		<service android:name=".service.PodcastService" />

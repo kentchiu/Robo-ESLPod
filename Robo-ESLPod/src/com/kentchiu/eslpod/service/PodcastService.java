@@ -28,9 +28,23 @@ public class PodcastService extends IntentService {
 	public static final int		COMMAND_FETCH_NEW_PODCAST	= 1;
 	public static final int		COMMAND_RICH_SCRIPT			= 2;
 	public static final int		COMMAND_DOWNLOAD_MEDIA		= 3;
+	public static final String	FETCH_NEW_PODCAST			= "fetch new padcast";
 
 	public PodcastService() {
 		super(PodcastService.class.getSimpleName());
+	}
+
+	protected void fetchNewPoadcast(String url) {
+		InputStream is;
+		try {
+			is = new URL(url).openStream();
+			PodcastCommand command = new PodcastCommand(this, is);
+			new Thread(command).start();
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -39,16 +53,7 @@ public class PodcastService extends IntentService {
 		final Uri podcastUri = intent.getData();
 		switch (cmd) {
 		case COMMAND_FETCH_NEW_PODCAST:
-			InputStream is;
-			try {
-				is = new URL(PodcastCommand.RSS_URI).openStream();
-				PodcastCommand command = new PodcastCommand(this, is);
-				new Thread(command).start();
-			} catch (MalformedURLException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			fetchNewPoadcast(PodcastCommand.RSS_URI);
 			break;
 		case COMMAND_RICH_SCRIPT:
 			try {

@@ -2,6 +2,7 @@ package com.kentchiu.eslpod.provider;
 
 import junit.framework.TestCase;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 
 public class DatabaseHelperTest extends TestCase {
@@ -23,9 +24,14 @@ public class DatabaseHelperTest extends TestCase {
 		assertEquals(13, c.getColumnCount());
 	}
 
-	public void testWordBankTable() throws Exception {
-		Cursor c = db.query(DatabaseHelper.WORD_BANK_TABLE_NAME, null, null, null, null, null, null);
-		assertEquals(2, c.getColumnCount());
+	public void testUniquIndex() throws Exception {
+		try {
+			db.execSQL("insert into Dictionary(dictionary_id, word) values(1, 'test')");
+			db.execSQL("insert into Dictionary(dictionary_id, word) values(1, 'test')");
+			fail("Shoud throw uniqu constrain exception");
+		} catch (SQLiteConstraintException e) {
+			// do nothing
+		}
 	}
 
 	@Override

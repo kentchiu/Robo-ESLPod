@@ -11,8 +11,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.content.Context;
-import android.net.Uri;
+import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -116,8 +115,8 @@ public class WiktionaryCommand extends AbstractDictionaryCommand {
 
 	}
 
-	public WiktionaryCommand(Context context, Uri wordBankUri) {
-		super(context, wordBankUri);
+	protected WiktionaryCommand(Handler handler, String query) {
+		super(handler, query);
 	}
 
 	@Override

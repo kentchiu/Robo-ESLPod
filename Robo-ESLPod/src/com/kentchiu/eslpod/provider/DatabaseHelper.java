@@ -8,15 +8,12 @@ import android.util.Log;
 
 import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
-import com.kentchiu.eslpod.provider.Dictionary.WordBankColumns;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 	public static String	DATABASE_NAME			= "elspod.db";
-	public static int		DATABASE_VERSION		= 1;
+	public static int		DATABASE_VERSION		= 9;
 	public static String	PODCAST_TABLE_NAME		= "podcast";
-	public static String	MEDIA_TABLE_NAME		= "media";
-	public static String	WORD_BANK_TABLE_NAME	= "word_bank";
 	public static String	DICTIONARY_TABLE_NAME	= "dictionary";
 
 	public DatabaseHelper(Context context, String name, SQLiteDatabase.CursorFactory factory) {
@@ -26,17 +23,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	@Override
 	public void onCreate(SQLiteDatabase sqLiteDatabase) {
 		createPodcastTable(sqLiteDatabase);
-		createWordBankTable(sqLiteDatabase);
 		createDictionaryTable(sqLiteDatabase);
 	}
 
 	@Override
 	public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldv, int newv) {
 		sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + PODCAST_TABLE_NAME + ";");
-		sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + WORD_BANK_TABLE_NAME + ";");
 		sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + DICTIONARY_TABLE_NAME + ";");
 		createPodcastTable(sqLiteDatabase);
-		createWordBankTable(sqLiteDatabase);
 		createDictionaryTable(sqLiteDatabase);
 	}
 
@@ -44,13 +38,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		// @formatter:off
 		String sql = "CREATE TABLE " + DICTIONARY_TABLE_NAME + " (" +
 		BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-		DictionaryColumns.WORD_ID + " INTEGER NOT NULL, " +
+		DictionaryColumns.WORD + " TEXT NOT NULL, " +
 		DictionaryColumns.DICTIONARY_ID + " INTEGER NOT NULL, " +
 		DictionaryColumns.CONTENT + " TEXT " +
 		");";
+		String sql2= "CREATE UNIQUE INDEX [IDX_DICT_DICTIONID_WORD] ON [" + DICTIONARY_TABLE_NAME + "]([" + DictionaryColumns.DICTIONARY_ID + "]  DESC, [" + DictionaryColumns.WORD + "]  DESC)";
+
 		// @formatter:on
 		Log.i(EslPodApplication.TAG, sql);
 		sqLiteDatabase.execSQL(sql);
+		// create unique index
+		sqLiteDatabase.execSQL(sql2);
 	}
 
 	private void createPodcastTable(SQLiteDatabase sqLiteDatabase) {
@@ -69,17 +67,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		PodcastColumns.RICH_SCRIPT + " TEXT, " +
 		PodcastColumns.TAGS + " TEXT, " +
 		PodcastColumns.PARAGRAPH_INDEX + " TEXT " +
-		");";
-		// @formatter:on
-		Log.i(EslPodApplication.TAG, sql);
-		sqLiteDatabase.execSQL(sql);
-	}
-
-	private void createWordBankTable(SQLiteDatabase sqLiteDatabase) {
-		// @formatter:off
-		String sql = "CREATE TABLE " + WORD_BANK_TABLE_NAME + " (" +
-		BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-		WordBankColumns.WORD + " TEXT UNIQUE NOT NULL" +
 		");";
 		// @formatter:on
 		Log.i(EslPodApplication.TAG, sql);

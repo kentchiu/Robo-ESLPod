@@ -59,7 +59,7 @@ public class MediaCommand implements Runnable {
 		InputStream openStream = url.openStream();
 		// TODO move to sdcard
 		File localFile = new File(context.getCacheDir(), remoteFile.getName());
-		Log.v(EslPodApplication.TAG, "file length : " + localFile.length());
+		Log.v(EslPodApplication.TAG, "Media file length : " + localFile.length());
 		if (localFile.exists() && localFile.length() == length) {
 			Log.i(EslPodApplication.TAG, localFile.toString() + " exists");
 		} else {

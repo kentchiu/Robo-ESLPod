@@ -1,34 +1,43 @@
 package com.kentchiu.eslpod.provider;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.BaseColumns;
+import android.util.Log;
 
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
+import com.kentchiu.eslpod.EslPodApplication;
+import com.kentchiu.eslpod.cmd.AbstractDictionaryCommand;
 import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
-import com.kentchiu.eslpod.provider.Dictionary.WordBankColumns;
 
 public class DictionaryContentProvider extends ContentProvider {
 
-	private static final int	WORDS			= 1;
-	private static final int	WORD			= 2;
-	private static final int	DICTIONARIES	= 3;
-	private static final int	DICTIONARY		= 4;
-	private UriMatcher			uriMatcher;
-	private DatabaseHelper		databaseHelper;
+	private static final int		WORDS	= 1;
+	private static final int		WORD	= 2;
+	private UriMatcher				uriMatcher;
+	private DatabaseHelper			databaseHelper;
+	private static ExecutorService	es		= Executors.newFixedThreadPool(3);
+	private Handler					handler;
 
 	@Override
 	public int delete(Uri uri, String selection, String[] selectionArgs) {
 		switch (uriMatcher.match(uri)) {
 		case WORDS:
-			SQLiteDatabase db = databaseHelper.getWritableDatabase();
-			int result = db.delete(DatabaseHelper.WORD_BANK_TABLE_NAME, selection, selectionArgs);
-			getContext().getContentResolver().notifyChange(uri, null);
-			return result;
 		default:
 			return 0;
 		}
@@ -42,13 +51,9 @@ public class DictionaryContentProvider extends ContentProvider {
 	public String getType(Uri uri) {
 		switch (uriMatcher.match(uri)) {
 		case WORDS:
-			return WordBankColumns.CONTENT_TYPE_WORDS;
+			return DictionaryColumns.CONTENT_TYPE_WORDS;
 		case WORD:
-			return WordBankColumns.CONTENT_TYPE_WORD;
-		case DICTIONARIES:
-			return DictionaryColumns.CONTENT_TYPE_DICTIONARIES;
-		case DICTIONARY:
-			return DictionaryColumns.CONTENT_TYPE_DICTIONARY;
+			return DictionaryColumns.CONTENT_TYPE_WORD;
 		default:
 			throw new IllegalArgumentException("Unknow URI : " + uri);
 		}
@@ -60,11 +65,8 @@ public class DictionaryContentProvider extends ContentProvider {
 		final long id;
 		switch (uriMatcher.match(uri)) {
 		case WORDS:
-			id = db.insert(DatabaseHelper.WORD_BANK_TABLE_NAME, null, values);
-			getContext().getContentResolver().notifyChange(WordBankColumns.WORDBANK_URI, null);
-			break;
-		case DICTIONARIES:
 			id = db.insert(DatabaseHelper.DICTIONARY_TABLE_NAME, null, values);
+			Log.v(EslPodApplication.TAG, "save word [" + values.getAsString(DictionaryColumns.WORD) + "] to dictionary " + values.getAsLong(DictionaryColumns.DICTIONARY_ID));
 			getContext().getContentResolver().notifyChange(DictionaryColumns.DICTIONARY_URI, null);
 			break;
 		default:
@@ -78,10 +80,9 @@ public class DictionaryContentProvider extends ContentProvider {
 	public boolean onCreate() {
 		databaseHelper = new DatabaseHelper(getContext(), DatabaseHelper.DATABASE_NAME, null);
 		uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-		uriMatcher.addURI(Dictionary.AUTHORITY, "word", WORDS);
-		uriMatcher.addURI(Dictionary.AUTHORITY, "word" + "/#", WORD);
-		uriMatcher.addURI(Dictionary.AUTHORITY, "dict", DICTIONARIES);
-		uriMatcher.addURI(Dictionary.AUTHORITY, "dict" + "/#", DICTIONARY);
+		uriMatcher.addURI(Dictionary.AUTHORITY, "word/", WORDS);
+		uriMatcher.addURI(Dictionary.AUTHORITY, "word/#", WORD);
+		handler = new MyHandler(getContext());
 		return true;
 	}
 
@@ -90,15 +91,30 @@ public class DictionaryContentProvider extends ContentProvider {
 		SQLiteDatabase db = databaseHelper.getReadableDatabase();
 		switch (uriMatcher.match(uri)) {
 		case WORDS:
-			return db.query(DatabaseHelper.WORD_BANK_TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
+			Cursor c = db.query(DatabaseHelper.DICTIONARY_TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
+			Log.v(EslPodApplication.TAG, "Query word [" + c.getString(c.getColumnIndex(DictionaryColumns.WORD)) + "] count : " + c.getCount());
+			Set<Integer> dictIds = Sets.newHashSet();
+			while (c.moveToNext()) {
+				dictIds.add(c.getInt(c.getColumnIndex(DictionaryColumns.DICTIONARY_ID)));
+			}
+
+			HashSet<Integer> allDictIds = Sets.newHashSet();
+			allDictIds.add(Dictionary.DICTIONARY_DREYE_DICTIONARY);
+			allDictIds.add(Dictionary.DICTIONARY_DICTIONARY_DICTIONARY);
+			allDictIds.add(Dictionary.DICTIONARY_WIKITIONARY);
+			Iterables.removeAll(allDictIds, dictIds);
+			String query = selectionArgs[0];
+			for (Integer each : allDictIds) {
+				//
+				es.execute(AbstractDictionaryCommand.newDictionaryCommand(handler, query, each));
+			}
+			c.requery();
+			return c;
 		case WORD:
-			long id = ContentUris.parseId(uri);
-			return db.query(DatabaseHelper.WORD_BANK_TABLE_NAME, projection, BaseColumns._ID + "=?", new String[] { Long.toString(id) }, null, null, sortOrder);
-		case DICTIONARIES:
-			return db.query(DatabaseHelper.DICTIONARY_TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
-		case DICTIONARY:
+			long id;
 			id = ContentUris.parseId(uri);
-			return db.query(DatabaseHelper.DICTIONARY_TABLE_NAME, projection, BaseColumns._ID + "=?", new String[] { Long.toString(id) }, null, null, sortOrder);
+			c = db.query(DatabaseHelper.DICTIONARY_TABLE_NAME, projection, BaseColumns._ID + "=?", new String[] { Long.toString(id) }, null, null, sortOrder);
+			return c;
 		default:
 			throw new IllegalArgumentException("Unkonw uri:" + uri);
 		}
@@ -107,5 +123,38 @@ public class DictionaryContentProvider extends ContentProvider {
 	@Override
 	public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
 		return 0;
+	}
+
+}
+
+class MyHandler extends Handler {
+
+	private Context	context;
+
+	public MyHandler(Context context) {
+		super();
+		this.context = context;
+	}
+
+	public Context getContext() {
+		return context;
+	}
+
+	@Override
+	public void handleMessage(Message msg) {
+		Bundle b = msg.getData();
+		int dictId = b.getInt(DictionaryColumns.DICTIONARY_ID);
+		String query = b.getString(DictionaryColumns.WORD);
+		String content = b.getString(DictionaryColumns.CONTENT);
+		Log.v(EslPodApplication.TAG, "save word definition of [" + query + "] to dictionary " + dictId);
+		ContentValues cv = new ContentValues();
+		cv.put(DictionaryColumns.DICTIONARY_ID, dictId);
+		cv.put(DictionaryColumns.WORD, query);
+		cv.put(DictionaryColumns.CONTENT, content);
+		getContext().getContentResolver().insert(DictionaryColumns.DICTIONARY_URI, cv);
+	}
+
+	public void setContext(Context context) {
+		this.context = context;
 	}
 }

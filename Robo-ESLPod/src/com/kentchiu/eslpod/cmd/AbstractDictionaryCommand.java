@@ -8,74 +8,65 @@ import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
-import android.content.ContentUris;
-import android.content.ContentValues;
-import android.content.Context;
-import android.database.Cursor;
-import android.net.Uri;
-import android.provider.BaseColumns;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Preconditions;
 import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.provider.Dictionary;
 import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
-import com.kentchiu.eslpod.provider.Dictionary.WordBankColumns;
 
 public abstract class AbstractDictionaryCommand implements Runnable {
 
 	// http://m.dictionary.com/?q=book&submit-result-SEARCHD=Search
 	// http://i.word.com/
 
-	public static AbstractDictionaryCommand newDictionaryCommand(Context context, Uri wordBankUri, int dictionaryId) {
+	public static AbstractDictionaryCommand newDictionaryCommand(Handler handler, String query, int dictionaryId) {
 		switch (dictionaryId) {
 		case Dictionary.DICTIONARY_DREYE_DICTIONARY:
-			return new DreyeDictionaryCommand(context, wordBankUri);
+			return new DreyeDictionaryCommand(handler, query);
 		case Dictionary.DICTIONARY_DICTIONARY_DICTIONARY:
-			return new DictionaryDictionaryCommand(context, wordBankUri);
+			return new DictionaryDictionaryCommand(handler, query);
 		case Dictionary.DICTIONARY_WIKITIONARY:
-			return new WiktionaryCommand(context, wordBankUri);
+			return new WiktionaryCommand(handler, query);
 		default:
 			throw new IllegalArgumentException("Unkonw dictionary id : " + dictionaryId);
 		}
 	}
 
-	private Uri		wordBankUri;
-	private Context	context;
+	private Handler	handler;
+	private String	query;
 
-	protected AbstractDictionaryCommand(Context context, Uri wordBankUri) {
+	protected AbstractDictionaryCommand(Handler handler, String query) {
 		super();
-		this.context = context;
-		this.wordBankUri = wordBankUri;
-	}
-
-	public Context getContext() {
-		return context;
+		this.handler = handler;
+		this.query = query;
 	}
 
 	@Override
 	public void run() {
-		String type = getContext().getContentResolver().getType(wordBankUri);
-		if (StringUtils.equals(WordBankColumns.CONTENT_TYPE_WORD, type)) {
-			Cursor c = getContext().getContentResolver().query(wordBankUri, null, null, null, null);
-			if (c.moveToFirst()) {
-				String word = c.getString(c.getColumnIndex(WordBankColumns.WORD));
-				String wordId = c.getString(c.getColumnIndex(BaseColumns._ID));
-				String selection = DictionaryColumns.WORD_ID + "=? and " + DictionaryColumns.DICTIONARY_ID + "=?";
-				String[] projection = new String[] { BaseColumns._ID };
-				String[] selectionArgs = new String[] { wordId, Integer.toString(getDictionaryId()) };
-				if (getContext().getContentResolver().query(DictionaryColumns.DICTIONARY_URI, projection, selection, selectionArgs, null).getCount() == 0) {
-					try {
-						Log.v(EslPodApplication.TAG, "get word definition of [" + word + "] to dictionary " + getDictionaryId());
-						String content = getContent(word);
-						updateDatabase(content);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				} else {
-					Log.v(EslPodApplication.TAG, "word already exists in dictionary " + getDictionaryId());
-				}
+		try {
+			String content;
+			Log.v(EslPodApplication.TAG, "Start querying  word " + query + " from dictionary " + getDictionaryId());
+			if (StringUtils.isBlank(query)) {
+				content = "";
+			} else {
+				content = getContent(query);
 			}
+			Log.v(EslPodApplication.TAG, "End queried  word " + query + " from dictionary " + getDictionaryId());
+			Message msg = new Message();
+			Bundle b = new Bundle();
+			b.putInt(DictionaryColumns.DICTIONARY_ID, getDictionaryId());
+			b.putString(DictionaryColumns.WORD, query);
+			b.putString(DictionaryColumns.CONTENT, content);
+			msg.setData(b);
+			Preconditions.checkNotNull(handler);
+			handler.sendMessage(msg);
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -99,14 +90,6 @@ public abstract class AbstractDictionaryCommand implements Runnable {
 		URL url = new URL(urlStr);
 		List<String> lines = IOUtils.readLines(url.openStream(), encoding);
 		return Joiner.on("").join(lines);
-	}
-
-	protected void updateDatabase(String content) {
-		ContentValues cv = new ContentValues();
-		cv.put(DictionaryColumns.DICTIONARY_ID, getDictionaryId());
-		cv.put(DictionaryColumns.WORD_ID, ContentUris.parseId(wordBankUri));
-		cv.put(DictionaryColumns.CONTENT, content);
-		getContext().getContentResolver().insert(DictionaryColumns.DICTIONARY_URI, cv);
 	}
 
 }
