@@ -92,20 +92,14 @@ public class DictionaryContentProvider extends ContentProvider {
 		switch (uriMatcher.match(uri)) {
 		case WORDS:
 			Cursor c = db.query(DatabaseHelper.DICTIONARY_TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
-			Log.v(EslPodApplication.TAG, "Query word [" + c.getString(c.getColumnIndex(DictionaryColumns.WORD)) + "] count : " + c.getCount());
 			Set<Integer> dictIds = Sets.newHashSet();
 			while (c.moveToNext()) {
 				dictIds.add(c.getInt(c.getColumnIndex(DictionaryColumns.DICTIONARY_ID)));
 			}
-
-			HashSet<Integer> allDictIds = Sets.newHashSet();
-			allDictIds.add(Dictionary.DICTIONARY_DREYE_DICTIONARY);
-			allDictIds.add(Dictionary.DICTIONARY_DICTIONARY_DICTIONARY);
-			allDictIds.add(Dictionary.DICTIONARY_WIKITIONARY);
+			HashSet<Integer> allDictIds = listAllDictIds();
 			Iterables.removeAll(allDictIds, dictIds);
 			String query = selectionArgs[0];
 			for (Integer each : allDictIds) {
-				//
 				es.execute(AbstractDictionaryCommand.newDictionaryCommand(handler, query, each));
 			}
 			c.requery();
@@ -123,6 +117,14 @@ public class DictionaryContentProvider extends ContentProvider {
 	@Override
 	public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
 		return 0;
+	}
+
+	private HashSet<Integer> listAllDictIds() {
+		HashSet<Integer> allDictIds = Sets.newHashSet();
+		allDictIds.add(Dictionary.DICTIONARY_DREYE_DICTIONARY);
+		allDictIds.add(Dictionary.DICTIONARY_DICTIONARY_DICTIONARY);
+		allDictIds.add(Dictionary.DICTIONARY_WIKITIONARY);
+		return allDictIds;
 	}
 
 }

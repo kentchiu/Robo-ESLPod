@@ -19,7 +19,6 @@ public class DreyeDictionaryCommand extends AbstractDictionaryCommand {
 		input = input.replaceAll("images/", base + "/images/");
 		input = input.replaceAll("\\<form.*?form\\>", "");
 		input = input.replaceAll("dict\\.php\\?", base + "/dict\\.php\\?");
-
 		return input;
 	}
 

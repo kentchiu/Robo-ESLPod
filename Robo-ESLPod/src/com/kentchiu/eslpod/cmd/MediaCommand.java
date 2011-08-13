@@ -1,79 +1,105 @@
 package com.kentchiu.eslpod.cmd;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
+import java.io.OutputStream;
 import java.net.URL;
+import java.net.URLConnection;
 
-import org.apache.commons.io.IOUtils;
-
-import android.content.ContentValues;
-import android.content.Context;
-import android.database.Cursor;
-import android.net.Uri;
+import android.os.Handler;
 import android.util.Log;
 
 import com.kentchiu.eslpod.EslPodApplication;
-import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
 public class MediaCommand implements Runnable {
 
-	private Context	context;
-	private Uri		podacstUri;
+	private URL		from;
 
-	public MediaCommand(Context context, Uri podacstUri) {
+	private File	to;
+
+	private Handler	handler;
+
+	public MediaCommand(URL from, File to) {
+		this(from, to, null);
+	}
+
+	public MediaCommand(URL from, File to, Handler handler) {
 		super();
-		this.context = context;
-		this.podacstUri = podacstUri;
+		this.from = from;
+		this.to = to;
+		this.handler = handler;
+	}
+
+	public URL getFrom() {
+		return from;
+	}
+
+	public Handler getHandler() {
+		return handler;
+	}
+
+	public File getTo() {
+		return to;
 	}
 
 	@Override
 	public void run() {
-		Cursor c = context.getContentResolver().query(podacstUri, null, null, null, null);
-		if (c.moveToFirst()) {
-			String localUrlStr = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URL_LOCAL));
-			String urlStr = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URL));
-			long length = c.getLong(c.getColumnIndex(PodcastColumns.MEDIA_LENGTH));
-			if (localUrlStr == null || !new File(localUrlStr).exists()) {
-				try {
-					File localFile = downloadFrom(urlStr, length);
-					updateDatabase(localFile);
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				} catch (FileNotFoundException e) {
-					e.printStackTrace();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
+		try {
+			downloadFile(from, to, handler);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
-	protected File downloadFrom(String urlStr, long length) throws MalformedURLException, IOException, FileNotFoundException {
-		URL url = new URL(urlStr);
-		File remoteFile = new File(url.getFile());
-		Log.i(EslPodApplication.TAG, "Downloading file from " + urlStr);
-		InputStream openStream = url.openStream();
-		// TODO move to sdcard
-		File localFile = new File(context.getCacheDir(), remoteFile.getName());
-		Log.v(EslPodApplication.TAG, "Media file length : " + localFile.length());
-		if (localFile.exists() && localFile.length() == length) {
-			Log.i(EslPodApplication.TAG, localFile.toString() + " exists");
+	public void setFrom(URL from) {
+		this.from = from;
+	}
+
+	public void setHandler(Handler handler) {
+		this.handler = handler;
+	}
+
+	public void setTo(File to) {
+		this.to = to;
+	}
+
+	private void downloadFile(URL from, File to, Handler h) throws IOException, FileNotFoundException {
+		Log.i(EslPodApplication.TAG, "Downloading file from " + from.toString());
+		URLConnection conn = from.openConnection();
+
+		conn.connect();
+		// this will be useful so that you can show a typical 0-100% progress bar
+		int lenghtOfFile = conn.getContentLength();
+		Log.v(EslPodApplication.TAG, "file length : " + lenghtOfFile);
+		if (to.exists() && to.length() == lenghtOfFile) {
+			Log.i(EslPodApplication.TAG, to.getAbsolutePath() + " exists");
 		} else {
-			localFile.createNewFile();
-			IOUtils.copyLarge(openStream, new FileOutputStream(localFile));
-			Log.i(EslPodApplication.TAG, "Downloaded file " + localFile.toString() + " completed");
+			// downloading the file
+			InputStream input = new BufferedInputStream(from.openStream());
+			OutputStream output = new FileOutputStream(to.getAbsolutePath());
+			byte data[] = new byte[1024];
+			long total = 0;
+			int count;
+			while ((count = input.read(data)) != -1) {
+				total += count;
+				if (h != null) {
+					// publishing the progress....
+					int processing = (int) (total * 100 / lenghtOfFile);
+					h.sendEmptyMessage(processing);
+				}
+				output.write(data, 0, count);
+			}
+			output.flush();
+			output.close();
+			input.close();
+			Log.i(EslPodApplication.TAG, "Downloaded file " + to.toString() + " completed");
 		}
-		return localFile;
-	}
-
-	protected void updateDatabase(File localFile) {
-		ContentValues cv = new ContentValues();
-		cv.put(PodcastColumns.MEDIA_URL_LOCAL, localFile.getPath());
-		context.getContentResolver().update(podacstUri, cv, null, null);
 	}
 
 }

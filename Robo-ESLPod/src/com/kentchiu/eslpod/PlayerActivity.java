@@ -2,7 +2,10 @@ package com.kentchiu.eslpod;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -10,6 +13,7 @@ import org.apache.commons.lang.StringUtils;
 
 import android.app.ListActivity;
 import android.app.SearchManager;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.database.ContentObserver;
 import android.database.Cursor;
@@ -35,10 +39,10 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.kentchiu.eslpod.cmd.DownloadTask;
 import com.kentchiu.eslpod.cmd.RichScriptCommand;
 import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
-import com.kentchiu.eslpod.service.PodcastService;
 
 public class PlayerActivity extends ListActivity implements OnTouchListener, OnGestureListener, OnClickListener {
 
@@ -142,12 +146,16 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 		if (c.moveToFirst()) {
 			String script = c.getString(c.getColumnIndex(PodcastColumns.SCRIPT));
 			String richScript = c.getString(c.getColumnIndex(PodcastColumns.RICH_SCRIPT));
-			//String link = c.getString(c.getColumnIndex(PodcastColumns.LINK));
+			String link = c.getString(c.getColumnIndex(PodcastColumns.LINK));
 			if (StringUtils.isBlank(richScript)) {
-				Intent intent = new Intent(this, PodcastService.class);
-				intent.putExtra(PodcastService.COMMAND, PodcastService.COMMAND_RICH_SCRIPT);
-				intent.setData(uri);
-				startService(intent);
+				if (StringUtils.isBlank(richScript) && StringUtils.isNotBlank(link)) {
+					try {
+						new Thread(new RichScriptCommand(this, uri, new URL(link))).start();
+					} catch (MalformedURLException e) {
+						e.printStackTrace();
+					}
+				}
+
 			}
 			Iterable<String> lines = Splitter.on("\n").trimResults().split(script);
 			ScriptListAdapter result = new ScriptListAdapter(this, R.layout.script_list_item, R.id.scriptLine, ImmutableList.copyOf(lines));
@@ -183,24 +191,10 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 		player = new MediaPlayer();
 		try {
 			String url = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URL_LOCAL));
-			String path = "";
-			if (StringUtils.isNotBlank(url)) {
-				File file = new File(url);
-				if (file.exists()) {
-					path = file.getAbsolutePath();
-					player.setDataSource(new FileInputStream(file).getFD());
-					player.prepareAsync();
-				} else {
-					path = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URL));
-					player.setDataSource(path);
-					player.prepareAsync();
-					sendDownloadIntent(uri);
-				}
-			} else {
-				path = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URL));
-				player.setDataSource(path);
-				player.prepareAsync();
-				sendDownloadIntent(uri);
+			String path = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URL));
+			initPlayer(url, path);
+			if (StringUtils.isBlank(url) || !new File(url).exists()) {
+				downloadMedia(uri, path);
 			}
 			Log.d(EslPodApplication.TAG, "media url : " + path);
 		} catch (IllegalArgumentException e1) {
@@ -269,11 +263,39 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 		super.onDestroy();
 	}
 
-	private void sendDownloadIntent(Uri uri) {
-		Intent intent = new Intent(this, PodcastService.class);
-		intent.putExtra(PodcastService.COMMAND, PodcastService.COMMAND_DOWNLOAD_MEDIA);
-		intent.setData(uri);
-		startService(intent);
+	private void downloadMedia(final Uri podcastUri, String mediaUrl) {
+		try {
+			URL from = new URL(mediaUrl);
+			String name = StringUtils.substringAfterLast(from.getFile(), "/");
+			File to = new File(PlayerActivity.this.getCacheDir(), name);
+			new DownloadTask(to, null) {
+				@Override
+				protected void afterDownload() {
+					ContentValues cv = new ContentValues();
+					cv.put(PodcastColumns.MEDIA_URL_LOCAL, getDownloadTo().getPath());
+					PlayerActivity.this.getContentResolver().update(podcastUri, cv, null, null);
+				};
+			}.execute(mediaUrl);
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	private void initPlayer(String url, String path) throws IOException, FileNotFoundException {
+		if (StringUtils.isNotBlank(url)) {
+			File file = new File(url);
+			if (file.exists()) {
+				player.setDataSource(new FileInputStream(file).getFD());
+				player.prepareAsync();
+			} else {
+				player.setDataSource(path);
+				player.prepareAsync();
+			}
+		} else {
+			player.setDataSource(path);
+			player.prepareAsync();
+		}
 	}
 
 }
