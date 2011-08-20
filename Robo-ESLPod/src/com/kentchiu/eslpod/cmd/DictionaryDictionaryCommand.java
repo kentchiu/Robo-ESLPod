@@ -2,21 +2,20 @@ package com.kentchiu.eslpod.cmd;
 
 import java.io.IOException;
 
-import android.os.Handler;
+import android.content.Context;
 
 import com.kentchiu.eslpod.provider.Dictionary;
 
 public class DictionaryDictionaryCommand extends AbstractDictionaryCommand {
 
-	public DictionaryDictionaryCommand(Handler handler, String query) {
-		super(handler, query);
+	protected DictionaryDictionaryCommand(Context context, String query) {
+		super(context, query);
 	}
 
 	@Override
 	protected String getContent(String word) throws IOException {
 		String url = getQueryUrl(word);
-		String join = readAsOneLine(url);
-		return join;
+		return readAsOneLine(url, 0);
 	}
 
 	@Override

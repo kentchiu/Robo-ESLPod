@@ -25,6 +25,7 @@ import android.widget.ListView;
 import com.kentchiu.eslpod.cmd.DownloadTask;
 import com.kentchiu.eslpod.cmd.PodcastCommand;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
+import com.kentchiu.eslpod.service.FetchService;
 
 public class HomeActivity extends ListActivity {
 
@@ -38,10 +39,6 @@ public class HomeActivity extends ListActivity {
 		if (c.moveToFirst()) {
 			String urlStr = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URL));
 			downloadMedia(view, podcastUri, urlStr);
-			String richScript = c.getString(c.getColumnIndex(PodcastColumns.RICH_SCRIPT));
-			if (StringUtils.isEmpty(richScript)) {
-
-			}
 		}
 
 	}
@@ -62,7 +59,8 @@ public class HomeActivity extends ListActivity {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
+		Intent intent = new Intent(this, FetchService.class);
+		startService(intent);
 	}
 
 	@Override
@@ -83,7 +81,7 @@ public class HomeActivity extends ListActivity {
 		Cursor cursor = managedQuery(PodcastColumns.PODCAST_URI, null, null, null, null);
 		if (cursor.getCount() == 0) {
 			// parse exists podcast xml to db
-			inmportPodcasts();
+			importPodcasts();
 		}
 	}
 
@@ -126,7 +124,7 @@ public class HomeActivity extends ListActivity {
 		}
 	}
 
-	private void inmportPodcasts() {
+	private void importPodcasts() {
 		new AsyncTask<Void, Void, Void>() {
 			@Override
 			protected Void doInBackground(Void... params) {

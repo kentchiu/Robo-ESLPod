@@ -14,6 +14,7 @@ import org.apache.commons.lang.StringUtils;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
 
@@ -56,16 +57,16 @@ public class RichScriptCommand implements Runnable {
 	}
 
 	public static Iterable<String> headword(Context context, Iterable<String> filter) {
-		Set<String> menuStr = Sets.newLinkedHashSet();
+		Set<String> result = Sets.newLinkedHashSet();
 		for (String each : filter) {
 			Iterable<String> words2 = splitPhaseVerbToWords(each);
 			for (String word : words2) {
 				if (!isBaseWord(context, word)) {
-					menuStr.add(word);
+					result.add(word);
 				}
 			}
 		}
-		return menuStr;
+		return result;
 	}
 
 	protected static boolean isBaseWord(Context context, String word) {
@@ -96,8 +97,6 @@ public class RichScriptCommand implements Runnable {
 
 	private URL		scriptUrl;
 
-	private String	richScriptCache;
-
 	public RichScriptCommand(Context context, Uri podcastUri, URL scriptUrl) {
 		super();
 		setContext(context);
@@ -109,31 +108,42 @@ public class RichScriptCommand implements Runnable {
 		int index1 = Iterables.indexOf(lines, new ContainPredicate("Audio Index:"));
 		int index2 = Iterables.indexOf(lines, new ContainPredicate("Script by Dr. Lucy Tse"));
 		// start from line "Audio Index:" to line "Script by Dr. Lucy Tse"
-		List<String> subLines = lines.subList(index1, index2);
-		String wholeLine = Joiner.on("\n").join(subLines);
-		String lines3 = StringUtils.substringBetween(wholeLine, "<span class=\"pod_body\">", "</span>");
-		Iterable<String> result = Splitter.on("\n").trimResults().split(lines3.replaceAll("<br>", ""));
-		return ImmutableList.copyOf(result);
+		List<String> subLines;
+		try {
+			subLines = lines.subList(index1, index2);
+			String wholeLine = Joiner.on("\n").join(subLines);
+			String lines3 = StringUtils.substringBetween(wholeLine, "<span class=\"pod_body\">", "</span>");
+			Iterable<String> result = Splitter.on("\n").trimResults().split(lines3.replaceAll("<br>", ""));
+			return ImmutableList.copyOf(result);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ImmutableList.of();
+		}
 	}
 
 	public Context getContext() {
 		return context;
 	}
 
-	/**
-	 * Get RichScript which fetch from web.
-	 * This method only available after {@link #run()} method completed.
-	 * @return Rich Script in Html format.
-	 */
-	public String getRichScriptCache() {
-		return richScriptCache;
-	}
-
 	@Override
 	public void run() {
-		richScriptCache = fetchScript();
-		if (StringUtils.isNotBlank(richScriptCache)) {
-			updateDatabase(richScriptCache);
+		Cursor c = context.getContentResolver().query(PodcastColumns.PODCAST_URI, null, PodcastColumns.LINK + "=?", new String[] { scriptUrl.toString() }, null);
+		String richScript = "";
+		String link = "";
+		if (c.moveToFirst()) {
+			richScript = c.getString(c.getColumnIndex(PodcastColumns.RICH_SCRIPT));
+			link = c.getString(c.getColumnIndex(PodcastColumns.LINK));
+		}
+		if (StringUtils.isBlank(richScript)) {
+			if (StringUtils.isNotBlank(link)) {
+				String script = fetchScript();
+				if (StringUtils.isNotBlank(script)) {
+					updateDatabase(script);
+				}
+			} else {
+			}
+		} else {
+			Log.v(EslPodApplication.TAG, "rich script for url [" + scriptUrl + "] already exists");
 		}
 	}
 
@@ -142,6 +152,7 @@ public class RichScriptCommand implements Runnable {
 	}
 
 	protected String fetchScript() {
+
 		List<String> lines = ImmutableList.of();
 		Log.d(EslPodApplication.TAG, "Start fetching script form : " + scriptUrl);
 		try {
@@ -150,6 +161,7 @@ public class RichScriptCommand implements Runnable {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		Log.d(EslPodApplication.TAG, "End fetching script form : " + scriptUrl);
 		if (!lines.isEmpty()) {
 			Iterable<String> filter = Iterables.filter(extractScript(lines), new Predicate<String>() {
 				@Override

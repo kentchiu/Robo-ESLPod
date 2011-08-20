@@ -2,18 +2,18 @@ package com.kentchiu.eslpod.cmd;
 
 import java.io.IOException;
 
-import android.os.Handler;
+import android.content.Context;
 
 import com.kentchiu.eslpod.provider.Dictionary;
 
 public class DreyeDictionaryCommand extends AbstractDictionaryCommand {
 
-	public DreyeDictionaryCommand(Handler handler, String query) {
-		super(handler, query);
+	protected DreyeDictionaryCommand(Context context, String query) {
+		super(context, query);
 	}
 
 	@Override
-	public String toHtml(String input) {
+	public String render(String input) {
 		System.out.println(input);
 		String base = "http://www.dreye.com/mws";
 		input = input.replaceAll("images/", base + "/images/");
@@ -25,7 +25,7 @@ public class DreyeDictionaryCommand extends AbstractDictionaryCommand {
 	@Override
 	protected String getContent(String word) throws IOException {
 		String url = getQueryUrl(word);
-		String join = readAsOneLine(url);
+		String join = readAsOneLine(url, 0);
 		return join;
 	}
 

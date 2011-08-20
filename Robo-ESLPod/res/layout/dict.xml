@@ -4,23 +4,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
-
-    <LinearLayout
-        android:id="@+id/title_bar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
-        <EditText android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_weight="0.87" android:id="@+id/titleTxt">
-        </EditText>
-        <Button android:id="@+id/go" android:layout_height="wrap_content" android:layout_width="wrap_content" android:text="Go" android:onClick="onClick"></Button>
-
-    </LinearLayout>
-
     <WebView
         android:id="@+id/webview"
         android:layout_width="match_parent"
         android:layout_height="0dip"
         android:layout_weight="1" />
-
 </LinearLayout>

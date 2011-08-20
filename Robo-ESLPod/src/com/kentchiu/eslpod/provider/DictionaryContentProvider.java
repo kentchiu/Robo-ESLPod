@@ -1,7 +1,5 @@
 package com.kentchiu.eslpod.provider;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -19,10 +17,7 @@ import android.os.Message;
 import android.provider.BaseColumns;
 import android.util.Log;
 
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
 import com.kentchiu.eslpod.EslPodApplication;
-import com.kentchiu.eslpod.cmd.AbstractDictionaryCommand;
 import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
 
 public class DictionaryContentProvider extends ContentProvider {
@@ -92,17 +87,20 @@ public class DictionaryContentProvider extends ContentProvider {
 		switch (uriMatcher.match(uri)) {
 		case WORDS:
 			Cursor c = db.query(DatabaseHelper.DICTIONARY_TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
+			/*
 			Set<Integer> dictIds = Sets.newHashSet();
 			while (c.moveToNext()) {
 				dictIds.add(c.getInt(c.getColumnIndex(DictionaryColumns.DICTIONARY_ID)));
 			}
 			HashSet<Integer> allDictIds = listAllDictIds();
 			Iterables.removeAll(allDictIds, dictIds);
-			String query = selectionArgs[0];
+			String query = StringUtils.trim(selectionArgs[0]);
+			Log.v(EslPodApplication.TAG, "There are "+ allDictIds.size() +  " dictionary need to be update for word [" + query + "]");
 			for (Integer each : allDictIds) {
 				es.execute(AbstractDictionaryCommand.newDictionaryCommand(handler, query, each));
 			}
 			c.requery();
+			*/
 			return c;
 		case WORD:
 			long id;
@@ -117,14 +115,6 @@ public class DictionaryContentProvider extends ContentProvider {
 	@Override
 	public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
 		return 0;
-	}
-
-	private HashSet<Integer> listAllDictIds() {
-		HashSet<Integer> allDictIds = Sets.newHashSet();
-		allDictIds.add(Dictionary.DICTIONARY_DREYE_DICTIONARY);
-		allDictIds.add(Dictionary.DICTIONARY_DICTIONARY_DICTIONARY);
-		allDictIds.add(Dictionary.DICTIONARY_WIKITIONARY);
-		return allDictIds;
 	}
 
 }

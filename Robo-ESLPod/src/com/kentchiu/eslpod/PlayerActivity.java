@@ -87,16 +87,7 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 		menu.setHeaderTitle("字典搜尋");
 		final String item = (String) adapter.getItem(info.position);
 		Iterable<String> words = RichScriptCommand.extractWord(adapter.getRichScript());
-
-		Iterable<String> filter = Iterables.filter(words, new Predicate<String>() {
-
-			@Override
-			public boolean apply(String input) {
-				Matcher matcher = Pattern.compile("\\b" + input + "\\b").matcher(item);
-				return matcher.find();
-			}
-		});
-
+		Iterable<String> filter = listWordsMatchToMenuItem(words, item);
 		int i = 1;
 		for (String each : RichScriptCommand.headword(PlayerActivity.this, filter)) {
 			menu.add(0, i++, 0, each);
@@ -148,14 +139,11 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 			String richScript = c.getString(c.getColumnIndex(PodcastColumns.RICH_SCRIPT));
 			String link = c.getString(c.getColumnIndex(PodcastColumns.LINK));
 			if (StringUtils.isBlank(richScript)) {
-				if (StringUtils.isBlank(richScript) && StringUtils.isNotBlank(link)) {
-					try {
-						new Thread(new RichScriptCommand(this, uri, new URL(link))).start();
-					} catch (MalformedURLException e) {
-						e.printStackTrace();
-					}
+				try {
+					new Thread(new RichScriptCommand(this, uri, new URL(link))).start();
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
 				}
-
 			}
 			Iterable<String> lines = Splitter.on("\n").trimResults().split(script);
 			ScriptListAdapter result = new ScriptListAdapter(this, R.layout.script_list_item, R.id.scriptLine, ImmutableList.copyOf(lines));
@@ -296,6 +284,18 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 			player.setDataSource(path);
 			player.prepareAsync();
 		}
+	}
+
+	private Iterable<String> listWordsMatchToMenuItem(Iterable<String> words, final String item) {
+		Iterable<String> filter = Iterables.filter(words, new Predicate<String>() {
+
+			@Override
+			public boolean apply(String input) {
+				Matcher matcher = Pattern.compile("\\b" + input + "\\b").matcher(item);
+				return matcher.find();
+			}
+		});
+		return filter;
 	}
 
 }

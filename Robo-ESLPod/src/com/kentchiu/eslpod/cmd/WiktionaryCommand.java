@@ -11,7 +11,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.os.Handler;
+import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -115,19 +115,29 @@ public class WiktionaryCommand extends AbstractDictionaryCommand {
 
 	}
 
-	protected WiktionaryCommand(Handler handler, String query) {
-		super(handler, query);
+	protected WiktionaryCommand(Context context, String query) {
+		super(context, query);
 	}
 
 	@Override
 	public String getContent(String word) throws IOException {
 		String url = getQueryUrl(word);
-		String join = readAsOneLine(url);
+		String join = readAsOneLine(url, 0);
 		return extractContent(join);
 	}
 
 	@Override
-	public String toHtml(String input) {
+	protected int getDictionaryId() {
+		return Dictionary.DICTIONARY_WIKITIONARY;
+	}
+
+	@Override
+	protected String getQueryUrl(String word) {
+		return "http://en.wiktionary.org/w/api.php?action=query&prop=revisions&rvprop=content&format=json&rvexpandtemplates=true&alllinks=true&titles=" + word;
+	}
+
+	@Override
+	protected String render(String input) {
 		if (input == null) {
 			return null;
 		}
@@ -169,16 +179,6 @@ public class WiktionaryCommand extends AbstractDictionaryCommand {
 		} else {
 			return null;
 		}
-	}
-
-	@Override
-	protected int getDictionaryId() {
-		return Dictionary.DICTIONARY_WIKITIONARY;
-	}
-
-	@Override
-	protected String getQueryUrl(String word) {
-		return "http://en.wiktionary.org/w/api.php?action=query&prop=revisions&rvprop=content&format=json&rvexpandtemplates=true&alllinks=true&titles=" + word;
 	}
 
 	private synchronized String extractContent(String content) {

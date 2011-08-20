@@ -3,75 +3,107 @@ package com.kentchiu.eslpod.cmd;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.BasicResponseHandler;
 
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
 import android.util.Log;
 
 import com.google.common.base.Joiner;
-import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.provider.Dictionary;
 import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
 
 public abstract class AbstractDictionaryCommand implements Runnable {
 
-	// http://m.dictionary.com/?q=book&submit-result-SEARCHD=Search
 	// http://i.word.com/
 
-	public static AbstractDictionaryCommand newDictionaryCommand(Handler handler, String query, int dictionaryId) {
+	public static AbstractDictionaryCommand newDictionaryCommand(Context context, String query, int dictionaryId) {
 		switch (dictionaryId) {
 		case Dictionary.DICTIONARY_DREYE_DICTIONARY:
-			return new DreyeDictionaryCommand(handler, query);
+			return new DreyeDictionaryCommand(context, query);
 		case Dictionary.DICTIONARY_DICTIONARY_DICTIONARY:
-			return new DictionaryDictionaryCommand(handler, query);
+			return new DictionaryDictionaryCommand(context, query);
 		case Dictionary.DICTIONARY_WIKITIONARY:
-			return new WiktionaryCommand(handler, query);
+			return new WiktionaryCommand(context, query);
 		default:
 			throw new IllegalArgumentException("Unkonw dictionary id : " + dictionaryId);
 		}
 	}
 
-	private Handler	handler;
+	public static List<AbstractDictionaryCommand> newDictionaryCommands(Context context, String w) {
+		Cursor c2 = context.getContentResolver().query(DictionaryColumns.DICTIONARY_URI, null, DictionaryColumns.WORD + "=?", new String[] { w }, null);
+		Set<Integer> dictIds = Sets.newHashSet();
+		while (c2.moveToNext()) {
+			dictIds.add(c2.getInt(c2.getColumnIndex(DictionaryColumns.DICTIONARY_ID)));
+		}
+		HashSet<Integer> allDictIds = Sets.newHashSet();
+		allDictIds.add(Dictionary.DICTIONARY_DREYE_DICTIONARY);
+		allDictIds.add(Dictionary.DICTIONARY_DICTIONARY_DICTIONARY);
+		allDictIds.add(Dictionary.DICTIONARY_WIKITIONARY);
+		Iterables.removeAll(allDictIds, dictIds);
+		String query = StringUtils.trim(w);
+		Log.v(EslPodApplication.TAG, "There are " + allDictIds.size() + " dictionary need to be update for word [" + query + "]");
+		List<AbstractDictionaryCommand> cmds = Lists.newArrayList();
+		for (Integer each : allDictIds) {
+			AbstractDictionaryCommand cmd = newDictionaryCommand(context, query, each);
+			cmds.add(cmd);
+		}
+		return cmds;
+	}
+
+	public static String toHtml(String content, int dictId) {
+		return newDictionaryCommand(null, content, dictId).render(content);
+	}
+
+	private Context	context;
+
 	private String	query;
 
-	protected AbstractDictionaryCommand(Handler handler, String query) {
+	protected AbstractDictionaryCommand(Context context, String query) {
 		super();
-		this.handler = handler;
+		this.context = context;
 		this.query = query;
 	}
 
 	@Override
 	public void run() {
+		String url = getQueryUrl(query);
+		String content;
 		try {
-			String content;
-			Log.v(EslPodApplication.TAG, "Start querying  word " + query + " from dictionary " + getDictionaryId());
+			Log.d(EslPodApplication.TAG, "Start fetch  word [" + query + "] from dictionary " + getDictionaryId());
 			if (StringUtils.isBlank(query)) {
 				content = "";
 			} else {
 				content = getContent(query);
 			}
-			Log.v(EslPodApplication.TAG, "End queried  word " + query + " from dictionary " + getDictionaryId());
-			Message msg = new Message();
-			Bundle b = new Bundle();
-			b.putInt(DictionaryColumns.DICTIONARY_ID, getDictionaryId());
-			b.putString(DictionaryColumns.WORD, query);
-			b.putString(DictionaryColumns.CONTENT, content);
-			msg.setData(b);
-			Preconditions.checkNotNull(handler);
-			handler.sendMessage(msg);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
 
-	public String toHtml(String input) {
-		return input;
+			Log.d(EslPodApplication.TAG, "End fetch  word [" + query + "] from dictionary " + getDictionaryId());
+			if (StringUtils.isNotBlank(content)) {
+				ContentValues cv = new ContentValues();
+				cv.put(DictionaryColumns.DICTIONARY_ID, getDictionaryId());
+				cv.put(DictionaryColumns.WORD, query);
+				cv.put(DictionaryColumns.CONTENT, content);
+				context.getContentResolver().insert(DictionaryColumns.DICTIONARY_URI, cv);
+				Log.d(EslPodApplication.TAG, "Save word [" + query + "] to dictionary " + getDictionaryId());
+			} else {
+				Log.w(EslPodApplication.TAG, "fetch word [" + query + "] fail form dictionary " + getDictionaryId() + ", url:" + url);
+			}
+		} catch (Exception e) {
+			Log.w(EslPodApplication.TAG, "fetch word [" + query + "] fail form dictionary " + getDictionaryId() + ", url:" + url, e);
+		}
 	}
 
 	protected abstract String getContent(String word) throws IOException;
@@ -80,16 +112,30 @@ public abstract class AbstractDictionaryCommand implements Runnable {
 
 	protected abstract String getQueryUrl(String word);
 
-	protected String readAsOneLine(String urlStr) throws MalformedURLException, IOException {
-		URL url = new URL(urlStr);
-		List<String> lines = IOUtils.readLines(url.openStream());
-		return Joiner.on("").join(lines);
+	protected String readAsOneLine(String urlStr, int retried) {
+		int retry = 3;
+		HttpClient httpClient = CustomHttpClient.getHttpClient();
+		String url = StringUtils.trim(urlStr).replaceAll(",", "").replaceAll(" ", "%20");
+		try {
+			HttpGet request = new HttpGet(url);
+			String page = httpClient.execute(request, new UTFResponseHandler());
+			return page;
+		} catch (IOException e) {
+			e.printStackTrace();
+			// 如果發生SocketTimeout時，可以這樣進行retry
+			if (retried < retry) {
+				Log.w(EslPodApplication.TAG, "Retry to fetch from " + url);
+				return readAsOneLine(url, retried + 1);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "";
+		}
+		return "";
 	}
 
-	protected String readAsOneLine(String urlStr, String encoding) throws MalformedURLException, IOException {
-		URL url = new URL(urlStr);
-		List<String> lines = IOUtils.readLines(url.openStream(), encoding);
-		return Joiner.on("").join(lines);
-	}
 
+	protected String render(String input) {
+		return input;
+	}
 }
