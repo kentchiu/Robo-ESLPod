@@ -25,7 +25,7 @@ import android.widget.ListView;
 import com.kentchiu.eslpod.cmd.DownloadTask;
 import com.kentchiu.eslpod.cmd.PodcastCommand;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
-import com.kentchiu.eslpod.service.FetchService;
+import com.kentchiu.eslpod.service.RichScriptFetchService;
 
 public class HomeActivity extends ListActivity {
 
@@ -34,13 +34,11 @@ public class HomeActivity extends ListActivity {
 	public void downloadClickHandler(View view) {
 		Integer id = (Integer) view.getTag();
 		final Uri podcastUri = ContentUris.withAppendedId(PodcastColumns.PODCAST_URI, id);
-
 		Cursor c = HomeActivity.this.getContentResolver().query(podcastUri, null, null, null, null);
 		if (c.moveToFirst()) {
 			String urlStr = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URL));
 			downloadMedia(view, podcastUri, urlStr);
 		}
-
 	}
 
 	/** Called when the activity is first created. */
@@ -59,7 +57,7 @@ public class HomeActivity extends ListActivity {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		Intent intent = new Intent(this, FetchService.class);
+		Intent intent = new Intent(this, RichScriptFetchService.class);
 		startService(intent);
 	}
 

@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
@@ -95,9 +94,9 @@ public class RichScriptCommand implements Runnable {
 
 	private Uri		podcastUri;
 
-	private URL		scriptUrl;
+	private String	scriptUrl;
 
-	public RichScriptCommand(Context context, Uri podcastUri, URL scriptUrl) {
+	public RichScriptCommand(Context context, Uri podcastUri, String scriptUrl) {
 		super();
 		setContext(context);
 		this.podcastUri = podcastUri;
@@ -127,6 +126,7 @@ public class RichScriptCommand implements Runnable {
 
 	@Override
 	public void run() {
+		fetchScript(); // TODO remove me
 		Cursor c = context.getContentResolver().query(PodcastColumns.PODCAST_URI, null, PodcastColumns.LINK + "=?", new String[] { scriptUrl.toString() }, null);
 		String richScript = "";
 		String link = "";
@@ -152,16 +152,31 @@ public class RichScriptCommand implements Runnable {
 	}
 
 	protected String fetchScript() {
-
 		List<String> lines = ImmutableList.of();
-		Log.d(EslPodApplication.TAG, "Start fetching script form : " + scriptUrl);
+
 		try {
-			InputStream is = scriptUrl.openStream();
-			lines = IOUtils.readLines(is, "iso-8859-1");
+			Log.d(EslPodApplication.TAG, "Start fetching script form : " + scriptUrl);
+			// ===== The ascii 146 issues ====
+			// Ascii 146 (or 0x92) is render as ’ (Right single quotation mark) ref : http://www.ascii-code.com/
+			// But ascii 146 is not exists in any encoding which I can found
+			// iso-8859-1 and utf-8 not includes ascii 146, but it can be render by any browser and render as ’ (Right single quotation mark)
+			// I have no idea which encoding can be used to render 146 to right single quotation mark
+			// So, I hacking it, if I got asc146, I will force it to ’
+			InputStream is = new URL(scriptUrl).openStream();
+			int c;
+			StringBuilder sb = new StringBuilder();
+			while ((c = is.read()) != -1) {
+				if (c == 146) {
+					sb.append('’');
+				} else {
+					sb.append((char) c);
+				}
+			}
+			Log.d(EslPodApplication.TAG, "End fetching script form : " + scriptUrl);
+			lines = ImmutableList.copyOf(Splitter.on("\n").split(sb.toString()));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		Log.d(EslPodApplication.TAG, "End fetching script form : " + scriptUrl);
 		if (!lines.isEmpty()) {
 			Iterable<String> filter = Iterables.filter(extractScript(lines), new Predicate<String>() {
 				@Override
@@ -174,6 +189,7 @@ public class RichScriptCommand implements Runnable {
 		} else {
 			return "";
 		}
+
 	}
 
 	protected void updateDatabase(String richScript) {

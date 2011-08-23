@@ -27,7 +27,9 @@
 				<data android:mimeType="vnd.android.cursor.dir/vnd.eslpod.word" />
 			</intent-filter>
 		</activity>
-		<service android:name=".service.FetchService">
+		<service android:name=".service.RichScriptFetchService">
+		</service>
+		<service android:name=".service.WordFetchService">
 		</service>
 		<provider android:name=".provider.DictionaryContentProvider" android:authorities="com.kentchiu.eslpod.provider.Dictionary" />
 		<provider android:name=".provider.PodcastContentProvider" android:authorities="com.kentchiu.eslpod.provider.Podcast" />

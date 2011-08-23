@@ -1,24 +1,19 @@
 package com.kentchiu.eslpod.cmd;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.BasicResponseHandler;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.util.Log;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -118,7 +113,7 @@ public abstract class AbstractDictionaryCommand implements Runnable {
 		String url = StringUtils.trim(urlStr).replaceAll(",", "").replaceAll(" ", "%20");
 		try {
 			HttpGet request = new HttpGet(url);
-			String page = httpClient.execute(request, new UTFResponseHandler());
+			String page = httpClient.execute(request, new UnicodeResponseHandler());
 			return page;
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -133,7 +128,6 @@ public abstract class AbstractDictionaryCommand implements Runnable {
 		}
 		return "";
 	}
-
 
 	protected String render(String input) {
 		return input;

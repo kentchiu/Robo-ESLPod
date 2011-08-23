@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
@@ -59,6 +60,14 @@ public class RichScriptCommandTest extends AndroidTestCase {
 		assertThat(words, not(hasItem("bar")));
 	}
 
+	public void testFetchScriptWithNonAsciiCode() throws Exception {
+		String scriptUrl = "http://www.eslpod.com/website/show_podcast.php?issue_id=10718756";
+		RichScriptCommand cmd = new RichScriptCommand(mContext, null, scriptUrl);
+		String script = cmd.fetchScript();
+		assertThat(script, containsString("<b>There’s no way around it</b>"));
+
+	}
+
 	public void testGetScript() throws Exception {
 		String script = command.fetchScript();
 		assertThat(script, startsWith("Cherise:  <b>Rise and shine</b>!"));
@@ -82,7 +91,7 @@ public class RichScriptCommandTest extends AndroidTestCase {
 		database = databaseHelper.getWritableDatabase();
 		database.execSQL("delete from podcast");
 		database.execSQL("insert into podcast(_id, link) values(1, '" + resource.toString() + "')");
-		command = new RichScriptCommand(mContext, ContentUris.withAppendedId(PodcastColumns.PODCAST_URI, 1), resource);
+		command = new RichScriptCommand(mContext, ContentUris.withAppendedId(PodcastColumns.PODCAST_URI, 1), resource.toString());
 	}
 
 }

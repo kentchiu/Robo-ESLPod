@@ -23,11 +23,9 @@ public class CustomHttpClient {
 		if (customHttpClient == null) {
 			HttpParams params = new BasicHttpParams();
 			HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
-			//HttpProtocolParams.setContentCharset(params, HTTP.DEFAULT_CONTENT_CHARSET);
 			HttpProtocolParams.setContentCharset(params, HTTP.DEFAULT_CONTENT_CHARSET);
 			HttpProtocolParams.setUseExpectContinue(params, true);
 			HttpProtocolParams.setUserAgent(params, "Mozilla/5.0 (Linux; U; Android 2.2.1; en-us; Nexus One Build/FRG83) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1");
-			params.setParameter("charset", "UTF-8"); // 要設成utf-8，否則中文的utf-8網頁會出錯
 			ConnManagerParams.setTimeout(params, 5000);
 
 			HttpConnectionParams.setConnectionTimeout(params, 20000);
