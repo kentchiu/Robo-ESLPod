@@ -17,6 +17,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
 
+import com.google.common.base.CharMatcher;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
@@ -60,7 +61,7 @@ public class RichScriptCommand implements Runnable {
 		for (String each : filter) {
 			Iterable<String> words2 = splitPhaseVerbToWords(each);
 			for (String word : words2) {
-				if (!isBaseWord(context, word)) {
+				if (!isBaseWord(context, word) && !StringUtils.containsAny(word, "’")) {
 					result.add(word);
 				}
 			}
@@ -86,7 +87,7 @@ public class RichScriptCommand implements Runnable {
 	}
 
 	protected static Iterable<String> splitPhaseVerbToWords(String words) {
-		Iterable<String> results = Splitter.on(' ').trimResults().split(words);
+		Iterable<String> results = Splitter.on(' ').trimResults().trimResults(CharMatcher.is(',')).split(words);
 		return results;
 	}
 

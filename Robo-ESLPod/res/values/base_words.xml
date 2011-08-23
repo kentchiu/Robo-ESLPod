@@ -15,13 +15,10 @@
 		<item>been</item>
 		<item>but</item>
 		<item>can</item>
-		<item>can\'t</item>
 		<item>come</item>
 		<item>could</item>
 		<item>did</item>
-		<item>didn\'t</item>
 		<item>do</item>
-		<item>don\'t</item>
 		<item>for</item>
 		<item>from</item>
 		<item>get</item>
@@ -35,19 +32,15 @@
 		<item>he</item>
 		<item>her</item>
 		<item>here</item>
-		<item>he\'s</item>
 		<item>hey</item>
 		<item>him</item>
 		<item>his</item>
 		<item>how</item>
 		<item>I</item>
 		<item>if</item>
-		<item>I\'ll</item>
-		<item>I\'m</item>
 		<item>in</item>
 		<item>is</item>
 		<item>it</item>
-		<item>it\'s</item>
 		<item>just</item>
 		<item>know</item>
 		<item>like</item>
@@ -76,7 +69,6 @@
 		<item>something</item>
 		<item>tell</item>
 		<item>that</item>
-		<item>that\'s</item>
 		<item>the</item>
 		<item>then</item>
 		<item>there</item>
@@ -104,7 +96,6 @@
 		<item>yes</item>
 		<item>you</item>
 		<item>your</item>
-		<item>you\'re</item>
 	</string-array>
 </resources>
 
