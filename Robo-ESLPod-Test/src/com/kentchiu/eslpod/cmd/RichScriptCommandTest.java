@@ -20,6 +20,7 @@ import android.content.ContentUris;
 import android.database.sqlite.SQLiteDatabase;
 import android.test.AndroidTestCase;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.kentchiu.eslpod.provider.DatabaseHelper;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
@@ -30,13 +31,14 @@ public class RichScriptCommandTest extends AndroidTestCase {
 	private SQLiteDatabase		database;
 
 	public void isBaseWord() throws Exception {
-		assertTrue(RichScriptCommand.isBaseWord(mContext, "I"));
-		assertTrue(RichScriptCommand.isBaseWord(mContext, "You"));
-		assertTrue(RichScriptCommand.isBaseWord(mContext, "you"));
-		assertTrue(RichScriptCommand.isBaseWord(mContext, "on"));
-		assertTrue(RichScriptCommand.isBaseWord(mContext, "On"));
-		assertFalse(RichScriptCommand.isBaseWord(mContext, "foo"));
-		assertFalse(RichScriptCommand.isBaseWord(mContext, "Foo"));
+		ImmutableSet<String> baseWords = ImmutableSet.of("I", "you", "me", "of", "on", "of", "off", "it", "a", "an");
+		assertTrue(RichScriptCommand.isBaseWord(baseWords, "I"));
+		assertTrue(RichScriptCommand.isBaseWord(baseWords, "You"));
+		assertTrue(RichScriptCommand.isBaseWord(baseWords, "you"));
+		assertTrue(RichScriptCommand.isBaseWord(baseWords, "on"));
+		assertTrue(RichScriptCommand.isBaseWord(baseWords, "On"));
+		assertFalse(RichScriptCommand.isBaseWord(baseWords, "foo"));
+		assertFalse(RichScriptCommand.isBaseWord(baseWords, "Foo"));
 	}
 
 	public void testExtractScript() throws Exception {
@@ -63,13 +65,13 @@ public class RichScriptCommandTest extends AndroidTestCase {
 	public void testFetchScriptWithNonAsciiCode() throws Exception {
 		String scriptUrl = "http://www.eslpod.com/website/show_podcast.php?issue_id=10718756";
 		RichScriptCommand cmd = new RichScriptCommand(mContext, null, scriptUrl);
-		String script = cmd.fetchScript();
+		String script = cmd.fetchScript("test");
 		assertThat(script, containsString("<b>There’s no way around it</b>"));
 
 	}
 
 	public void testGetScript() throws Exception {
-		String script = command.fetchScript();
+		String script = command.fetchScript("test");
 		assertThat(script, startsWith("Cherise:  <b>Rise and shine</b>!"));
 	}
 

@@ -23,28 +23,22 @@ import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
 public class WordFetchService extends IntentService {
 
-	private ExecutorService	es2;
+	private static ExecutorService	es2;
 
-	private static int		count;
+	private int		count;
 
 	public WordFetchService() {
 		super(WordFetchService.class.getName());
 	}
 
-	@Override
-	public void onCreate() {
-		super.onCreate();
+	static {
 		ThreadFactoryBuilder builder = new ThreadFactoryBuilder();
 		builder.setPriority(Thread.MIN_PRIORITY);
 		builder.setDaemon(true);
 		es2 = Executors.newFixedThreadPool(3, builder.build());
 	}
 
-	@Override
-	public void onDestroy() {
-		super.onDestroy();
-		es2.shutdown();
-	}
+
 
 	@Override
 	protected void onHandleIntent(Intent intent) {
@@ -75,6 +69,7 @@ public class WordFetchService extends IntentService {
 			});
 		}
 	}
+
 
 	private List<AbstractDictionaryCommand> prepareCommands(Iterable<String> words) {
 		List<AbstractDictionaryCommand> results = Lists.newArrayList();

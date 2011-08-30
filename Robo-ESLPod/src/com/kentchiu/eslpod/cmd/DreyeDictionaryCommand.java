@@ -14,7 +14,6 @@ public class DreyeDictionaryCommand extends AbstractDictionaryCommand {
 
 	@Override
 	public String render(String input) {
-		System.out.println(input);
 		String base = "http://www.dreye.com/mws";
 		input = input.replaceAll("images/", base + "/images/");
 		input = input.replaceAll("\\<form.*?form\\>", "");

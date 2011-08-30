@@ -12,7 +12,7 @@ import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 	public static String	DATABASE_NAME			= "elspod.db";
-	public static int		DATABASE_VERSION		= 1;
+	public static int		DATABASE_VERSION		= 2;
 	public static String	PODCAST_TABLE_NAME		= "podcast";
 	public static String	DICTIONARY_TABLE_NAME	= "dictionary";
 

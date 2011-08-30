@@ -59,18 +59,26 @@ public class RichScriptCommand implements Runnable {
 	public static Iterable<String> headword(Context context, Iterable<String> filter) {
 		Set<String> result = Sets.newLinkedHashSet();
 		for (String each : filter) {
-			Iterable<String> words2 = splitPhaseVerbToWords(each);
-			for (String word : words2) {
-				if (!isBaseWord(context, word) && !StringUtils.containsAny(word, "’")) {
-					result.add(word);
+			for (String word : splitPhaseVerbToWords(each)) {
+				String w = word.replace('?', ' ').replace('.', ' ').replace(',', ' ').trim();
+				if (!isBaseWord(getBaseWords(context), w) && !StringUtils.containsAny(w, "’")) {
+					result.add(w);
 				}
 			}
 		}
 		return result;
 	}
 
-	protected static boolean isBaseWord(Context context, String word) {
-		//ImmutableList<String> baseWords = ImmutableList.of("I", "you", "me", "of", "on", "of", "off", "it", "a", "an");
+	protected static boolean isBaseWord(Set<String> baseWords, String word) {
+		for (String each : baseWords) {
+			if (StringUtils.equalsIgnoreCase(each, word)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static HashSet<String> getBaseWords(Context context) {
 		Resources res = context.getResources();
 		String[] baseWords = res.getStringArray(R.array.base_words);
 		// Using set to remove duplication
@@ -78,12 +86,7 @@ public class RichScriptCommand implements Runnable {
 		for (String each : baseWords) {
 			baseWordSet.add(each.toLowerCase());
 		}
-		for (String each : baseWordSet) {
-			if (StringUtils.equalsIgnoreCase(each, word)) {
-				return true;
-			}
-		}
-		return false;
+		return baseWordSet;
 	}
 
 	protected static Iterable<String> splitPhaseVerbToWords(String words) {
@@ -92,9 +95,7 @@ public class RichScriptCommand implements Runnable {
 	}
 
 	private Context	context;
-
 	private Uri		podcastUri;
-
 	private String	scriptUrl;
 
 	public RichScriptCommand(Context context, Uri podcastUri, String scriptUrl) {
@@ -127,17 +128,18 @@ public class RichScriptCommand implements Runnable {
 
 	@Override
 	public void run() {
-		fetchScript(); // TODO remove me
 		Cursor c = context.getContentResolver().query(PodcastColumns.PODCAST_URI, null, PodcastColumns.LINK + "=?", new String[] { scriptUrl.toString() }, null);
 		String richScript = "";
 		String link = "";
+		String title = "";
 		if (c.moveToFirst()) {
 			richScript = c.getString(c.getColumnIndex(PodcastColumns.RICH_SCRIPT));
 			link = c.getString(c.getColumnIndex(PodcastColumns.LINK));
+			title = c.getString(c.getColumnIndex(PodcastColumns.TITLE));
 		}
 		if (StringUtils.isBlank(richScript)) {
 			if (StringUtils.isNotBlank(link)) {
-				String script = fetchScript();
+				String script = fetchScript(title);
 				if (StringUtils.isNotBlank(script)) {
 					updateDatabase(script);
 				}
@@ -152,11 +154,11 @@ public class RichScriptCommand implements Runnable {
 		this.context = context;
 	}
 
-	protected String fetchScript() {
+	protected String fetchScript(String title) {
 		List<String> lines = ImmutableList.of();
 
 		try {
-			Log.d(EslPodApplication.TAG, "Start fetching script form : " + scriptUrl);
+			Log.d(EslPodApplication.TAG, "Start fetching script of " + title +  " form : " + scriptUrl);
 			// ===== The ascii 146 issues ====
 			// Ascii 146 (or 0x92) is render as ’ (Right single quotation mark) ref : http://www.ascii-code.com/
 			// But ascii 146 is not exists in any encoding which I can found
@@ -173,7 +175,7 @@ public class RichScriptCommand implements Runnable {
 					sb.append((char) c);
 				}
 			}
-			Log.d(EslPodApplication.TAG, "End fetching script form : " + scriptUrl);
+			Log.d(EslPodApplication.TAG, "End fetching script of " + title +  " form : " + scriptUrl);
 			lines = ImmutableList.copyOf(Splitter.on("\n").split(sb.toString()));
 		} catch (IOException e) {
 			e.printStackTrace();
