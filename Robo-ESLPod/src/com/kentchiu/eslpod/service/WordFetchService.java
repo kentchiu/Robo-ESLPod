@@ -1,8 +1,12 @@
 package com.kentchiu.eslpod.service;
 
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -10,7 +14,9 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Handler;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
@@ -23,22 +29,39 @@ import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
 public class WordFetchService extends IntentService {
 
-	private static ExecutorService	es2;
+	private static final int					MAX_TASK	= 500;
+	private final Handler						handler		= new Handler();
+	private static ExecutorService				executorService;
+	private static ArrayBlockingQueue<Runnable>	commandQueue;
 
-	private int		count;
-
-	public WordFetchService() {
-		super(WordFetchService.class.getName());
-	}
+	//private int		count;
 
 	static {
 		ThreadFactoryBuilder builder = new ThreadFactoryBuilder();
 		builder.setPriority(Thread.MIN_PRIORITY);
 		builder.setDaemon(true);
-		es2 = Executors.newFixedThreadPool(3, builder.build());
+
+		commandQueue = new ArrayBlockingQueue<Runnable>(MAX_TASK);
+		executorService = new ThreadPoolExecutor(3, // core size
+				3, // max size
+				10 * 60, // idle timeout
+				TimeUnit.SECONDS, commandQueue, builder.build(), new AbortPolicy()); // queue with a size
+
 	}
 
+	public WordFetchService() {
+		super(WordFetchService.class.getName());
+	}
 
+	void showMessage(final String text, final int lengthLong) {
+		handler.post(new Runnable() {
+
+			@Override
+			public void run() {
+				Toast.makeText(WordFetchService.this, text, lengthLong).show();
+			}
+		});
+	}
 
 	@Override
 	protected void onHandleIntent(Intent intent) {
@@ -56,20 +79,31 @@ public class WordFetchService extends IntentService {
 	}
 
 	private void executeWordCommands(final List<AbstractDictionaryCommand> fetchCmds) {
-		final int total = Iterables.size(fetchCmds);
-		Log.i(EslPodApplication.TAG, "End of fetch command collecting, there are new command need " + total + " be executed");
-		count = 1;
-		for (final AbstractDictionaryCommand each : fetchCmds) {
-			es2.execute(new Runnable() {
-				@Override
-				public void run() {
-					each.run();
-					Log.i(EslPodApplication.TAG, "Execute command " + count++ + " / " + total);
-				}
-			});
+		final int addtion = Iterables.size(fetchCmds);
+		final int total = commandQueue.size() + addtion;
+		Log.i(EslPodApplication.TAG, "Queue size " + total + "(+" + addtion + ")");
+		String msg = "There are " + total + "(+" + addtion + ")" + " entries be downloaded";
+		if (total != 0) {
+			showMessage(msg, Toast.LENGTH_SHORT);
+		}
+		try {
+			for (final AbstractDictionaryCommand each : fetchCmds) {
+				executorService.execute(new Runnable() {
+					@Override
+					public void run() {
+						each.run();
+						Log.v(EslPodApplication.TAG, "queue size : " + commandQueue.size());
+						if (commandQueue.isEmpty()) {
+							showMessage("Dictionary entry download completed.", Toast.LENGTH_LONG);
+						}
+					}
+				});
+			}
+		} catch (RejectedExecutionException e) {
+			final String text = "Only " + MAX_TASK + " tasks allow, tyr it later";
+			showMessage(text, Toast.LENGTH_LONG);
 		}
 	}
-
 
 	private List<AbstractDictionaryCommand> prepareCommands(Iterable<String> words) {
 		List<AbstractDictionaryCommand> results = Lists.newArrayList();

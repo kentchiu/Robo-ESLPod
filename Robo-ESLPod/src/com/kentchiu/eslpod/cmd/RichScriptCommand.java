@@ -56,6 +56,17 @@ public class RichScriptCommand implements Runnable {
 		}
 	}
 
+	public static HashSet<String> getBaseWords(Context context) {
+		Resources res = context.getResources();
+		String[] baseWords = res.getStringArray(R.array.base_words);
+		// Using set to remove duplication
+		final HashSet<String> baseWordSet = Sets.newHashSet();
+		for (String each : baseWords) {
+			baseWordSet.add(each.toLowerCase());
+		}
+		return baseWordSet;
+	}
+
 	public static Iterable<String> headword(Context context, Iterable<String> filter) {
 		Set<String> result = Sets.newLinkedHashSet();
 		for (String each : filter) {
@@ -76,17 +87,6 @@ public class RichScriptCommand implements Runnable {
 			}
 		}
 		return false;
-	}
-
-	public static HashSet<String> getBaseWords(Context context) {
-		Resources res = context.getResources();
-		String[] baseWords = res.getStringArray(R.array.base_words);
-		// Using set to remove duplication
-		final HashSet<String> baseWordSet = Sets.newHashSet();
-		for (String each : baseWords) {
-			baseWordSet.add(each.toLowerCase());
-		}
-		return baseWordSet;
 	}
 
 	protected static Iterable<String> splitPhaseVerbToWords(String words) {
@@ -158,7 +158,7 @@ public class RichScriptCommand implements Runnable {
 		List<String> lines = ImmutableList.of();
 
 		try {
-			Log.d(EslPodApplication.TAG, "Start fetching script of " + title +  " form : " + scriptUrl);
+			Log.d(EslPodApplication.TAG, "Start fetching script of " + title + " form : " + scriptUrl);
 			// ===== The ascii 146 issues ====
 			// Ascii 146 (or 0x92) is render as ’ (Right single quotation mark) ref : http://www.ascii-code.com/
 			// But ascii 146 is not exists in any encoding which I can found
@@ -175,7 +175,7 @@ public class RichScriptCommand implements Runnable {
 					sb.append((char) c);
 				}
 			}
-			Log.d(EslPodApplication.TAG, "End fetching script of " + title +  " form : " + scriptUrl);
+			Log.d(EslPodApplication.TAG, "End fetching script of " + title + " form : " + scriptUrl);
 			lines = ImmutableList.copyOf(Splitter.on("\n").split(sb.toString()));
 		} catch (IOException e) {
 			e.printStackTrace();

@@ -83,6 +83,7 @@ public class HomeActivity extends ListActivity {
 		}
 	}
 
+	// TODO move to Media Download Service (Using download manager)
 	private void downloadMedia(View view, final Uri podcastUri, String urlStr) {
 		try {
 			URL url = new URL(urlStr);
