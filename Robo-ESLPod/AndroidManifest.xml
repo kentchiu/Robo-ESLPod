@@ -31,6 +31,10 @@
 		</service>
 		<service android:name=".service.WordFetchService">
 		</service>
+		<service android:name=".service.MediaService">
+		</service>
+		<service android:name=".service.MediaDownloadService">
+		</service>
 		<provider android:name=".provider.DictionaryContentProvider" android:authorities="com.kentchiu.eslpod.provider.Dictionary" />
 		<provider android:name=".provider.PodcastContentProvider" android:authorities="com.kentchiu.eslpod.provider.Podcast" />
 	</application>

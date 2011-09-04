@@ -98,6 +98,7 @@ public class MediaCommand implements Runnable {
 			output.flush();
 			output.close();
 			input.close();
+			// h.sendMessage(null); TODO send download completed message
 			Log.i(EslPodApplication.TAG, "Downloaded file " + to.toString() + " completed");
 		}
 	}

@@ -10,11 +10,12 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.StringUtils;
 
-import android.app.IntentService;
+import android.app.Service;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -27,16 +28,20 @@ import com.kentchiu.eslpod.cmd.AbstractDictionaryCommand;
 import com.kentchiu.eslpod.cmd.RichScriptCommand;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
-public class WordFetchService extends IntentService {
+public class WordFetchService extends Service {
 
-	private static final int					MAX_TASK	= 500;
-	private final Handler						handler		= new Handler();
-	private static ExecutorService				executorService;
-	private static ArrayBlockingQueue<Runnable>	commandQueue;
+	private final int						MAX_TASK	= 500;
+	private final Handler					handler		= new Handler();
+	private ExecutorService					executorService;
+	private ArrayBlockingQueue<Runnable>	commandQueue;
 
-	//private int		count;
+	@Override
+	public IBinder onBind(Intent intent) {
+		return null;
+	}
 
-	static {
+	@Override
+	public void onCreate() {
 		ThreadFactoryBuilder builder = new ThreadFactoryBuilder();
 		builder.setPriority(Thread.MIN_PRIORITY);
 		builder.setDaemon(true);
@@ -49,22 +54,8 @@ public class WordFetchService extends IntentService {
 
 	}
 
-	public WordFetchService() {
-		super(WordFetchService.class.getName());
-	}
-
-	void showMessage(final String text, final int lengthLong) {
-		handler.post(new Runnable() {
-
-			@Override
-			public void run() {
-				Toast.makeText(WordFetchService.this, text, lengthLong).show();
-			}
-		});
-	}
-
 	@Override
-	protected void onHandleIntent(Intent intent) {
+	public int onStartCommand(Intent intent, int flags, int startId) {
 		final List<AbstractDictionaryCommand> fetchCmds = Lists.newArrayList();
 		Uri podcastUri = intent.getData();
 		Cursor c = getContentResolver().query(podcastUri, null, null, null, null);
@@ -76,6 +67,18 @@ public class WordFetchService extends IntentService {
 			Log.v(EslPodApplication.TAG, "Add " + Iterables.size(cmds) + " new command, total command is" + Iterables.size(fetchCmds));
 		}
 		executeWordCommands(fetchCmds);
+		return super.onStartCommand(intent, flags, startId);
+	}
+
+	// TODO change to broadcast
+	void showMessage(final String text, final int lengthLong) {
+		handler.post(new Runnable() {
+
+			@Override
+			public void run() {
+				Toast.makeText(WordFetchService.this, text, lengthLong).show();
+			}
+		});
 	}
 
 	private void executeWordCommands(final List<AbstractDictionaryCommand> fetchCmds) {

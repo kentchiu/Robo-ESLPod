@@ -1,9 +1,6 @@
 package com.kentchiu.eslpod;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.regex.Matcher;
@@ -17,7 +14,6 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.database.ContentObserver;
 import android.database.Cursor;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -43,24 +39,23 @@ import com.kentchiu.eslpod.cmd.DownloadTask;
 import com.kentchiu.eslpod.cmd.RichScriptCommand;
 import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
+import com.kentchiu.eslpod.service.MediaService;
 import com.kentchiu.eslpod.service.WordFetchService;
 
 public class PlayerActivity extends ListActivity implements OnTouchListener, OnGestureListener, OnClickListener {
 
 	private GestureDetector	gd;
-	private MediaPlayer		player;
 	private SeekBar			seekBar;
+
 	private Handler			handler	= new Handler();
 
 	@Override
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.playButton:
-			if (player.isPlaying()) {
-				player.pause();
-			} else {
-				player.start();
-			}
+			Intent intent = new Intent(this, MediaService.class);
+			intent.setAction(MediaService.ACTION_PLAY);
+			startService(intent);
 			break;
 		case R.id.prevButton:
 			// action for myButton2 click
@@ -158,9 +153,9 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.player_activity);
 
+		registerForContextMenu(getListView());
 		final Uri uri = getIntent().getData();
 		Log.i(EslPodApplication.TAG, "working uri:" + uri);
-		registerForContextMenu(getListView());
 		getContentResolver().registerContentObserver(uri, false, new ContentObserver(handler) {
 			@Override
 			public void onChange(boolean selfChange) {
@@ -171,24 +166,15 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 		final Cursor c = getContentResolver().query(uri, null, null, null, null);
 		c.moveToFirst();
 		String title = c.getString(c.getColumnIndex(PodcastColumns.TITLE));
-
 		setTitle(title);
 		setListAdapter(createAdapter(uri));
-
 		fetchWord(uri);
-
-		String url = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URL_LOCAL));
-		String path = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URL));
-
-		initPlayer(uri, url, path);
+		Intent intent = new Intent(this, MediaService.class);
+		intent.setAction(MediaService.ACTION_PREPARE);
+		intent.setData(uri);
+		startService(intent);
 
 		initSeekBar();
-	}
-
-	@Override
-	protected void onDestroy() {
-		player.release();
-		super.onDestroy();
 	}
 
 	private void downloadMedia(final Uri podcastUri, String mediaUrl) {
@@ -216,39 +202,6 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 		startService(intent);
 	}
 
-	private void initPlayer(String url, String path) throws IOException, FileNotFoundException {
-		if (StringUtils.isNotBlank(url)) {
-			File file = new File(url);
-			if (file.exists()) {
-				player.setDataSource(new FileInputStream(file).getFD());
-				player.prepareAsync();
-			} else {
-				player.setDataSource(path);
-				player.prepareAsync();
-			}
-		} else {
-			player.setDataSource(path);
-			player.prepareAsync();
-		}
-	}
-
-	private void initPlayer(final Uri uri, String url, String path) {
-		player = new MediaPlayer();
-		try {
-			initPlayer(url, path);
-			if (StringUtils.isBlank(url) || !new File(url).exists()) {
-				downloadMedia(uri, path);
-			}
-			Log.d(EslPodApplication.TAG, "media url : " + path);
-		} catch (IllegalArgumentException e1) {
-			e1.printStackTrace();
-		} catch (IllegalStateException e1) {
-			e1.printStackTrace();
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
-	}
-
 	private void initSeekBar() {
 		//controller = new MediaController(this);
 		seekBar = (SeekBar) findViewById(R.id.seekBar);
@@ -259,7 +212,7 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 				Log.d(EslPodApplication.TAG, "progress:" + progress + ", from User:" + fromUser);
 				if (fromUser) {
-					player.seekTo(progress);
+					//player.seekTo(progress);
 				} else {
 					// the event was fired from code and you shouldn't call player.seekTo()
 				}
@@ -280,26 +233,26 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 		getListView().setLongClickable(true);
 		getListView().setOnTouchListener(this);
 
-		Thread syncSeekBarThread = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				int currentPosition = 0;
-				int total = player.getDuration();
-				seekBar.setMax(total);
-				while (player != null && currentPosition < total) {
-					try {
-						Thread.sleep(1000);
-						currentPosition = player.getCurrentPosition();
-					} catch (InterruptedException e) {
-						return;
-					} catch (Exception e) {
-						return;
-					}
-					seekBar.setProgress(currentPosition);
-				}
-			}
-		});
-		syncSeekBarThread.start();
+		//		Thread syncSeekBarThread = new Thread(new Runnable() {
+		//			@Override
+		//			public void run() {
+		//				int currentPosition = 0;
+		//				int total = player.getDuration();
+		//				seekBar.setMax(total);
+		//				while (player != null && currentPosition < total) {
+		//					try {
+		//						Thread.sleep(1000);
+		//						currentPosition = player.getCurrentPosition();
+		//					} catch (InterruptedException e) {
+		//						return;
+		//					} catch (Exception e) {
+		//						return;
+		//					}
+		//					seekBar.setProgress(currentPosition);
+		//				}
+		//			}
+		//		});
+		//		syncSeekBarThread.start();
 	}
 
 	private Iterable<String> listWordsMatchToMenuItem(Iterable<String> words, final String item) {

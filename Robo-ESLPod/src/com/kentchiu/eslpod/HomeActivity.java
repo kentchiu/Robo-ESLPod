@@ -1,30 +1,25 @@
 package com.kentchiu.eslpod;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import org.apache.commons.lang.StringUtils;
-
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ListView;
 
-import com.kentchiu.eslpod.cmd.DownloadTask;
 import com.kentchiu.eslpod.cmd.PodcastCommand;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
+import com.kentchiu.eslpod.service.MediaDownloadService;
 import com.kentchiu.eslpod.service.RichScriptFetchService;
 
 public class HomeActivity extends ListActivity {
@@ -37,7 +32,10 @@ public class HomeActivity extends ListActivity {
 		Cursor c = HomeActivity.this.getContentResolver().query(podcastUri, null, null, null, null);
 		if (c.moveToFirst()) {
 			String urlStr = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URL));
-			downloadMedia(view, podcastUri, urlStr);
+			//downloadMedia(view, podcastUri, urlStr);
+			Intent intent = new Intent(this, MediaDownloadService.class);
+			intent.putExtra(PodcastColumns.MEDIA_URL, urlStr);
+			startService(intent);
 		}
 	}
 
@@ -84,44 +82,44 @@ public class HomeActivity extends ListActivity {
 	}
 
 	// TODO move to Media Download Service (Using download manager)
-	private void downloadMedia(View view, final Uri podcastUri, String urlStr) {
-		try {
-			URL url = new URL(urlStr);
-			String name = StringUtils.substringAfterLast(url.getFile(), "/");
-			File localFile = new File(HomeActivity.this.getCacheDir(), name);
-			new DownloadTask(localFile, view) {
-				@Override
-				protected void afterDownload() {
-					ContentValues cv = new ContentValues();
-					cv.put(PodcastColumns.MEDIA_URL_LOCAL, getDownloadTo().getPath());
-					HomeActivity.this.getContentResolver().update(podcastUri, cv, null, null);
-				};
-
-				@Override
-				protected void onPostExecute(String result) {
-					Button button = (Button) getProgressView();
-					button.setText("Clean");
-					button.setEnabled(true);
-				}
-
-				@Override
-				protected void onPreExecute() {
-					Button button = (Button) getProgressView();
-					button.setText("Download...");
-					button.setEnabled(false);
-				}
-
-				@Override
-				protected void onProgressUpdate(Integer... values) {
-					Button button = (Button) getProgressView();
-					button.setText(Integer.toString(values[0]) + "/100");
-				}
-
-			}.execute(urlStr);
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		}
-	}
+	//	private void downloadMedia(View view, final Uri podcastUri, String urlStr) {
+	//		try {
+	//			URL url = new URL(urlStr);
+	//			String name = StringUtils.substringAfterLast(url.getFile(), "/");
+	//			File localFile = new File(HomeActivity.this.getCacheDir(), name);
+	//			new DownloadTask(localFile, view) {
+	//				@Override
+	//				protected void afterDownload() {
+	//					ContentValues cv = new ContentValues();
+	//					cv.put(PodcastColumns.MEDIA_URL_LOCAL, getDownloadTo().getPath());
+	//					HomeActivity.this.getContentResolver().update(podcastUri, cv, null, null);
+	//				};
+	//
+	//				@Override
+	//				protected void onPostExecute(String result) {
+	//					Button button = (Button) getProgressView();
+	//					button.setText("Clean");
+	//					button.setEnabled(true);
+	//				}
+	//
+	//				@Override
+	//				protected void onPreExecute() {
+	//					Button button = (Button) getProgressView();
+	//					button.setText("Download...");
+	//					button.setEnabled(false);
+	//				}
+	//
+	//				@Override
+	//				protected void onProgressUpdate(Integer... values) {
+	//					Button button = (Button) getProgressView();
+	//					button.setText(Integer.toString(values[0]) + "/100");
+	//				}
+	//
+	//			}.execute(urlStr);
+	//		} catch (MalformedURLException e) {
+	//			e.printStackTrace();
+	//		}
+	//	}
 
 	private void importPodcasts() {
 		new AsyncTask<Void, Void, Void>() {

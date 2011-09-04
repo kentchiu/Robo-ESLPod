@@ -9,6 +9,7 @@ import android.os.Handler.Callback;
 import android.os.Message;
 import android.view.View;
 
+@Deprecated
 public class DownloadTask extends AsyncTask<String, Integer, String> {
 	private final View	progressView;
 	private Handler		handler;
