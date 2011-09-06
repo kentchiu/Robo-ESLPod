@@ -19,16 +19,17 @@ import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
 public class MediaService extends Service {
-	public static String	ACTION_PREPARE	= "com.kentchiu.eslpod.intent.action.PREPARE";
-	public static String	ACTION_PLAY		= "com.kentchiu.eslpod.intent.action.PLAY";
-	public static String	ACTION_PAUSE	= "com.kentchiu.eslpod.intent.action.PAUSE";
-	public static String	ACTION_STOP		= "com.kentchiu.eslpod.intent.action.STOP";
+
 
 	private MediaPlayer		player;
 
+	public MediaPlayer getPlayer() {
+		return player;
+	}
+
 	@Override
 	public IBinder onBind(Intent intent) {
-		return null;
+		 return new LocalBinder<MediaService>(this);
 	}
 
 	@Override
@@ -45,31 +46,17 @@ public class MediaService extends Service {
 		player.release();
 	}
 
-	@Override
-	public int onStartCommand(Intent intent, int flags, int startId) {
-		if (StringUtils.equals(ACTION_PREPARE, intent.getAction())) {
-			final Uri uri = intent.getData();
-			Log.i(EslPodApplication.TAG, "working uri:" + uri);
-			Preconditions.checkNotNull(uri);
-			final Cursor c = getContentResolver().query(uri, null, null, null, null);
-			c.moveToFirst();
-			String url = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URL_LOCAL));
-			String path = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URL));
-			initPlayer(url, path);
-		} else if (StringUtils.equals(ACTION_PLAY, intent.getAction())) {
-			if (player.isPlaying()) {
-				player.pause();
-			} else {
-				player.start();
-			}
-		} else {
-			throw new IllegalArgumentException("Unknow action : " + intent.getAction());
-		}
-		return super.onStartCommand(intent, flags, startId);
-
+	public void prepare(Uri uri) {
+		Log.i(EslPodApplication.TAG, "working uri:" + uri);
+		Preconditions.checkNotNull(uri);
+		Cursor c = getContentResolver().query(uri, null, null, null, null);
+		c.moveToFirst();
+		String url = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URL_LOCAL));
+		String path = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URL));
+		prepare(url, path);
 	}
 
-	private void initPlayer(String url, String path) {
+	private void prepare(String url, String path) {
 		try {
 			if (StringUtils.isNotBlank(url)) {
 				File file = new File(url);

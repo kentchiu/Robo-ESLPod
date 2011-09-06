@@ -11,17 +11,19 @@ import java.net.URL;
 import java.net.URLConnection;
 
 import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 
 import com.kentchiu.eslpod.EslPodApplication;
 
 public class MediaCommand implements Runnable {
 
-	private URL		from;
-
-	private File	to;
-
-	private Handler	handler;
+	private static final int	DOWNLOAD_COMPLETED	= 1;
+	private static final int	DOWNLOAD_PROCESSING	= 2;
+	private static final int	DOWNLOAD_START	= 3;
+	private URL					from;
+	private File				to;
+	private Handler				handler;
 
 	public MediaCommand(URL from, File to) {
 		this(from, to, null);
@@ -71,6 +73,10 @@ public class MediaCommand implements Runnable {
 
 	private void downloadFile(URL from, File to, Handler h) throws IOException, FileNotFoundException {
 		Log.i(EslPodApplication.TAG, "Downloading file from " + from.toString());
+		if (h != null) {
+			Message m = h.obtainMessage(DOWNLOAD_START, 0, 0, from);
+			h.sendMessage(m);
+		}
 		URLConnection conn = from.openConnection();
 
 		conn.connect();
@@ -86,19 +92,27 @@ public class MediaCommand implements Runnable {
 			byte data[] = new byte[1024];
 			long total = 0;
 			int count;
+			int cache = -1; // Using cache to reduce sending message
 			while ((count = input.read(data)) != -1) {
 				total += count;
 				if (h != null) {
 					// publishing the progress....
 					int processing = (int) (total * 100 / lenghtOfFile);
-					h.sendEmptyMessage(processing);
+					if (cache != processing) {
+						Message m = h.obtainMessage(DOWNLOAD_PROCESSING, processing, lenghtOfFile);
+						h.sendMessage(m);
+						cache = processing;
+					}
 				}
 				output.write(data, 0, count);
 			}
 			output.flush();
 			output.close();
 			input.close();
-			// h.sendMessage(null); TODO send download completed message
+			if (h != null) {
+				Message m = h.obtainMessage(DOWNLOAD_COMPLETED, lenghtOfFile, 0, to);
+				h.sendMessage(m);
+			}
 			Log.i(EslPodApplication.TAG, "Downloaded file " + to.toString() + " completed");
 		}
 	}

@@ -1,8 +1,5 @@
 package com.kentchiu.eslpod;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -10,13 +7,16 @@ import org.apache.commons.lang.StringUtils;
 
 import android.app.ListActivity;
 import android.app.SearchManager;
-import android.content.ContentValues;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.database.ContentObserver;
 import android.database.Cursor;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -28,6 +28,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.MediaController;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
@@ -35,10 +36,10 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.kentchiu.eslpod.cmd.DownloadTask;
 import com.kentchiu.eslpod.cmd.RichScriptCommand;
 import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
+import com.kentchiu.eslpod.service.LocalBinder;
 import com.kentchiu.eslpod.service.MediaService;
 import com.kentchiu.eslpod.service.WordFetchService;
 
@@ -46,16 +47,19 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 
 	private GestureDetector	gd;
 	private SeekBar			seekBar;
-
 	private Handler			handler	= new Handler();
+	private MediaPlayer		player;
+	private ServiceConnection	connection;
 
 	@Override
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.playButton:
-			Intent intent = new Intent(this, MediaService.class);
-			intent.setAction(MediaService.ACTION_PLAY);
-			startService(intent);
+			if (player.isPlaying()) {
+				player.pause();
+			} else {
+				player.start();
+			}
 			break;
 		case R.id.prevButton:
 			// action for myButton2 click
@@ -169,32 +173,27 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 		setTitle(title);
 		setListAdapter(createAdapter(uri));
 		fetchWord(uri);
+
 		Intent intent = new Intent(this, MediaService.class);
-		intent.setAction(MediaService.ACTION_PREPARE);
-		intent.setData(uri);
-		startService(intent);
+		connection = new ServiceConnection() {
 
-		initSeekBar();
+			@Override
+			public void onServiceConnected(ComponentName className, IBinder service) {
+				MediaService s = ((LocalBinder<MediaService>) service).getService();
+				s.prepare(getIntent().getData());
+				player = s.getPlayer();
+				initSeekBar();
+			}
+
+			@Override
+			public void onServiceDisconnected(ComponentName className) {
+				// As our service is in the same process, this should never be called
+			}
+		};
+		bindService(intent, connection, BIND_AUTO_CREATE);
 	}
 
-	private void downloadMedia(final Uri podcastUri, String mediaUrl) {
-		try {
-			URL from = new URL(mediaUrl);
-			String name = StringUtils.substringAfterLast(from.getFile(), "/");
-			File to = new File(PlayerActivity.this.getCacheDir(), name);
-			new DownloadTask(to, null) {
-				@Override
-				protected void afterDownload() {
-					ContentValues cv = new ContentValues();
-					cv.put(PodcastColumns.MEDIA_URL_LOCAL, getDownloadTo().getPath());
-					PlayerActivity.this.getContentResolver().update(podcastUri, cv, null, null);
-				};
-			}.execute(mediaUrl);
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		}
 
-	}
 
 	private void fetchWord(final Uri uri) {
 		Intent intent = new Intent(this, WordFetchService.class);
@@ -203,7 +202,7 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 	}
 
 	private void initSeekBar() {
-		//controller = new MediaController(this);
+		new MediaController(this);
 		seekBar = (SeekBar) findViewById(R.id.seekBar);
 
 		OnSeekBarChangeListener sbcl = new OnSeekBarChangeListener() {
@@ -212,7 +211,7 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 				Log.d(EslPodApplication.TAG, "progress:" + progress + ", from User:" + fromUser);
 				if (fromUser) {
-					//player.seekTo(progress);
+					player.seekTo(progress);
 				} else {
 					// the event was fired from code and you shouldn't call player.seekTo()
 				}
@@ -233,26 +232,32 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 		getListView().setLongClickable(true);
 		getListView().setOnTouchListener(this);
 
-		//		Thread syncSeekBarThread = new Thread(new Runnable() {
-		//			@Override
-		//			public void run() {
-		//				int currentPosition = 0;
-		//				int total = player.getDuration();
-		//				seekBar.setMax(total);
-		//				while (player != null && currentPosition < total) {
-		//					try {
-		//						Thread.sleep(1000);
-		//						currentPosition = player.getCurrentPosition();
-		//					} catch (InterruptedException e) {
-		//						return;
-		//					} catch (Exception e) {
-		//						return;
-		//					}
-		//					seekBar.setProgress(currentPosition);
-		//				}
-		//			}
-		//		});
-		//		syncSeekBarThread.start();
+		Thread syncSeekBarThread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				int currentPosition = 0;
+				int total = player.getDuration();
+				seekBar.setMax(total);
+				while (player != null && currentPosition < total) {
+					try {
+						Thread.sleep(1000);
+						currentPosition = player.getCurrentPosition();
+					} catch (InterruptedException e) {
+						return;
+					} catch (Exception e) {
+						return;
+					}
+					seekBar.setProgress(currentPosition);
+				}
+			}
+		});
+		syncSeekBarThread.start();
+	}
+
+	@Override
+	protected void onDestroy() {
+		unbindService(connection);
+		super.onDestroy();
 	}
 
 	private Iterable<String> listWordsMatchToMenuItem(Iterable<String> words, final String item) {

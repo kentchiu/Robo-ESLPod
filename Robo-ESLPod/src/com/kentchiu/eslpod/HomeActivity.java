@@ -8,35 +8,37 @@ import java.net.URL;
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
+import android.content.ComponentName;
 import android.content.ContentUris;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
 import android.view.View;
 import android.widget.ListView;
 
 import com.kentchiu.eslpod.cmd.PodcastCommand;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
+import com.kentchiu.eslpod.service.LocalBinder;
 import com.kentchiu.eslpod.service.MediaDownloadService;
 import com.kentchiu.eslpod.service.RichScriptFetchService;
 
 public class HomeActivity extends ListActivity {
 
 	private static final int	DIALOG_INIT_LIST	= 0;
+	private MediaDownloadService	downloadService;
+	private ServiceConnection	connection;
+
 
 	public void downloadClickHandler(View view) {
-		Integer id = (Integer) view.getTag();
-		final Uri podcastUri = ContentUris.withAppendedId(PodcastColumns.PODCAST_URI, id);
-		Cursor c = HomeActivity.this.getContentResolver().query(podcastUri, null, null, null, null);
-		if (c.moveToFirst()) {
-			String urlStr = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URL));
-			//downloadMedia(view, podcastUri, urlStr);
-			Intent intent = new Intent(this, MediaDownloadService.class);
-			intent.putExtra(PodcastColumns.MEDIA_URL, urlStr);
-			startService(intent);
-		}
+		int id = (Integer) view.getTag();
+		final Uri uri = ContentUris.withAppendedId(PodcastColumns.PODCAST_URI, id);
+		downloadService.download(uri);
 	}
 
 	/** Called when the activity is first created. */
@@ -57,6 +59,28 @@ public class HomeActivity extends ListActivity {
 		}
 		Intent intent = new Intent(this, RichScriptFetchService.class);
 		startService(intent);
+		connection = new ServiceConnection() {
+
+
+			@Override
+			public void onServiceDisconnected(ComponentName name) {
+
+			}
+
+			@Override
+			public void onServiceConnected(ComponentName name, IBinder service) {
+				downloadService = ((LocalBinder<MediaDownloadService>) service).getService();
+				downloadService.setHandler(new Handler() {
+					@Override
+					public void handleMessage(Message msg) {
+						System.out.println(msg);
+					}
+
+				});
+
+			}
+		};
+		bindService(new Intent(this, MediaDownloadService.class), connection, BIND_AUTO_CREATE);
 	}
 
 	@Override
@@ -81,45 +105,11 @@ public class HomeActivity extends ListActivity {
 		}
 	}
 
-	// TODO move to Media Download Service (Using download manager)
-	//	private void downloadMedia(View view, final Uri podcastUri, String urlStr) {
-	//		try {
-	//			URL url = new URL(urlStr);
-	//			String name = StringUtils.substringAfterLast(url.getFile(), "/");
-	//			File localFile = new File(HomeActivity.this.getCacheDir(), name);
-	//			new DownloadTask(localFile, view) {
-	//				@Override
-	//				protected void afterDownload() {
-	//					ContentValues cv = new ContentValues();
-	//					cv.put(PodcastColumns.MEDIA_URL_LOCAL, getDownloadTo().getPath());
-	//					HomeActivity.this.getContentResolver().update(podcastUri, cv, null, null);
-	//				};
-	//
-	//				@Override
-	//				protected void onPostExecute(String result) {
-	//					Button button = (Button) getProgressView();
-	//					button.setText("Clean");
-	//					button.setEnabled(true);
-	//				}
-	//
-	//				@Override
-	//				protected void onPreExecute() {
-	//					Button button = (Button) getProgressView();
-	//					button.setText("Download...");
-	//					button.setEnabled(false);
-	//				}
-	//
-	//				@Override
-	//				protected void onProgressUpdate(Integer... values) {
-	//					Button button = (Button) getProgressView();
-	//					button.setText(Integer.toString(values[0]) + "/100");
-	//				}
-	//
-	//			}.execute(urlStr);
-	//		} catch (MalformedURLException e) {
-	//			e.printStackTrace();
-	//		}
-	//	}
+	@Override
+	protected void onDestroy() {
+		unbindService(connection);
+		super.onDestroy();
+	}
 
 	private void importPodcasts() {
 		new AsyncTask<Void, Void, Void>() {
