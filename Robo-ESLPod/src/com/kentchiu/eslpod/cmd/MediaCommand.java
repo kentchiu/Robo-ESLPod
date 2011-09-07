@@ -21,10 +21,10 @@ public class MediaCommand implements Runnable {
 
 	public static final int	DOWNLOAD_COMPLETED	= 1;
 	public static final int	DOWNLOAD_PROCESSING	= 2;
-	public static final int	DOWNLOAD_START	= 3;
-	private URL					from;
-	private File				to;
-	private Handler				handler;
+	public static final int	DOWNLOAD_START		= 3;
+	private URL				from;
+	private File			to;
+	private Handler			handler;
 
 	public MediaCommand(URL from, File to) {
 		this(from, to, null);
@@ -70,6 +70,15 @@ public class MediaCommand implements Runnable {
 
 	public void setTo(File to) {
 		this.to = to;
+	}
+
+	private Bundle createBundle(URL from, File to) {
+		String f = from.toString();
+		String t = to.toString();
+		Bundle data = new Bundle();
+		data.putString("from", f);
+		data.putString("to", t);
+		return data;
 	}
 
 	private void downloadFile(URL from, File to, Handler h) throws IOException, FileNotFoundException {
@@ -125,15 +134,6 @@ public class MediaCommand implements Runnable {
 			}
 			Log.i(EslPodApplication.TAG, "Downloaded file " + to.toString() + " completed");
 		}
-	}
-
-	private Bundle createBundle(URL from, File to) {
-		String f = from.toString();
-		String t = to.toString();
-		Bundle data = new Bundle();
-		data.putString("from",f );
-		data.putString("to", t);
-		return data;
 	}
 
 }

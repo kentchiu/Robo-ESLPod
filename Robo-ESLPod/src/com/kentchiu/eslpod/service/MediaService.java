@@ -20,8 +20,7 @@ import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
 public class MediaService extends Service {
 
-
-	private MediaPlayer		player;
+	private MediaPlayer	player;
 
 	public MediaPlayer getPlayer() {
 		return player;
@@ -29,7 +28,7 @@ public class MediaService extends Service {
 
 	@Override
 	public IBinder onBind(Intent intent) {
-		 return new LocalBinder<MediaService>(this);
+		return new LocalBinder<MediaService>(this);
 	}
 
 	@Override

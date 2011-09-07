@@ -29,37 +29,14 @@ import com.kentchiu.eslpod.cmd.MediaCommand;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
 public class MediaDownloadService extends Service {
-	private static final int	MAX_TASK	= 5;
-	private ExecutorService		executorService;
-
-	public ArrayBlockingQueue<Runnable> getCommandQueue() {
-		return commandQueue;
-	}
-
-	public Handler getDownloadHandler() {
-		return downloadHandler;
-	}
+	private static final int				MAX_TASK	= 5;
+	private ExecutorService					executorService;
 
 	private ArrayBlockingQueue<Runnable>	commandQueue;
+
 	private Handler							downloadHandler;
 
-	@Override
-	public IBinder onBind(Intent intent) {
-		return new LocalBinder<MediaDownloadService>(this);
-	}
-
-	@Override
-	public void onCreate() {
-		ThreadFactoryBuilder builder = new ThreadFactoryBuilder();
-		builder.setPriority(Thread.MIN_PRIORITY);
-		builder.setDaemon(true);
-		commandQueue = new ArrayBlockingQueue<Runnable>(MAX_TASK);
-		executorService = new ThreadPoolExecutor(2, // core size
-				2, // max size
-				30 * 60, // idle timeout
-				TimeUnit.SECONDS, commandQueue, builder.build(), new AbortPolicy()); // queue with a size
-		internalHandler = new Handler();
-	}
+	Handler									internalHandler;
 
 	public void download(Uri uri) {
 		Cursor c = getContentResolver().query(uri, null, null, null, null);
@@ -81,7 +58,35 @@ public class MediaDownloadService extends Service {
 		}
 	}
 
-	Handler	internalHandler;
+	public ArrayBlockingQueue<Runnable> getCommandQueue() {
+		return commandQueue;
+	}
+
+	public Handler getDownloadHandler() {
+		return downloadHandler;
+	}
+
+	@Override
+	public IBinder onBind(Intent intent) {
+		return new LocalBinder<MediaDownloadService>(this);
+	}
+
+	@Override
+	public void onCreate() {
+		ThreadFactoryBuilder builder = new ThreadFactoryBuilder();
+		builder.setPriority(Thread.MIN_PRIORITY);
+		builder.setDaemon(true);
+		commandQueue = new ArrayBlockingQueue<Runnable>(MAX_TASK);
+		executorService = new ThreadPoolExecutor(2, // core size
+				2, // max size
+				30 * 60, // idle timeout
+				TimeUnit.SECONDS, commandQueue, builder.build(), new AbortPolicy()); // queue with a size
+		internalHandler = new Handler();
+	}
+
+	public void setDownloadHandler(Handler downloadHandler) {
+		this.downloadHandler = downloadHandler;
+	}
 
 	void showMessage(final String text, final int lengthLong) {
 		internalHandler.post(new Runnable() {
@@ -101,10 +106,6 @@ public class MediaDownloadService extends Service {
 			Log.w(EslPodApplication.TAG, "SD card no found, save to internl storage");
 			return getCacheDir();
 		}
-	}
-
-	public void setDownloadHandler(Handler downloadHandler) {
-		this.downloadHandler = downloadHandler;
 	}
 
 }

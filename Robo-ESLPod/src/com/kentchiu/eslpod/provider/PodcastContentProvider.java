@@ -92,7 +92,7 @@ public class PodcastContentProvider extends ContentProvider {
 		SQLiteDatabase db = databaseHelper.getWritableDatabase();
 		switch (uriMatcher.match(uri)) {
 		case PODCASTS:
-			return db.update(DatabaseHelper.PODCAST_TABLE_NAME, values,where, whereArgs);
+			return db.update(DatabaseHelper.PODCAST_TABLE_NAME, values, where, whereArgs);
 		case PODCAST:
 			Long id = ContentUris.parseId(uri);
 			int update;

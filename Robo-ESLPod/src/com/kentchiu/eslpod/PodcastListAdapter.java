@@ -1,80 +1,95 @@
 package com.kentchiu.eslpod;
 
+import java.util.Set;
+
 import org.apache.commons.lang.StringUtils;
 
 import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
-import android.os.Handler;
-import android.os.Message;
+import android.net.Uri;
 import android.provider.BaseColumns;
-import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.ResourceCursorAdapter;
 import android.widget.TextView;
 
-import com.kentchiu.eslpod.cmd.MediaCommand;
+import com.google.common.collect.Sets;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
-public class PodcastListAdapter extends ResourceCursorAdapter {
+public class PodcastListAdapter extends BaseAdapter {
 
+	private int			layout;
+	private Context		context;
+	private Cursor		cursor;
+	private Set<View>	viewItemsCache;
 
-	public PodcastListAdapter(Context context, int layout, Cursor c) {
-		super(context, layout, c);
+	public PodcastListAdapter(Context context, int layout, Cursor cursor) {
+		this.context = context;
+		this.layout = layout;
+		this.cursor = cursor;
+		viewItemsCache = Sets.newHashSet();
+
 	}
 
 	@Override
-	public void bindView(View view, Context context, Cursor cursor) {
-		int idx = cursor.getColumnIndex(PodcastColumns.TITLE);
-		TextView tv = (TextView) view.findViewById(R.id.podcastTitle);
-		tv.setText(cursor.getString(idx));
-		Button button = (Button) view.findViewById(R.id.downloadButton);
+	public int getCount() {
+		return cursor.getCount();
+	}
+
+	@Override
+	public Object getItem(int position) {
+		cursor.move(position);
+		return cursor;
+	}
+
+	@Override
+	public long getItemId(int position) {
+		cursor.moveToPosition(position);
+		return cursor.getLong(cursor.getColumnIndex(BaseColumns._ID));
+	}
+
+	@Override
+	public View getView(int position, View convertView, ViewGroup parent) {
+		cursor.moveToPosition(position);
+		return newView(context, cursor, parent);
+	}
+
+	public View newView(Context context, Cursor cursor, ViewGroup parent) {
 		String downloadFrom = cursor.getString(cursor.getColumnIndex(PodcastColumns.MEDIA_URL));
-		view.setTag(downloadFrom);
+		int downloadTo = cursor.getColumnIndex(PodcastColumns.MEDIA_URL_LOCAL);
 		int id = cursor.getInt(cursor.getColumnIndex(BaseColumns._ID));
-		button.setTag(ContentUris.withAppendedId(PodcastColumns.PODCAST_URI, id));
-		String mediaCache = cursor.getString(cursor.getColumnIndex(PodcastColumns.MEDIA_URL_LOCAL));
+		Uri uri = ContentUris.withAppendedId(PodcastColumns.PODCAST_URI, id);
+		String title = cursor.getString(cursor.getColumnIndex(PodcastColumns.TITLE));
+		String mediaCache = cursor.getString(downloadTo);
+
+		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		View view = inflater.inflate(layout, parent, false);
+		TextView tv = (TextView) view.findViewById(R.id.podcastTitle);
+		Button button = (Button) view.findViewById(R.id.downloadButton);
+
+		view.setTag(downloadFrom);
+		tv.setText(title);
+
+		button.setTag(uri);
 		if (StringUtils.isNotBlank(mediaCache)) {
 			button.setText("Clean");
 		} else {
-			button.setText(button.toString());
+			button.setText("Download");
 		}
-	}
-
-
-	public Handler downloadHandler() {
-
-		return new Handler() {
-			@Override
-			public void handleMessage(Message msg) {
-				String from = msg.getData().getString("from");
-				Button button = findButtonByDownloadUrl(from);
-				if (button == null) {
-					return;
-				}
-				switch(msg.what) {
-				case MediaCommand.DOWNLOAD_START:
-					button.setText("Downloading");
-					break;
-				case MediaCommand.DOWNLOAD_PROCESSING:
-					button.setText(msg.arg1 + "/100");
-					break;
-				case MediaCommand.DOWNLOAD_COMPLETED:
-					button.setText("Clean");
-					break;
-				default :
-					Log.w(EslPodApplication.TAG, "Unknow message "  + msg);
-				}
-
-			}
-		};
+		viewItemsCache.add(view);
+		return view;
 	}
 
 	protected Button findButtonByDownloadUrl(String from) {
+		for (View each : viewItemsCache) {
+			if (StringUtils.equals(from, each.getTag().toString())) {
+				return (Button) each.findViewById(R.id.downloadButton);
+			}
+		}
 		return null;
 	}
-
-
 
 }

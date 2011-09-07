@@ -45,10 +45,10 @@ import com.kentchiu.eslpod.service.WordFetchService;
 
 public class PlayerActivity extends ListActivity implements OnTouchListener, OnGestureListener, OnClickListener {
 
-	private GestureDetector	gd;
-	private SeekBar			seekBar;
-	private Handler			handler	= new Handler();
-	private MediaPlayer		player;
+	private GestureDetector		gd;
+	private SeekBar				seekBar;
+	private Handler				handler	= new Handler();
+	private MediaPlayer			player;
 	private ServiceConnection	connection;
 
 	@Override
@@ -193,7 +193,11 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 		bindService(intent, connection, BIND_AUTO_CREATE);
 	}
 
-
+	@Override
+	protected void onDestroy() {
+		unbindService(connection);
+		super.onDestroy();
+	}
 
 	private void fetchWord(final Uri uri) {
 		Intent intent = new Intent(this, WordFetchService.class);
@@ -252,12 +256,6 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 			}
 		});
 		syncSeekBarThread.start();
-	}
-
-	@Override
-	protected void onDestroy() {
-		unbindService(connection);
-		super.onDestroy();
 	}
 
 	private Iterable<String> listWordsMatchToMenuItem(Iterable<String> words, final String item) {
