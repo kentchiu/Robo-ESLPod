@@ -5,11 +5,13 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.apache.commons.lang.StringUtils;
+
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
-import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.database.Cursor;
@@ -19,9 +21,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ListView;
 
+import com.google.common.base.Preconditions;
+import com.kentchiu.eslpod.cmd.MediaCommand;
 import com.kentchiu.eslpod.cmd.PodcastCommand;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 import com.kentchiu.eslpod.service.LocalBinder;
@@ -36,8 +42,10 @@ public class HomeActivity extends ListActivity {
 
 
 	public void downloadClickHandler(View view) {
-		int id = (Integer) view.getTag();
-		final Uri uri = ContentUris.withAppendedId(PodcastColumns.PODCAST_URI, id);
+		Button btn = (Button) view;
+		Uri uri = (Uri) btn.getTag();
+		btn.setEnabled(false);
+		btn.setText("Wating");
 		downloadService.download(uri);
 	}
 
@@ -46,7 +54,7 @@ public class HomeActivity extends ListActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		final Cursor cursor = managedQuery(PodcastColumns.PODCAST_URI, null, null, null, PodcastColumns.TITLE + " DESC");
-		PodcastListAdapter adapter = new PodcastListAdapter(HomeActivity.this, R.layout.episode_list_item, cursor);
+		PodcastListAdapter2 adapter = new PodcastListAdapter2(HomeActivity.this, R.layout.episode_list_item, cursor);
 		setListAdapter(adapter);
 		try {
 			InputStream is = new URL(PodcastCommand.RSS_URI).openStream();
@@ -70,17 +78,49 @@ public class HomeActivity extends ListActivity {
 			@Override
 			public void onServiceConnected(ComponentName name, IBinder service) {
 				downloadService = ((LocalBinder<MediaDownloadService>) service).getService();
-				downloadService.setHandler(new Handler() {
-					@Override
-					public void handleMessage(Message msg) {
-						System.out.println(msg);
-					}
-
-				});
-
+				downloadService.setDownloadHandler(createDownloadHandler());
 			}
 		};
 		bindService(new Intent(this, MediaDownloadService.class), connection, BIND_AUTO_CREATE);
+	}
+
+	public Handler createDownloadHandler() {
+		return new Handler() {
+			@Override
+			public void handleMessage(Message msg) {
+				String from = msg.getData().getString("from");
+				String to = msg.getData().getString("to");
+				if (from ==  null) {
+					Log.w(EslPodApplication.TAG, "Download fail with illegal message " + msg);
+					return;
+				}
+				Button button =  ((PodcastListAdapter2) getListAdapter()).findButtonByDownloadUrl(from);
+				if (button == null) {
+					return;
+				}
+				switch (msg.what) {
+				case MediaCommand.DOWNLOAD_START:
+					button.setText("Downloading");
+					break;
+				case MediaCommand.DOWNLOAD_PROCESSING:
+					button.setText(msg.arg1 + "/100");
+					break;
+				case MediaCommand.DOWNLOAD_COMPLETED:
+					button.setEnabled(true);
+					button.setText("Clean");
+					ContentValues cv = new ContentValues();
+					cv.put(PodcastColumns.MEDIA_URL_LOCAL, to);
+					int count = getContentResolver().update(PodcastColumns.PODCAST_URI, cv , PodcastColumns.MEDIA_URL+ "=?", new String[] {from});
+					if (count != 1) {
+						Log.w(EslPodApplication.TAG, "exception row updated but " + count);
+					}
+					break;
+				default:
+					Log.w(EslPodApplication.TAG, "Unknow message " + msg);
+				}
+
+			}
+		};
 	}
 
 	@Override

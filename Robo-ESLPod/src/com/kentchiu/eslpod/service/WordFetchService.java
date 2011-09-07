@@ -30,7 +30,7 @@ import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
 public class WordFetchService extends Service {
 
-	private final int						MAX_TASK	= 500;
+	private final int						MAX_TASK	= 5;
 	private final Handler					handler		= new Handler();
 	private ExecutorService					executorService;
 	private ArrayBlockingQueue<Runnable>	commandQueue;
@@ -70,7 +70,6 @@ public class WordFetchService extends Service {
 		return super.onStartCommand(intent, flags, startId);
 	}
 
-	// TODO change to broadcast
 	void showMessage(final String text, final int lengthLong) {
 		handler.post(new Runnable() {
 

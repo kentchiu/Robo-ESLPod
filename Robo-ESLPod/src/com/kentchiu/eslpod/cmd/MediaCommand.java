@@ -10,6 +10,7 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -18,9 +19,9 @@ import com.kentchiu.eslpod.EslPodApplication;
 
 public class MediaCommand implements Runnable {
 
-	private static final int	DOWNLOAD_COMPLETED	= 1;
-	private static final int	DOWNLOAD_PROCESSING	= 2;
-	private static final int	DOWNLOAD_START	= 3;
+	public static final int	DOWNLOAD_COMPLETED	= 1;
+	public static final int	DOWNLOAD_PROCESSING	= 2;
+	public static final int	DOWNLOAD_START	= 3;
 	private URL					from;
 	private File				to;
 	private Handler				handler;
@@ -73,8 +74,10 @@ public class MediaCommand implements Runnable {
 
 	private void downloadFile(URL from, File to, Handler h) throws IOException, FileNotFoundException {
 		Log.i(EslPodApplication.TAG, "Downloading file from " + from.toString());
+		int what = DOWNLOAD_START;
 		if (h != null) {
-			Message m = h.obtainMessage(DOWNLOAD_START, 0, 0, from);
+			Message m = h.obtainMessage(what);
+			m.setData(createBundle(from, to));
 			h.sendMessage(m);
 		}
 		URLConnection conn = from.openConnection();
@@ -85,6 +88,11 @@ public class MediaCommand implements Runnable {
 		Log.v(EslPodApplication.TAG, "file length : " + lenghtOfFile);
 		if (to.exists() && to.length() == lenghtOfFile) {
 			Log.i(EslPodApplication.TAG, to.getAbsolutePath() + " exists");
+			if (h != null) {
+				Message m = h.obtainMessage(DOWNLOAD_COMPLETED, lenghtOfFile, 0);
+				m.setData(createBundle(from, to));
+				h.sendMessage(m);
+			}
 		} else {
 			// downloading the file
 			InputStream input = new BufferedInputStream(from.openStream());
@@ -100,6 +108,7 @@ public class MediaCommand implements Runnable {
 					int processing = (int) (total * 100 / lenghtOfFile);
 					if (cache != processing) {
 						Message m = h.obtainMessage(DOWNLOAD_PROCESSING, processing, lenghtOfFile);
+						m.setData(createBundle(from, to));
 						h.sendMessage(m);
 						cache = processing;
 					}
@@ -110,11 +119,21 @@ public class MediaCommand implements Runnable {
 			output.close();
 			input.close();
 			if (h != null) {
-				Message m = h.obtainMessage(DOWNLOAD_COMPLETED, lenghtOfFile, 0, to);
+				Message m = h.obtainMessage(DOWNLOAD_COMPLETED, lenghtOfFile, 0);
+				m.setData(createBundle(from, to));
 				h.sendMessage(m);
 			}
 			Log.i(EslPodApplication.TAG, "Downloaded file " + to.toString() + " completed");
 		}
+	}
+
+	private Bundle createBundle(URL from, File to) {
+		String f = from.toString();
+		String t = to.toString();
+		Bundle data = new Bundle();
+		data.putString("from",f );
+		data.putString("to", t);
+		return data;
 	}
 
 }
