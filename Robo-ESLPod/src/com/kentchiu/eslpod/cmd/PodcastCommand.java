@@ -18,6 +18,7 @@ import org.xml.sax.InputSource;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.util.Log;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
@@ -25,6 +26,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
 public class PodcastCommand implements Runnable {
@@ -74,9 +76,9 @@ public class PodcastCommand implements Runnable {
 				}
 			}
 		} catch (XPathExpressionException e) {
-			e.printStackTrace();
+			Log.w(EslPodApplication.TAG, "rss parse fail", e);
 		} catch (IllegalStateException e) {
-			e.printStackTrace();
+			Log.w(EslPodApplication.TAG, "get podcast rss fail", e);
 		}
 	}
 

@@ -30,7 +30,7 @@ import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
 public class WordFetchService extends Service {
 
-	private final int						MAX_TASK	= 5;
+	private final int						MAX_TASK	= 500;
 	private final Handler					handler		= new Handler();
 	private ExecutorService					executorService;
 	private ArrayBlockingQueue<Runnable>	commandQueue;

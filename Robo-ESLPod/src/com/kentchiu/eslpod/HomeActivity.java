@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.concurrent.RejectedExecutionException;
 
 import android.app.Dialog;
 import android.app.ListActivity;
@@ -23,6 +24,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.kentchiu.eslpod.cmd.MediaCommand;
 import com.kentchiu.eslpod.cmd.PodcastCommand;
@@ -47,16 +49,18 @@ public class HomeActivity extends ListActivity {
 					Log.w(EslPodApplication.TAG, "Download fail with illegal message " + msg);
 					return;
 				}
-				Button button = ((PodcastListAdapter) getListAdapter()).findButtonByDownloadUrl(from);
+				Button button = findButtonByDownloadUrl(from);
 				if (button == null) {
 					Log.w(EslPodApplication.TAG, "Not Button associates to download url " + from);
 					return;
 				}
 				switch (msg.what) {
 				case MediaCommand.DOWNLOAD_START:
+					button.setEnabled(false);
 					button.setText("Downloading");
 					break;
 				case MediaCommand.DOWNLOAD_PROCESSING:
+					button.setEnabled(false);
 					button.setText(msg.arg1 + "/100");
 					break;
 				case MediaCommand.DOWNLOAD_COMPLETED:
@@ -74,6 +78,15 @@ public class HomeActivity extends ListActivity {
 				}
 
 			}
+
+			private Button findButtonByDownloadUrl(String from) {
+				for (int i = 0; i < getListView().getCount(); i++) {
+					Cursor c = (Cursor) getListView().getItemAtPosition(i);
+					c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URL));
+
+				}
+				return null;
+			}
 		};
 	}
 
@@ -82,7 +95,18 @@ public class HomeActivity extends ListActivity {
 		Uri uri = (Uri) btn.getTag();
 		btn.setEnabled(false);
 		btn.setText("Wating");
-		downloadService.download(uri);
+		try {
+			downloadService.download(uri);
+		} catch (RejectedExecutionException e) {
+			Toast.makeText(HomeActivity.this, "Too many tasks, try it later", Toast.LENGTH_SHORT).show();
+			btn.setEnabled(true);
+			btn.setText("Download");
+		} catch (MalformedURLException e) {
+			Toast.makeText(HomeActivity.this, "Download fail, invalid url", Toast.LENGTH_SHORT).show();
+			Log.e(EslPodApplication.TAG, "Download fail, invalid url , the source uri is " + uri);
+			btn.setEnabled(true);
+			btn.setText("Download");
+		}
 	}
 
 	/** Called when the activity is first created. */
