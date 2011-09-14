@@ -17,8 +17,8 @@ import android.os.Message;
 import android.provider.BaseColumns;
 import android.util.Log;
 
-import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
+import com.kentchiu.eslpod.view.EslPodApplication;
 
 public class DictionaryContentProvider extends ContentProvider {
 

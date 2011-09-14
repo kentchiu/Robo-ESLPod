@@ -15,8 +15,8 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.provider.Dictionary;
+import com.kentchiu.eslpod.view.EslPodApplication;
 
 public class WiktionaryCommand extends AbstractDictionaryCommand {
 

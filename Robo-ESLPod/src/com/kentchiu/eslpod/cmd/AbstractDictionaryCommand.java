@@ -17,9 +17,9 @@ import android.util.Log;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.provider.Dictionary;
 import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
+import com.kentchiu.eslpod.view.EslPodApplication;
 
 public abstract class AbstractDictionaryCommand implements Runnable {
 

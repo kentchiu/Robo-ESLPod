@@ -24,9 +24,9 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
-import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.R;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
+import com.kentchiu.eslpod.view.EslPodApplication;
 
 public class RichScriptCommand implements Runnable {
 	private static class ContainPredicate implements Predicate<String> {

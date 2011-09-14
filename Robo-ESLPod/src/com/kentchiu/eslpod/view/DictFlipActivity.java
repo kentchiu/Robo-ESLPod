@@ -1,4 +1,4 @@
-package com.kentchiu.eslpod;
+package com.kentchiu.eslpod.view;
 
 import java.util.List;
 
@@ -19,6 +19,7 @@ import android.widget.ViewFlipper;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.kentchiu.eslpod.R;
 import com.kentchiu.eslpod.cmd.AbstractDictionaryCommand;
 import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
 

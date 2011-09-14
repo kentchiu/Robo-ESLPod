@@ -1,4 +1,4 @@
-package com.kentchiu.eslpod;
+package com.kentchiu.eslpod.view;
 
 import java.util.List;
 
@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import com.kentchiu.eslpod.R;
 import com.kentchiu.eslpod.cmd.RichScriptCommand;
 
 public class ScriptListAdapter extends ArrayAdapter {

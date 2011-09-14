@@ -15,7 +15,7 @@ public class PodcastCommandTest extends AndroidTestCase {
 
 	public void testCreateContentValue() throws Exception {
 		InputStream inputStream = getClass().getResourceAsStream("/podcast.xml");
-		PodcastCommand h = new PodcastCommand(mContext, inputStream);
+		PodcastCommand h = new PodcastCommand(mContext, inputStream, null);
 		List<Node> items = h.getItemNodes();
 		Node node = Iterables.get(items, 5);
 		ContentValues values = h.convert(node);
@@ -31,13 +31,13 @@ public class PodcastCommandTest extends AndroidTestCase {
 
 	public void testGetItemNodes() throws Exception {
 		InputStream inputStream = getClass().getResourceAsStream("/podcast.xml");
-		PodcastCommand h = new PodcastCommand(mContext, inputStream);
+		PodcastCommand h = new PodcastCommand(mContext, inputStream, null);
 		assertEquals(86, Iterables.size(h.getItemNodes()));
 	}
 
 	public void testInsert() throws Exception {
 		InputStream inputStream = getClass().getResourceAsStream("/podcast.xml");
-		PodcastCommand h = new PodcastCommand(mContext, inputStream);
+		PodcastCommand h = new PodcastCommand(mContext, inputStream, null);
 		h.run();
 	}
 

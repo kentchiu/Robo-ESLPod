@@ -1,4 +1,4 @@
-package com.kentchiu.eslpod;
+package com.kentchiu.eslpod.view;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -36,6 +36,7 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.kentchiu.eslpod.R;
 import com.kentchiu.eslpod.cmd.RichScriptCommand;
 import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;

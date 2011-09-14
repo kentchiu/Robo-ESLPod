@@ -18,6 +18,8 @@ import org.xml.sax.InputSource;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 
 import com.google.common.base.Joiner;
@@ -26,27 +28,34 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
+import com.kentchiu.eslpod.view.EslPodApplication;
 
 public class PodcastCommand implements Runnable {
 
-	public static final String	RSS_URI	= "http://feeds.feedburner.com/EnglishAsASecondLanguagePodcast";
+	public static final String	RSS_URI					= "http://feeds.feedburner.com/EnglishAsASecondLanguagePodcast";
+	public static final int		START_GET_ITEM_NODES	= 1;
+	public static final int		ADD_ITEM_NODE			= 2;
+	public static final int		END_GET_ITEM_NODES		= 3;
 
 	private InputStream			inputStream;
 	private Context				context;
+	private Handler				handler;
 
-	public PodcastCommand(Context context, InputStream inputStream) {
+	public PodcastCommand(Context context, InputStream inputStream, Handler handler) {
 		super();
 		this.context = context;
 		this.inputStream = inputStream;
+		this.handler = handler;
 	}
 
 	public List<Node> getItemNodes() throws XPathExpressionException {
+		sendMessage(START_GET_ITEM_NODES, 0, 0);
 		XPath xpath = XPathFactory.newInstance().newXPath();
 		InputSource inputSource = new InputSource(inputStream);
 		NodeList nodes = (NodeList) xpath.evaluate("//channel/item/title", inputSource, XPathConstants.NODESET);
 		int length = nodes.getLength();
+		Log.d(EslPodApplication.TAG, "Count of nodes is " + length);
 		List<Node> results = Lists.newArrayList();
 		for (int i = 0; i < length; i++) {
 			Node item = nodes.item(i);
@@ -55,8 +64,10 @@ public class PodcastCommand implements Runnable {
 			if (content.matches(titlePattern)) {
 				Preconditions.checkNotNull(item.getParentNode());
 				results.add(item.getParentNode());
+				sendMessage(ADD_ITEM_NODE, i, length);
 			}
 		}
+		sendMessage(END_GET_ITEM_NODES, results.size(), length);
 		return results;
 	}
 
@@ -68,13 +79,18 @@ public class PodcastCommand implements Runnable {
 			while (c.moveToNext()) {
 				titles.add(c.getString(c.getColumnIndex(PodcastColumns.TITLE)));
 			}
-			for (Node item : getItemNodes()) {
+			List<Node> nodes = getItemNodes();
+			Log.i(EslPodApplication.TAG, nodes.size() + " need to be saved");
+			int count = 1;
+			for (Node item : nodes) {
 				ContentValues cv = convert(item);
 				String title = cv.getAsString(PodcastColumns.TITLE);
 				if (StringUtils.isNotBlank(title) && !titles.contains(title)) {
 					context.getContentResolver().insert(PodcastColumns.PODCAST_URI, cv);
+					count++;
 				}
 			}
+			Log.i(EslPodApplication.TAG, count + " podcast saved");
 		} catch (XPathExpressionException e) {
 			Log.w(EslPodApplication.TAG, "rss parse fail", e);
 		} catch (IllegalStateException e) {
@@ -117,6 +133,13 @@ public class PodcastCommand implements Runnable {
 			}
 		}
 		return result;
+	}
+
+	private void sendMessage(int what, int arg1, int arg2) {
+		if (handler != null) {
+			Message m = handler.obtainMessage(what, arg1, arg2);
+			handler.sendMessage(m);
+		}
 	}
 
 }

@@ -10,8 +10,8 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 import android.util.Log;
 
-import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
+import com.kentchiu.eslpod.view.EslPodApplication;
 
 public class PodcastContentProvider extends ContentProvider {
 
@@ -50,9 +50,9 @@ public class PodcastContentProvider extends ContentProvider {
 		case PODCASTS:
 			long rowId = db.insert(DatabaseHelper.PODCAST_TABLE_NAME, null, values);
 			Log.d(EslPodApplication.TAG, "insert pocast data as id " + rowId);
-			Uri url = ContentUris.withAppendedId(PodcastColumns.PODCAST_URI, rowId);
-			getContext().getContentResolver().notifyChange(uri, null);
-			return url;
+			Uri result = ContentUris.withAppendedId(PodcastColumns.PODCAST_URI, rowId);
+			getContext().getContentResolver().notifyChange(result, null);
+			return result;
 		default:
 			throw new IllegalArgumentException("Unknown URI " + uri);
 		}

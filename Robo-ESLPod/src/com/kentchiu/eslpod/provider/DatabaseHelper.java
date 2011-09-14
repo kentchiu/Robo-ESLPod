@@ -1,18 +1,20 @@
 package com.kentchiu.eslpod.provider;
 
+import org.apache.commons.lang.math.RandomUtils;
+
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 import android.util.Log;
 
-import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
+import com.kentchiu.eslpod.view.EslPodApplication;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 	public static String	DATABASE_NAME			= "elspod.db";
-	public static int		DATABASE_VERSION		= 1;
+	public static int		DATABASE_VERSION		= RandomUtils.nextInt();
 	public static String	PODCAST_TABLE_NAME		= "podcast";
 	public static String	DICTIONARY_TABLE_NAME	= "dictionary";
 
@@ -59,7 +61,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		PodcastColumns.SUBTITLE + " TEXT, " +
 		PodcastColumns.MEDIA_URL + " TEXT UNIQUE, " +
 		PodcastColumns.MEDIA_URL_LOCAL + " TEXT UNIQUE, " +
-		PodcastColumns.MEDIA_LENGTH+ " INTEGER, " +
+		PodcastColumns.MEDIA_LENGTH + " INTEGER, " +
+		PodcastColumns.MEDIA_STATUS + " INTEGER, " +
 		PodcastColumns.PUBLISHED+ " TEXT, " +
 		PodcastColumns.LINK  + " TEXT UNIQUE," +
 		PodcastColumns.DURATION  + " TEXT, " +

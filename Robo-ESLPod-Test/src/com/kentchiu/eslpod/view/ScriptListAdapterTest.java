@@ -1,8 +1,9 @@
-package com.kentchiu.eslpod;
+package com.kentchiu.eslpod.view;
 
 import android.test.AndroidTestCase;
 
 import com.google.common.collect.ImmutableList;
+import com.kentchiu.eslpod.R;
 
 public class ScriptListAdapterTest extends AndroidTestCase {
 
