@@ -31,15 +31,15 @@ public class PodcastListAdapter extends ResourceCursorAdapter {
 		tv.setText(title);
 		button.setTag(uri);
 		switch (status) {
-		case PodcastColumns.MEDIA_DOWNLOADED:
+		case PodcastColumns.MEDIA_STATUS_DOWNLOADED:
 			button.setEnabled(true);
 			button.setText("CLEAN");
 			break;
-		case PodcastColumns.MEDIA_DOWNLOADING:
+		case PodcastColumns.MEDIA_STATUS_DOWNLOADING:
 			button.setEnabled(false);
 			button.setText("DOWNLOADING...");
 			break;
-		case PodcastColumns.MEDIA_CLEAN:
+		case PodcastColumns.MEDIA_STATUS_DOWNLOADABLE:
 		default:
 			button.setEnabled(true);
 			button.setText("DOWNLOAD");

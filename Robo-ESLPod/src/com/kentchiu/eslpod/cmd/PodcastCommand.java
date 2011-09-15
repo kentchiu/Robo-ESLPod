@@ -37,6 +37,9 @@ public class PodcastCommand implements Runnable {
 	public static final int		START_GET_ITEM_NODES	= 1;
 	public static final int		ADD_ITEM_NODE			= 2;
 	public static final int		END_GET_ITEM_NODES		= 3;
+	public static final int		START_IMPORT	= 4;
+	public static final int		IMPORTING	= 5;
+	public static final int		END_IMPORT	= 6;
 
 	private InputStream			inputStream;
 	private Context				context;
@@ -80,16 +83,21 @@ public class PodcastCommand implements Runnable {
 				titles.add(c.getString(c.getColumnIndex(PodcastColumns.TITLE)));
 			}
 			List<Node> nodes = getItemNodes();
-			Log.i(EslPodApplication.TAG, nodes.size() + " need to be saved");
+			Log.d(EslPodApplication.TAG, nodes.size() + " need to be saved");
 			int count = 1;
+			sendMessage(START_IMPORT, 0, nodes.size());
 			for (Node item : nodes) {
+
 				ContentValues cv = convert(item);
 				String title = cv.getAsString(PodcastColumns.TITLE);
 				if (StringUtils.isNotBlank(title) && !titles.contains(title)) {
 					context.getContentResolver().insert(PodcastColumns.PODCAST_URI, cv);
+					sendMessage(IMPORTING, count, nodes.size());
 					count++;
 				}
 			}
+			sendMessage(END_IMPORT, count, nodes.size());
+
 			Log.i(EslPodApplication.TAG, count + " podcast saved");
 		} catch (XPathExpressionException e) {
 			Log.w(EslPodApplication.TAG, "rss parse fail", e);
@@ -111,7 +119,6 @@ public class PodcastCommand implements Runnable {
 				result.put(PodcastColumns.PUBLISHED, node.getTextContent());
 			} else if (StringUtils.equals("link", node.getNodeName())) {
 				result.put(PodcastColumns.LINK, node.getTextContent());
-
 			} else if (StringUtils.endsWith("enclosure", node.getNodeName())) {
 				NamedNodeMap attributes = node.getAttributes();
 				String url = attributes.getNamedItem("url").getNodeValue();
@@ -120,7 +127,6 @@ public class PodcastCommand implements Runnable {
 				result.put(PodcastColumns.MEDIA_LENGTH, length);
 			} else if (StringUtils.equals("description", node.getNodeName())) {
 				String desc = node.getTextContent();
-
 				String cleanText = desc.replaceAll("\n", "").replaceAll("<br />", ",").replaceAll("<p>", "");
 				// subtitle
 				Iterable<String> lines = Splitter.on("</p>").split(cleanText);

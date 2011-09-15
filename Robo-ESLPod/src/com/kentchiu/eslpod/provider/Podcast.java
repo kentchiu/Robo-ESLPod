@@ -6,12 +6,12 @@ import android.provider.BaseColumns;
 public class Podcast {
 
 	public static final class PodcastColumns implements BaseColumns {
-		public static final Uri		PODCAST_URI				= Uri.parse("content://" + Podcast.AUTHORITY + "/podcast");
-		public static final String	CONTENT_TYPE_PODCASTS	= "vnd.android.cursor.dir/vnd.eslpod.podcast";
-		public static final String	CONTENT_TYPE_PODCAST	= "vnd.android.cursor.item/vnd.eslpod.podcast";
-		public static final int		MEDIA_CLEAN				= 0;														// not yet download
-		public static final int		MEDIA_DOWNLOADED		= 1;
-		public static final int		MEDIA_DOWNLOADING		= 2;
+		public static final Uri		PODCAST_URI					= Uri.parse("content://" + Podcast.AUTHORITY + "/podcast");
+		public static final String	CONTENT_TYPE_PODCASTS		= "vnd.android.cursor.dir/vnd.eslpod.podcast";
+		public static final String	CONTENT_TYPE_PODCAST		= "vnd.android.cursor.item/vnd.eslpod.podcast";
+		public static final int		MEDIA_STATUS_DOWNLOADABLE	= 0;														// not yet download
+		public static final int		MEDIA_STATUS_DOWNLOADED		= 1;
+		public static final int		MEDIA_STATUS_DOWNLOADING	= 2;
 
 		/*
 		 * column name
@@ -19,56 +19,56 @@ public class Podcast {
 		/**
 		 * <P>Type: TEXT</P>
 		 */
-		public static final String	TITLE					= "title";
+		public static final String	TITLE						= "title";
 		/**
 		 * <P>Type: TEXT</P>
 		 */
-		public static final String	SUBTITLE				= "subtitle";
+		public static final String	SUBTITLE					= "subtitle";
 		/**
 		 * <P>Type: TEXT</P>
 		 */
-		public static final String	MEDIA_URL				= "media_url";
+		public static final String	MEDIA_URL					= "media_url";
 		/**
 		 * <P>Type: TEXT</P>
 		 */
-		public static final String	MEDIA_URL_LOCAL			= "media_url_local";
+		public static final String	MEDIA_URL_LOCAL				= "media_url_local";
 		/**
 		 * <P>Type: INTEGER</P>
 		 */
-		public static final String	MEDIA_LENGTH			= "media_length";
+		public static final String	MEDIA_LENGTH				= "media_length";
 		/**
 		 * <P>Type: INTEGER</P>
-		 * {@link #MEDIA_CLEAN} or {@link #MEDIA_DOWNLOADING} or {@link #MEDIA_DOWNLOADED}
+		 * {@link #MEDIA_STATUS_DOWNLOADABLE} or {@link #MEDIA_STATUS_DOWNLOADING} or {@link #MEDIA_STATUS_DOWNLOADED}
 		 */
-		public static final String	MEDIA_STATUS			= "download_status";
+		public static final String	MEDIA_STATUS				= "download_status";
 		/**
 		 * <P>Type: TEXT (Date String)</P>
 		 */
-		public static final String	PUBLISHED				= "published";
+		public static final String	PUBLISHED					= "published";
 		/**
 		 * <P>Type: TEXT</P>
 		 */
-		public static final String	LINK					= "link";
+		public static final String	LINK						= "link";
 		/**
 		 * <P>Type: INTEGER</P>
 		 */
-		public static final String	DURATION				= "duration";
+		public static final String	DURATION					= "duration";
 		/**
 		 * <P>Type: TEXT</P>
 		 */
-		public static final String	SCRIPT					= "script";
+		public static final String	SCRIPT						= "script";
 		/**
 		 * <P>Type: TEXT</P>
 		 */
-		public static final String	RICH_SCRIPT				= "rich_script";
+		public static final String	RICH_SCRIPT					= "rich_script";
 		/**
 		 * <P>Type: TEXT</P>
 		 */
-		public static final String	TAGS					= "tags";
+		public static final String	TAGS						= "tags";
 		/**
 		 * <P>Type: TEXT</P>
 		 */
-		public static final String	PARAGRAPH_INDEX			= "paragraph_index";
+		public static final String	PARAGRAPH_INDEX				= "paragraph_index";
 
 		private PodcastColumns() {
 		}

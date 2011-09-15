@@ -49,7 +49,7 @@ public class PodcastContentProvider extends ContentProvider {
 		switch (uriMatcher.match(uri)) {
 		case PODCASTS:
 			long rowId = db.insert(DatabaseHelper.PODCAST_TABLE_NAME, null, values);
-			Log.d(EslPodApplication.TAG, "insert pocast data as id " + rowId);
+			Log.v(EslPodApplication.TAG, "insert pocast data as id " + rowId);
 			Uri result = ContentUris.withAppendedId(PodcastColumns.PODCAST_URI, rowId);
 			getContext().getContentResolver().notifyChange(result, null);
 			return result;
@@ -70,7 +70,7 @@ public class PodcastContentProvider extends ContentProvider {
 
 	@Override
 	public Cursor query(Uri uri, String[] projection, String where, String[] whereArgs, String sortOrder) {
-		Log.d(EslPodApplication.TAG, "query uri :" + uri);
+		Log.v(EslPodApplication.TAG, "query uri :" + uri);
 		SQLiteDatabase db = databaseHelper.getWritableDatabase();
 		final Cursor c;
 		switch (uriMatcher.match(uri)) {
@@ -89,20 +89,23 @@ public class PodcastContentProvider extends ContentProvider {
 
 	@Override
 	public int update(Uri uri, ContentValues values, String where, String[] whereArgs) {
+		Log.v(EslPodApplication.TAG, "update uri : " + uri);
 		SQLiteDatabase db = databaseHelper.getWritableDatabase();
+		int result;
 		switch (uriMatcher.match(uri)) {
 		case PODCASTS:
-			return db.update(DatabaseHelper.PODCAST_TABLE_NAME, values, where, whereArgs);
+			result = db.update(DatabaseHelper.PODCAST_TABLE_NAME, values, where, whereArgs);
+			getContext().getContentResolver().notifyChange(uri, null);
+			break;
 		case PODCAST:
 			Long id = ContentUris.parseId(uri);
-			int update;
-			update = db.update(DatabaseHelper.PODCAST_TABLE_NAME, values, BaseColumns._ID + "=?", new String[] { id.toString() });
+			result = db.update(DatabaseHelper.PODCAST_TABLE_NAME, values, BaseColumns._ID + "=?", new String[] { id.toString() });
 			getContext().getContentResolver().notifyChange(uri, null);
-			return update;
+			break;
 		default:
-
+			result = 0;
 		}
-		return 0;
+		return result;
 	}
 
 }

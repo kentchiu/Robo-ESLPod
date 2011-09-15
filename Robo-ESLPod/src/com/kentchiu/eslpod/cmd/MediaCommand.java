@@ -52,7 +52,7 @@ public class MediaCommand implements Runnable {
 	@Override
 	public void run() {
 		try {
-			downloadFile(from, to, handler);
+			downloadFile();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -72,7 +72,7 @@ public class MediaCommand implements Runnable {
 		this.to = to;
 	}
 
-	private Bundle createBundle(URL from, File to) {
+	private Bundle createBundle() {
 		String f = from.toString();
 		String t = to.toString();
 		Bundle data = new Bundle();
@@ -81,59 +81,52 @@ public class MediaCommand implements Runnable {
 		return data;
 	}
 
-	private void downloadFile(URL from, File to, Handler h) throws IOException, FileNotFoundException {
+	private void downloadFile() throws IOException, FileNotFoundException {
 		Log.i(EslPodApplication.TAG, "Downloading file from " + from.toString());
-		int what = DOWNLOAD_START;
-		if (h != null) {
-			Message m = h.obtainMessage(what);
-			m.setData(createBundle(from, to));
-			h.sendMessage(m);
-		}
+		sendMessage(DOWNLOAD_START,0,0);
+
 		URLConnection conn = from.openConnection();
 
 		conn.connect();
 		// this will be useful so that you can show a typical 0-100% progress bar
-		int lenghtOfFile = conn.getContentLength();
+		long lenghtOfFile = conn.getContentLength();
 		Log.v(EslPodApplication.TAG, "file length : " + lenghtOfFile);
 		if (to.exists() && to.length() == lenghtOfFile) {
 			Log.i(EslPodApplication.TAG, to.getAbsolutePath() + " exists");
-			if (h != null) {
-				Message m = h.obtainMessage(DOWNLOAD_COMPLETED, lenghtOfFile, 0);
-				m.setData(createBundle(from, to));
-				h.sendMessage(m);
-			}
+			sendMessage(DOWNLOAD_COMPLETED, (int)lenghtOfFile, (int)lenghtOfFile);
 		} else {
 			// downloading the file
 			InputStream input = new BufferedInputStream(from.openStream());
 			OutputStream output = new FileOutputStream(to.getAbsolutePath());
 			byte data[] = new byte[1024];
-			long total = 0;
+			long process = 0;
 			int count;
-			int cache = -1; // Using cache to reduce sending message
+			long cache = -1; // Using cache to reduce sending message
 			while ((count = input.read(data)) != -1) {
-				total += count;
-				if (h != null) {
-					// publishing the progress....
-					int processing = (int) (total * 100 / lenghtOfFile);
-					if (cache != processing) {
-						Message m = h.obtainMessage(DOWNLOAD_PROCESSING, processing, lenghtOfFile);
-						m.setData(createBundle(from, to));
-						h.sendMessage(m);
-						cache = processing;
-					}
+				process += count;
+				// publishing the progress....
+				if (cache != process) {
+				sendMessage(DOWNLOAD_PROCESSING, process, lenghtOfFile);
+				cache = process;
 				}
 				output.write(data, 0, count);
 			}
 			output.flush();
 			output.close();
 			input.close();
-			if (h != null) {
-				Message m = h.obtainMessage(DOWNLOAD_COMPLETED, lenghtOfFile, 0);
-				m.setData(createBundle(from, to));
-				h.sendMessage(m);
-			}
+			sendMessage(DOWNLOAD_COMPLETED, (int)cache, (int)lenghtOfFile);
 			Log.i(EslPodApplication.TAG, "Downloaded file " + to.toString() + " completed");
 		}
+	}
+
+	public void sendMessage(int what, long process, long total) {
+		if (handler != null) {
+				Message m = handler.obtainMessage(what, (int)process, (int)total);
+				m.setData(createBundle());
+				handler.sendMessage(m);
+			} else {
+				Log.w(EslPodApplication.TAG, "try to sending but handler is null");
+			}
 	}
 
 }

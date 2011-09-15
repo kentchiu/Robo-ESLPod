@@ -15,7 +15,7 @@ import com.kentchiu.eslpod.cmd.PodcastCommand;
 
 public class PodcastFetchService extends Service {
 
-	public static int	LOCAL_PODCAST_COUNT	= 86;
+	public static int	LOCAL_PODCAST_COUNT	= 85;
 
 	public void fetchNew(Handler handler) throws MalformedURLException, IOException {
 		InputStream is = new URL(PodcastCommand.RSS_URI).openStream();

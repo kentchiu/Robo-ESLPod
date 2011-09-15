@@ -1,5 +1,7 @@
 package com.kentchiu.eslpod.provider;
 
+import java.util.Random;
+
 import org.apache.commons.lang.math.RandomUtils;
 
 import android.content.Context;
@@ -14,7 +16,7 @@ import com.kentchiu.eslpod.view.EslPodApplication;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 	public static String	DATABASE_NAME			= "elspod.db";
-	public static int		DATABASE_VERSION		= RandomUtils.nextInt();
+	public static int		DATABASE_VERSION		= 1;
 	public static String	PODCAST_TABLE_NAME		= "podcast";
 	public static String	DICTIONARY_TABLE_NAME	= "dictionary";
 

@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang.StringUtils;
 
 import android.app.Service;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
@@ -20,6 +21,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.provider.BaseColumns;
 import android.util.Log;
 
 import com.google.common.base.Preconditions;
@@ -29,7 +31,7 @@ import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 import com.kentchiu.eslpod.view.EslPodApplication;
 
 public class MediaDownloadService extends Service {
-	private static final int				MAX_TASK	= 5;
+	private static final int				MAX_TASK	= 10;
 	private ExecutorService					executorService;
 	private ArrayBlockingQueue<Runnable>	commandQueue;
 	private Handler							downloadHandler;
@@ -44,15 +46,28 @@ public class MediaDownloadService extends Service {
 					Log.w(EslPodApplication.TAG, "Download fail with illegal message " + msg);
 					return;
 				}
+				ContentValues cv = new ContentValues();
 				switch (msg.what) {
 				case MediaCommand.DOWNLOAD_START:
+					cv.put(PodcastColumns.MEDIA_STATUS, PodcastColumns.MEDIA_STATUS_DOWNLOADING);
+					int count = getContentResolver().update(PodcastColumns.PODCAST_URI, cv, PodcastColumns.MEDIA_URL + "=?", new String[] { from });
+					if (count != 1) {
+						Log.w(EslPodApplication.TAG, "exception row updated but " + count);
+					}
 					break;
 				case MediaCommand.DOWNLOAD_PROCESSING:
+					if (msg.arg1 % 5 == 0) {
+						cv.put(PodcastColumns.MEDIA_STATUS, PodcastColumns.MEDIA_STATUS_DOWNLOADING);
+						count = getContentResolver().update(PodcastColumns.PODCAST_URI, cv, PodcastColumns.MEDIA_URL + "=?", new String[] { from });
+						if (count != 1) {
+							Log.w(EslPodApplication.TAG, "exception row updated but " + count);
+						}
+					}
 					break;
 				case MediaCommand.DOWNLOAD_COMPLETED:
-					ContentValues cv = new ContentValues();
 					cv.put(PodcastColumns.MEDIA_URL_LOCAL, to);
-					int count = getContentResolver().update(PodcastColumns.PODCAST_URI, cv, PodcastColumns.MEDIA_URL + "=?", new String[] { from });
+					cv.put(PodcastColumns.MEDIA_STATUS, PodcastColumns.MEDIA_STATUS_DOWNLOADED);
+					count = getContentResolver().update(PodcastColumns.PODCAST_URI, cv, PodcastColumns.MEDIA_URL + "=?", new String[] { from });
 					if (count != 1) {
 						Log.w(EslPodApplication.TAG, "exception row updated but " + count);
 					}
@@ -74,7 +89,10 @@ public class MediaDownloadService extends Service {
 			String name = StringUtils.substringAfterLast(from.getFile(), "/");
 			File to = new File(getDownloadFolder(), name);
 			MediaCommand cmd = new MediaCommand(from, to, downloadHandler);
+			// executorService.execute(cmd) will not execute command immediately, we need send download start message as soon as possible when download() invoked.
+			cmd.sendMessage(MediaCommand.DOWNLOAD_START, 0, 0);
 			executorService.execute(cmd);
+			Log.d(EslPodApplication.TAG, "add download task, there are " + commandQueue.size()  + " in queue" );
 		}
 	}
 
@@ -104,6 +122,28 @@ public class MediaDownloadService extends Service {
 		downloadHandler = createDownloadHandler();
 	}
 
+	public int refreshStatus() {
+		Cursor c = getContentResolver().query(PodcastColumns.PODCAST_URI, null, null, null, null);
+		int count = 0;
+		while (c.moveToNext()) {
+			int id = c.getInt(c.getColumnIndex(BaseColumns._ID));
+			String path = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URL_LOCAL));
+			long length = c.getLong(c.getColumnIndex(PodcastColumns.MEDIA_LENGTH));
+			int status = c.getInt(c.getColumnIndex(PodcastColumns.MEDIA_STATUS));
+
+			int newStatus = getFileStatus(path, length);
+			if (newStatus != status) {
+				Log.d(EslPodApplication.TAG, "update download status of uri to " + newStatus);
+				Uri uri = ContentUris.withAppendedId(PodcastColumns.PODCAST_URI, id);
+				ContentValues values = new ContentValues();
+				values.put(PodcastColumns.MEDIA_STATUS, newStatus);
+				getContentResolver().update(uri, values, null, null);
+				count++;
+			}
+		}
+		return count++;
+	}
+
 	public void setDownloadHandler(Handler downloadHandler) {
 		this.downloadHandler = downloadHandler;
 	}
@@ -116,6 +156,21 @@ public class MediaDownloadService extends Service {
 			Log.w(EslPodApplication.TAG, "SD card no found, save to internl storage");
 			return getCacheDir();
 		}
+	}
+
+	private int getFileStatus(String path, long length) {
+		int newStatus = 0;
+		if (StringUtils.isBlank(path)) {
+			newStatus = PodcastColumns.MEDIA_STATUS_DOWNLOADABLE;
+		} else {
+			File file = new File(path);
+			if (file.exists() && file.length() == length) {
+				newStatus = PodcastColumns.MEDIA_STATUS_DOWNLOADED;
+			} else {
+				newStatus = PodcastColumns.MEDIA_STATUS_DOWNLOADABLE;
+			}
+		}
+		return newStatus;
 	}
 
 }
