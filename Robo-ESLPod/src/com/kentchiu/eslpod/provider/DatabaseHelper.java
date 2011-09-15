@@ -16,7 +16,7 @@ import com.kentchiu.eslpod.view.EslPodApplication;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 	public static String	DATABASE_NAME			= "elspod.db";
-	public static int		DATABASE_VERSION		= 1;
+	public static int		DATABASE_VERSION		= 4;
 	public static String	PODCAST_TABLE_NAME		= "podcast";
 	public static String	DICTIONARY_TABLE_NAME	= "dictionary";
 
@@ -64,7 +64,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		PodcastColumns.MEDIA_URL + " TEXT UNIQUE, " +
 		PodcastColumns.MEDIA_URL_LOCAL + " TEXT UNIQUE, " +
 		PodcastColumns.MEDIA_LENGTH + " INTEGER, " +
-		PodcastColumns.MEDIA_STATUS + " INTEGER, " +
+		PodcastColumns.MEDIA_DOWNLOAD_STATUS + " INTEGER, " +
+		PodcastColumns.MEDIA_DOWNLOAD_LENGTH + " INTEGER, " +
 		PodcastColumns.PUBLISHED+ " TEXT, " +
 		PodcastColumns.LINK  + " TEXT UNIQUE," +
 		PodcastColumns.DURATION  + " TEXT, " +

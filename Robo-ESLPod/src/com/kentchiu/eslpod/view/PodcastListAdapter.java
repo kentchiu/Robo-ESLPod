@@ -25,7 +25,10 @@ public class PodcastListAdapter extends ResourceCursorAdapter {
 		int id = cursor.getInt(cursor.getColumnIndex(BaseColumns._ID));
 		Uri uri = ContentUris.withAppendedId(PodcastColumns.PODCAST_URI, id);
 		String title = cursor.getString(cursor.getColumnIndex(PodcastColumns.TITLE));
-		int status = cursor.getInt(cursor.getColumnIndex(PodcastColumns.MEDIA_STATUS));
+		int status = cursor.getInt(cursor.getColumnIndex(PodcastColumns.MEDIA_DOWNLOAD_STATUS));
+		long length = cursor.getLong(cursor.getColumnIndex(PodcastColumns.MEDIA_LENGTH));
+		long downloadLength = cursor.getLong(cursor.getColumnIndex(PodcastColumns.MEDIA_DOWNLOAD_LENGTH));
+
 		TextView tv = (TextView) view.findViewById(R.id.podcastTitle);
 		final Button button = (Button) view.findViewById(R.id.downloadButton);
 		tv.setText(title);
@@ -37,7 +40,7 @@ public class PodcastListAdapter extends ResourceCursorAdapter {
 			break;
 		case PodcastColumns.MEDIA_STATUS_DOWNLOADING:
 			button.setEnabled(false);
-			button.setText("DOWNLOADING...");
+			button.setText(downloadLength + "/" + length);
 			break;
 		case PodcastColumns.MEDIA_STATUS_DOWNLOADABLE:
 		default:
@@ -51,5 +54,7 @@ public class PodcastListAdapter extends ResourceCursorAdapter {
 	public View newView(Context context, Cursor cursor, ViewGroup parent) {
 		return super.newView(context, cursor, parent);
 	}
+
+
 
 }

@@ -15,7 +15,7 @@ import com.kentchiu.eslpod.cmd.PodcastCommand;
 
 public class PodcastFetchService extends Service {
 
-	public static int	LOCAL_PODCAST_COUNT	= 85;
+	public static int	LOCAL_PODCAST_COUNT	= 5;
 
 	public void fetchNew(Handler handler) throws MalformedURLException, IOException {
 		InputStream is = new URL(PodcastCommand.RSS_URI).openStream();
@@ -26,7 +26,7 @@ public class PodcastFetchService extends Service {
 	}
 
 	public void importLocal(Handler handler) {
-		InputStream is = getResources().openRawResource(R.raw.podcast);
+		InputStream is = getResources().openRawResource(R.raw.podcast_680_685);
 		PodcastCommand podcastCommand = new PodcastCommand(PodcastFetchService.this, is, handler);
 		// doInBackground is already in work thread, no need to using a new one
 		Thread t = new Thread(podcastCommand);

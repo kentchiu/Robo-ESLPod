@@ -99,15 +99,16 @@ public class MediaCommand implements Runnable {
 			InputStream input = new BufferedInputStream(from.openStream());
 			OutputStream output = new FileOutputStream(to.getAbsolutePath());
 			byte data[] = new byte[1024];
-			long process = 0;
+			long total = 0;
 			int count;
-			long cache = -1; // Using cache to reduce sending message
+			int cache = -1; // Using cache to reduce sending message
 			while ((count = input.read(data)) != -1) {
-				process += count;
+				total += count;
+				int processing = (int) (total * 100 / lenghtOfFile);
 				// publishing the progress....
-				if (cache != process) {
-				sendMessage(DOWNLOAD_PROCESSING, process, lenghtOfFile);
-				cache = process;
+				if (cache != processing) {
+					sendMessage(DOWNLOAD_PROCESSING, total, lenghtOfFile);
+				cache = processing;
 				}
 				output.write(data, 0, count);
 			}
@@ -123,7 +124,7 @@ public class MediaCommand implements Runnable {
 		if (handler != null) {
 				Message m = handler.obtainMessage(what, (int)process, (int)total);
 				m.setData(createBundle());
-				handler.sendMessage(m);
+				m.sendToTarget();
 			} else {
 				Log.w(EslPodApplication.TAG, "try to sending but handler is null");
 			}

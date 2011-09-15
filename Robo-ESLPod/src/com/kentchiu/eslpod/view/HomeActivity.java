@@ -1,18 +1,23 @@
 package com.kentchiu.eslpod.view;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.concurrent.RejectedExecutionException;
+
+import org.apache.commons.lang.StringUtils;
 
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -23,6 +28,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.kentchiu.eslpod.R;
+import com.kentchiu.eslpod.cmd.MediaCommand;
 import com.kentchiu.eslpod.cmd.PodcastCommand;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 import com.kentchiu.eslpod.service.LocalBinder;
@@ -31,6 +37,51 @@ import com.kentchiu.eslpod.service.PodcastFetchService;
 import com.kentchiu.eslpod.service.RichScriptFetchService;
 
 public class HomeActivity extends ListActivity {
+
+	private  class DownloadHandler extends Handler {
+		@Override
+		public void handleMessage(Message msg) {
+			String from = msg.getData().getString("from");
+			String to = msg.getData().getString("to");
+			if (from == null) {
+				Log.w(EslPodApplication.TAG, "Download fail with illegal message " + msg);
+				return;
+			}
+			ContentValues cv = new ContentValues();
+			switch (msg.what) {
+			case MediaCommand.DOWNLOAD_START:
+				cv.put(PodcastColumns.MEDIA_DOWNLOAD_STATUS, PodcastColumns.MEDIA_STATUS_DOWNLOADING);
+				cv.put(PodcastColumns.MEDIA_DOWNLOAD_LENGTH, msg.arg1);
+				int count = getContentResolver().update(PodcastColumns.PODCAST_URI, cv, PodcastColumns.MEDIA_URL + "=?", new String[] { from });
+				if (count != 1) {
+					Log.w(EslPodApplication.TAG, "exception row updated but " + count);
+				}
+				break;
+			case MediaCommand.DOWNLOAD_PROCESSING:
+					cv.put(PodcastColumns.MEDIA_DOWNLOAD_STATUS, PodcastColumns.MEDIA_STATUS_DOWNLOADING);
+					cv.put(PodcastColumns.MEDIA_DOWNLOAD_LENGTH, msg.arg1);
+					count = getContentResolver().update(PodcastColumns.PODCAST_URI, cv, PodcastColumns.MEDIA_URL + "=?", new String[] { from });
+					if (count != 1) {
+						Log.w(EslPodApplication.TAG, "exception row updated but " + count);
+					}
+				break;
+			case MediaCommand.DOWNLOAD_COMPLETED:
+				cv.put(PodcastColumns.MEDIA_URL_LOCAL, to);
+				cv.put(PodcastColumns.MEDIA_DOWNLOAD_LENGTH, msg.arg1);
+				cv.put(PodcastColumns.MEDIA_DOWNLOAD_STATUS, PodcastColumns.MEDIA_STATUS_DOWNLOADED);
+				count = getContentResolver().update(PodcastColumns.PODCAST_URI, cv, PodcastColumns.MEDIA_URL + "=?", new String[] { from });
+				if (count != 1) {
+					Log.w(EslPodApplication.TAG, "exception row updated but " + count);
+				}
+				break;
+			default:
+				Log.w(EslPodApplication.TAG, "Unknow message " + msg);
+			}
+			PodcastListAdapter adapter = (PodcastListAdapter) getListAdapter();
+			adapter.changeCursor(managedQuery(PodcastColumns.PODCAST_URI, null, null, null, PodcastColumns.TITLE + " DESC"));
+			adapter.notifyDataSetChanged();
+		}
+	}
 
 	private final class ImportHandler extends Handler {
 		@Override
@@ -51,32 +102,29 @@ public class HomeActivity extends ListActivity {
 	}
 
 	private static final int		DIALOG_IMPORT	= 0;
-	private MediaDownloadService	meidaDownloadService;
 	private ServiceConnection		mediaConn;
 	private ServiceConnection		podcastConn;
 	private PodcastFetchService		podcastFetchService;
+	private MediaDownloadService	mediaDownloadService;
 
-	public void downloadClickHandler(View view) {
+
+	public void downloadClickHandler(View view) throws MalformedURLException {
 		Button btn = (Button) view;
 		Uri uri = (Uri) btn.getTag();
-		//btn.setEnabled(false);
-		//btn.setText("Wating");
+		btn.setEnabled(false);
 		try {
-			meidaDownloadService.download(uri);
+			mediaDownloadService.download(uri);
 		} catch (RejectedExecutionException e) {
 			Toast.makeText(HomeActivity.this, "Too many tasks, try it later", Toast.LENGTH_SHORT).show();
-			//btn.setEnabled(true);
-			//btn.setText("Download");
+			btn.setEnabled(true);
+			btn.setText("Download");
 		} catch (MalformedURLException e) {
 			Toast.makeText(HomeActivity.this, "Download fail, invalid url", Toast.LENGTH_SHORT).show();
 			Log.e(EslPodApplication.TAG, "Download fail, invalid url , the source uri is " + uri);
-			//btn.setEnabled(true);
-			//btn.setText("Download");
+			btn.setEnabled(true);
+			btn.setText("Download");
 		}
-		PodcastListAdapter adapter = (PodcastListAdapter) getListAdapter();
-		Cursor newCursor = managedQuery(PodcastColumns.PODCAST_URI, null, null, null, PodcastColumns.TITLE + " DESC");
-		adapter.changeCursor(newCursor);
-		adapter.notifyDataSetChanged();
+
 
 	}
 
@@ -120,11 +168,14 @@ public class HomeActivity extends ListActivity {
 	private void bindMediadownloadService() {
 		mediaConn = new ServiceConnection() {
 
+
+
 			@SuppressWarnings("synthetic-access")
 			@Override
 			public void onServiceConnected(ComponentName name, IBinder service) {
-				meidaDownloadService = ((LocalBinder<MediaDownloadService>) service).getService();
-				meidaDownloadService.refreshStatus();
+				mediaDownloadService = ((LocalBinder<MediaDownloadService>) service).getService();
+				mediaDownloadService.refreshStatus();
+				mediaDownloadService.setDownloadHandler(new DownloadHandler());
 			}
 
 			@Override
