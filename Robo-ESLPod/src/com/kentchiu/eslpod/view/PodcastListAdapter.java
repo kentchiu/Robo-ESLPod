@@ -55,6 +55,4 @@ public class PodcastListAdapter extends ResourceCursorAdapter {
 		return super.newView(context, cursor, parent);
 	}
 
-
-
 }

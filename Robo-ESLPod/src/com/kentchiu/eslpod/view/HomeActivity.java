@@ -1,11 +1,8 @@
 package com.kentchiu.eslpod.view;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.concurrent.RejectedExecutionException;
-
-import org.apache.commons.lang.StringUtils;
 
 import android.app.Dialog;
 import android.app.ListActivity;
@@ -17,7 +14,6 @@ import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -38,7 +34,7 @@ import com.kentchiu.eslpod.service.RichScriptFetchService;
 
 public class HomeActivity extends ListActivity {
 
-	private  class DownloadHandler extends Handler {
+	private class DownloadHandler extends Handler {
 		@Override
 		public void handleMessage(Message msg) {
 			String from = msg.getData().getString("from");
@@ -58,12 +54,12 @@ public class HomeActivity extends ListActivity {
 				}
 				break;
 			case MediaCommand.DOWNLOAD_PROCESSING:
-					cv.put(PodcastColumns.MEDIA_DOWNLOAD_STATUS, PodcastColumns.MEDIA_STATUS_DOWNLOADING);
-					cv.put(PodcastColumns.MEDIA_DOWNLOAD_LENGTH, msg.arg1);
-					count = getContentResolver().update(PodcastColumns.PODCAST_URI, cv, PodcastColumns.MEDIA_URL + "=?", new String[] { from });
-					if (count != 1) {
-						Log.w(EslPodApplication.TAG, "exception row updated but " + count);
-					}
+				cv.put(PodcastColumns.MEDIA_DOWNLOAD_STATUS, PodcastColumns.MEDIA_STATUS_DOWNLOADING);
+				cv.put(PodcastColumns.MEDIA_DOWNLOAD_LENGTH, msg.arg1);
+				count = getContentResolver().update(PodcastColumns.PODCAST_URI, cv, PodcastColumns.MEDIA_URL + "=?", new String[] { from });
+				if (count != 1) {
+					Log.w(EslPodApplication.TAG, "exception row updated but " + count);
+				}
 				break;
 			case MediaCommand.DOWNLOAD_COMPLETED:
 				cv.put(PodcastColumns.MEDIA_URL_LOCAL, to);
@@ -107,7 +103,6 @@ public class HomeActivity extends ListActivity {
 	private PodcastFetchService		podcastFetchService;
 	private MediaDownloadService	mediaDownloadService;
 
-
 	public void downloadClickHandler(View view) throws MalformedURLException {
 		Button btn = (Button) view;
 		Uri uri = (Uri) btn.getTag();
@@ -124,7 +119,6 @@ public class HomeActivity extends ListActivity {
 			btn.setEnabled(true);
 			btn.setText("Download");
 		}
-
 
 	}
 
@@ -167,8 +161,6 @@ public class HomeActivity extends ListActivity {
 
 	private void bindMediadownloadService() {
 		mediaConn = new ServiceConnection() {
-
-
 
 			@SuppressWarnings("synthetic-access")
 			@Override

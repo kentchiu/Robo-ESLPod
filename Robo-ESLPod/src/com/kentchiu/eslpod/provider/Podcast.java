@@ -40,12 +40,12 @@ public class Podcast {
 		 * <P>Type: INTEGER</P>
 		 * {@link #MEDIA_STATUS_DOWNLOADABLE} or {@link #MEDIA_STATUS_DOWNLOADING} or {@link #MEDIA_STATUS_DOWNLOADED}
 		 */
-		public static final String	MEDIA_DOWNLOAD_STATUS				= "media_download_status";
+		public static final String	MEDIA_DOWNLOAD_STATUS		= "media_download_status";
 		/**
 		 * <P>Type: INTEGER</P>
 		 * {@link #MEDIA_STATUS_DOWNLOADABLE} or {@link #MEDIA_STATUS_DOWNLOADING} or {@link #MEDIA_STATUS_DOWNLOADED}
 		 */
-		public static final String	MEDIA_DOWNLOAD_LENGTH				= "media_download_length";
+		public static final String	MEDIA_DOWNLOAD_LENGTH		= "media_download_length";
 		/**
 		 * <P>Type: TEXT (Date String)</P>
 		 */

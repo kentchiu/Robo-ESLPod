@@ -37,9 +37,9 @@ public class PodcastCommand implements Runnable {
 	public static final int		START_GET_ITEM_NODES	= 1;
 	public static final int		ADD_ITEM_NODE			= 2;
 	public static final int		END_GET_ITEM_NODES		= 3;
-	public static final int		START_IMPORT	= 4;
-	public static final int		IMPORTING	= 5;
-	public static final int		END_IMPORT	= 6;
+	public static final int		START_IMPORT			= 4;
+	public static final int		IMPORTING				= 5;
+	public static final int		END_IMPORT				= 6;
 
 	private InputStream			inputStream;
 	private Context				context;

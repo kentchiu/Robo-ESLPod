@@ -60,6 +60,16 @@ public class MediaCommand implements Runnable {
 		}
 	}
 
+	public void sendMessage(int what, long process, long total) {
+		if (handler != null) {
+			Message m = handler.obtainMessage(what, (int) process, (int) total);
+			m.setData(createBundle());
+			m.sendToTarget();
+		} else {
+			Log.w(EslPodApplication.TAG, "try to sending but handler is null");
+		}
+	}
+
 	public void setFrom(URL from) {
 		this.from = from;
 	}
@@ -83,7 +93,7 @@ public class MediaCommand implements Runnable {
 
 	private void downloadFile() throws IOException, FileNotFoundException {
 		Log.i(EslPodApplication.TAG, "Downloading file from " + from.toString());
-		sendMessage(DOWNLOAD_START,0,0);
+		sendMessage(DOWNLOAD_START, 0, 0);
 
 		URLConnection conn = from.openConnection();
 
@@ -93,7 +103,7 @@ public class MediaCommand implements Runnable {
 		Log.v(EslPodApplication.TAG, "file length : " + lenghtOfFile);
 		if (to.exists() && to.length() == lenghtOfFile) {
 			Log.i(EslPodApplication.TAG, to.getAbsolutePath() + " exists");
-			sendMessage(DOWNLOAD_COMPLETED, (int)lenghtOfFile, (int)lenghtOfFile);
+			sendMessage(DOWNLOAD_COMPLETED, (int) lenghtOfFile, (int) lenghtOfFile);
 		} else {
 			// downloading the file
 			InputStream input = new BufferedInputStream(from.openStream());
@@ -108,26 +118,16 @@ public class MediaCommand implements Runnable {
 				// publishing the progress....
 				if (cache != processing) {
 					sendMessage(DOWNLOAD_PROCESSING, total, lenghtOfFile);
-				cache = processing;
+					cache = processing;
 				}
 				output.write(data, 0, count);
 			}
 			output.flush();
 			output.close();
 			input.close();
-			sendMessage(DOWNLOAD_COMPLETED, (int)cache, (int)lenghtOfFile);
+			sendMessage(DOWNLOAD_COMPLETED, cache, (int) lenghtOfFile);
 			Log.i(EslPodApplication.TAG, "Downloaded file " + to.toString() + " completed");
 		}
-	}
-
-	public void sendMessage(int what, long process, long total) {
-		if (handler != null) {
-				Message m = handler.obtainMessage(what, (int)process, (int)total);
-				m.setData(createBundle());
-				m.sendToTarget();
-			} else {
-				Log.w(EslPodApplication.TAG, "try to sending but handler is null");
-			}
 	}
 
 }

@@ -1,9 +1,5 @@
 package com.kentchiu.eslpod.provider;
 
-import java.util.Random;
-
-import org.apache.commons.lang.math.RandomUtils;
-
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
