@@ -3,6 +3,7 @@ package com.kentchiu.eslpod.cmd;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -18,9 +19,11 @@ import android.net.Uri;
 import android.util.Log;
 
 import com.google.common.base.CharMatcher;
+import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
@@ -52,7 +55,17 @@ public class RichScriptCommand implements Runnable {
 		if (ArrayUtils.isEmpty(words)) {
 			return ImmutableList.of();
 		} else {
-			return ImmutableList.copyOf(words);
+			Iterable<String> results= Iterables.transform(Arrays.asList(words), new Function<String, String>() {
+
+				@Override
+				public String apply(String input) {
+					String noDot = StringUtils.removeEnd(input, ".");
+					String noExclamation = StringUtils.removeEnd(noDot, "!");
+					String noComma = StringUtils.removeEnd(noExclamation, ",");
+					return noComma;
+				}
+			});
+			return ImmutableList.copyOf(results);
 		}
 	}
 
@@ -143,7 +156,6 @@ public class RichScriptCommand implements Runnable {
 				if (StringUtils.isNotBlank(script)) {
 					updateDatabase(script);
 				}
-			} else {
 			}
 		} else {
 			Log.v(EslPodApplication.TAG, "rich script for url [" + scriptUrl + "] already exists");

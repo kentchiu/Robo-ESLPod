@@ -53,14 +53,6 @@ public class HomeActivity extends ListActivity {
 					Log.w(EslPodApplication.TAG, "exception row updated but " + count);
 				}
 				break;
-			case MediaCommand.DOWNLOAD_PROCESSING:
-				cv.put(PodcastColumns.MEDIA_DOWNLOAD_STATUS, PodcastColumns.MEDIA_STATUS_DOWNLOADING);
-				cv.put(PodcastColumns.MEDIA_DOWNLOAD_LENGTH, msg.arg1);
-				count = getContentResolver().update(PodcastColumns.PODCAST_URI, cv, PodcastColumns.MEDIA_URL + "=?", new String[] { from });
-				if (count != 1) {
-					Log.w(EslPodApplication.TAG, "exception row updated but " + count);
-				}
-				break;
 			case MediaCommand.DOWNLOAD_COMPLETED:
 				cv.put(PodcastColumns.MEDIA_URL_LOCAL, to);
 				cv.put(PodcastColumns.MEDIA_DOWNLOAD_LENGTH, msg.arg1);
@@ -70,8 +62,6 @@ public class HomeActivity extends ListActivity {
 					Log.w(EslPodApplication.TAG, "exception row updated but " + count);
 				}
 				break;
-			default:
-				Log.w(EslPodApplication.TAG, "Unknow message " + msg);
 			}
 			PodcastListAdapter adapter = (PodcastListAdapter) getListAdapter();
 			adapter.changeCursor(managedQuery(PodcastColumns.PODCAST_URI, null, null, null, PodcastColumns.TITLE + " DESC"));
@@ -112,12 +102,10 @@ public class HomeActivity extends ListActivity {
 		} catch (RejectedExecutionException e) {
 			Toast.makeText(HomeActivity.this, "Too many tasks, try it later", Toast.LENGTH_SHORT).show();
 			btn.setEnabled(true);
-			btn.setText("Download");
 		} catch (MalformedURLException e) {
 			Toast.makeText(HomeActivity.this, "Download fail, invalid url", Toast.LENGTH_SHORT).show();
 			Log.e(EslPodApplication.TAG, "Download fail, invalid url , the source uri is " + uri);
 			btn.setEnabled(true);
-			btn.setText("Download");
 		}
 
 	}

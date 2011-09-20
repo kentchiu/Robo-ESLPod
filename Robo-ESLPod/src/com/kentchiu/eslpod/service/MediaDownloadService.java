@@ -35,50 +35,6 @@ public class MediaDownloadService extends Service {
 	private ArrayBlockingQueue<Runnable>	commandQueue;
 	private Handler							downloadHandler;
 
-	//	public Handler createDownloadHandler() {
-	//		return new Handler() {
-	//			@Override
-	//			public void handleMessage(Message msg) {
-	//				String from = msg.getData().getString("from");
-	//				String to = msg.getData().getString("to");
-	//				if (from == null) {
-	//					Log.w(EslPodApplication.TAG, "Download fail with illegal message " + msg);
-	//					return;
-	//				}
-	//				ContentValues cv = new ContentValues();
-	//				switch (msg.what) {
-	//				case MediaCommand.DOWNLOAD_START:
-	//					cv.put(PodcastColumns.MEDIA_DOWNLOAD_STATUS, PodcastColumns.MEDIA_STATUS_DOWNLOADING);
-	//					int count = getContentResolver().update(PodcastColumns.PODCAST_URI, cv, PodcastColumns.MEDIA_URL + "=?", new String[] { from });
-	//					if (count != 1) {
-	//						Log.w(EslPodApplication.TAG, "exception row updated but " + count);
-	//					}
-	//					break;
-	//				case MediaCommand.DOWNLOAD_PROCESSING:
-	//					if (msg.arg1 % 5 == 0) {
-	//						cv.put(PodcastColumns.MEDIA_DOWNLOAD_STATUS, PodcastColumns.MEDIA_STATUS_DOWNLOADING);
-	//						count = getContentResolver().update(PodcastColumns.PODCAST_URI, cv, PodcastColumns.MEDIA_URL + "=?", new String[] { from });
-	//						if (count != 1) {
-	//							Log.w(EslPodApplication.TAG, "exception row updated but " + count);
-	//						}
-	//					}
-	//					break;
-	//				case MediaCommand.DOWNLOAD_COMPLETED:
-	//					cv.put(PodcastColumns.MEDIA_URL_LOCAL, to);
-	//					cv.put(PodcastColumns.MEDIA_DOWNLOAD_STATUS, PodcastColumns.MEDIA_STATUS_DOWNLOADED);
-	//					count = getContentResolver().update(PodcastColumns.PODCAST_URI, cv, PodcastColumns.MEDIA_URL + "=?", new String[] { from });
-	//					if (count != 1) {
-	//						Log.w(EslPodApplication.TAG, "exception row updated but " + count);
-	//					}
-	//					break;
-	//				default:
-	//					Log.w(EslPodApplication.TAG, "Unknow message " + msg);
-	//				}
-	//
-	//			}
-	//		};
-	//	}
-
 	public void download(Uri uri) throws MalformedURLException {
 		Cursor c = getContentResolver().query(uri, null, null, null, null);
 		if (c.moveToFirst()) {

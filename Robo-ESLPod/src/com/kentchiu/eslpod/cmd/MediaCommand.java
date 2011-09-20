@@ -117,7 +117,7 @@ public class MediaCommand implements Runnable {
 				int processing = (int) (total * 100 / lenghtOfFile);
 				// publishing the progress....
 				if (cache != processing) {
-					sendMessage(DOWNLOAD_PROCESSING, total, lenghtOfFile);
+					//sendMessage(DOWNLOAD_PROCESSING, total, lenghtOfFile);
 					cache = processing;
 				}
 				output.write(data, 0, count);
