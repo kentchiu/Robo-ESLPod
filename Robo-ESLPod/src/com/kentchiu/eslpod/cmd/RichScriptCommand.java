@@ -23,7 +23,6 @@ import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
-import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
@@ -32,6 +31,25 @@ import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 import com.kentchiu.eslpod.view.EslPodApplication;
 
 public class RichScriptCommand implements Runnable {
+	static final class Trim implements Function<String, String> {
+		@Override
+		public String apply(String input) {
+			String input2 = StringUtils.trim(input);
+			char last = input2.charAt(input2.length() - 1);
+			char first = input2.charAt(0);
+			String result;
+			if (!StringUtils.isAlpha(String.valueOf(last))) {
+				result = input2.substring(0, input2.length() - 1);
+			} else {
+				result = input2;
+			}
+			if (!StringUtils.isAlpha(String.valueOf(first))) {
+				result = result.substring(1, result.length());
+			}
+			return result;
+		}
+	}
+
 	private static class ContainPredicate implements Predicate<String> {
 
 		private String	token;
@@ -55,16 +73,7 @@ public class RichScriptCommand implements Runnable {
 		if (ArrayUtils.isEmpty(words)) {
 			return ImmutableList.of();
 		} else {
-			Iterable<String> results= Iterables.transform(Arrays.asList(words), new Function<String, String>() {
-
-				@Override
-				public String apply(String input) {
-					String noDot = StringUtils.removeEnd(input, ".");
-					String noExclamation = StringUtils.removeEnd(noDot, "!");
-					String noComma = StringUtils.removeEnd(noExclamation, ",");
-					return noComma;
-				}
-			});
+			Iterable<String> results = Iterables.transform(Arrays.asList(words), new Trim());
 			return ImmutableList.copyOf(results);
 		}
 	}

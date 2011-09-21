@@ -78,21 +78,21 @@ public abstract class AbstractDictionaryCommand implements Runnable {
 		String url = getQueryUrl(query);
 		String content;
 		try {
-			Log.d(EslPodApplication.TAG, "Start fetch  word [" + query + "] from dictionary " + getDictionaryId());
+			Log.v(EslPodApplication.TAG, "Start fetch  word [" + query + "] from dictionary " + getDictionaryId());
 			if (StringUtils.isBlank(query)) {
 				content = "";
 			} else {
 				content = getContent(query);
 			}
 
-			Log.d(EslPodApplication.TAG, "End fetch  word [" + query + "] from dictionary " + getDictionaryId());
+			Log.v(EslPodApplication.TAG, "End fetch  word [" + query + "] from dictionary " + getDictionaryId());
 			if (StringUtils.isNotBlank(content)) {
 				ContentValues cv = new ContentValues();
 				cv.put(DictionaryColumns.DICTIONARY_ID, getDictionaryId());
 				cv.put(DictionaryColumns.WORD, query);
 				cv.put(DictionaryColumns.CONTENT, content);
 				context.getContentResolver().insert(DictionaryColumns.DICTIONARY_URI, cv);
-				Log.d(EslPodApplication.TAG, "Save word [" + query + "] to dictionary " + getDictionaryId());
+				Log.v(EslPodApplication.TAG, "Save word [" + query + "] to dictionary " + getDictionaryId());
 			} else {
 				Log.w(EslPodApplication.TAG, "fetch word [" + query + "] fail form dictionary " + getDictionaryId() + ", url:" + url);
 			}
