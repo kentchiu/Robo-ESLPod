@@ -17,6 +17,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -28,8 +29,10 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.ImageButton;
 import android.widget.MediaController;
 import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
 import com.google.common.base.Predicate;
@@ -50,6 +53,7 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 	private SeekBar				seekBar;
 	private Handler				handler	= new Handler();
 	private MediaPlayer			player;
+	private ImageButton playButton;
 	private ServiceConnection	connection;
 
 	@Override
@@ -58,19 +62,46 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 		case R.id.playButton:
 			if (player.isPlaying()) {
 				player.pause();
+				playButton.setBackgroundResource(R.drawable.playback_play);
 			} else {
 				player.start();
+				playButton.setBackgroundResource(R.drawable.playback_pause);
 			}
+			updatingPlayPosition();
 			break;
-		case R.id.prevButton:
+		case R.id.forwardButton:
 			// action for myButton2 click
+			int pos = player.getCurrentPosition();
+			player.seekTo(pos + 10 * 1000);
 			break;
-		case R.id.nextButton:
-			// action for myButton2 click
+		case R.id.reverseButton:
+			int pos2 = player.getCurrentPosition();
+			player.seekTo(pos2 - 10 * 1000);
 			break;
 		default:
 			break;
 		}
+	}
+
+	private void updatingPlayPosition() {
+		final TextView playPosition = (TextView) findViewById(R.id.playPosition);
+		final Handler h = new Handler() {
+			@Override
+			public void handleMessage(Message msg) {
+				String pos = String.valueOf(msg.what);
+				playPosition.setText(pos);
+			}
+		};
+
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				while(player.isPlaying()) {
+					h.sendEmptyMessage(player.getCurrentPosition());
+				}
+			}
+
+		}).start();
 	}
 
 	@Override
@@ -192,6 +223,13 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 			}
 		};
 		bindService(intent, connection, BIND_AUTO_CREATE);
+		playButton = (ImageButton) findViewById(R.id.playButton);
+
+	}
+
+	@Override
+	protected void onStart() {
+		super.onStart();
 	}
 
 	@Override

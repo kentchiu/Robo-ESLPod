@@ -8,9 +8,10 @@
 			<SeekBar android:layout_weight="1" android:layout_height="wrap_content" android:layout_width="match_parent" android:id="@+id/seekBar"></SeekBar>
 		</LinearLayout>
 		<LinearLayout android:id="@+id/linearLayout3" android:layout_height="wrap_content" android:layout_width="match_parent">
-			<Button android:text="Button" android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/prevButton" android:onClick="onClick"></Button>
-			<Button android:text="Button" android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/playButton" android:onClick="onClick"></Button>
-			<Button android:text="Button" android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/nextButton" android:onClick="onClick"></Button>
+			<ImageButton android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/reverseButton" android:onClick="onClick" android:background="@drawable/playback_rew"></ImageButton>
+			<ImageButton android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/playButton" android:onClick="onClick" android:background="@drawable/playback_play"></ImageButton>
+			<ImageButton android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/forwardButton" android:onClick="onClick" android:background="@drawable/playback_ff"></ImageButton>
 		</LinearLayout>
 	</LinearLayout>
+	<TextView android:text="00:00" android:textAppearance="?android:attr/textAppearanceLarge" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentBottom="true" android:layout_alignParentRight="true" android:id="@+id/playPosition"></TextView>
 </RelativeLayout>
