@@ -41,6 +41,23 @@ public class RichScriptCommandTest extends AndroidTestCase {
 		assertFalse(RichScriptCommand.isBaseWord(baseWords, "Foo"));
 	}
 
+	public void test7_722_issues() throws Exception {
+		//String script722 = "http://www.eslpod.com/website/show_podcast.php?issue_id=10848015";
+		String script722 = "http://feedproxy.google.com/~r/EnglishAsASecondLanguagePodcast/~3/8YqeQY3nJ2U/show_podcast.php";
+
+		RichScriptCommand cmd = new RichScriptCommand(mContext, null, script722);
+		String script = cmd.fetchScript("722");
+		System.out.println(script);
+		//System.out.println(script);
+		// line 2 <u>Madwomen</u>  -> not mark as headword
+		// line 4 cancelled -> not show in  headword list
+		// line 5 cliffhanger! -> not show in headword list  (cause by '!'?)
+		// line 6 episodes,  -> not show in headword list  (cause by '!'?)
+		// line <u>Reviver</u>   -> not mark as headword
+		// last line <img src=..... with="1"/> -> this line should not in script
+
+	}
+
 	public void testExtractScript() throws Exception {
 		InputStream is = getClass().getResourceAsStream("/script.html");
 		List<String> script = command.extractScript(IOUtils.readLines(is));
@@ -67,24 +84,6 @@ public class RichScriptCommandTest extends AndroidTestCase {
 		RichScriptCommand cmd = new RichScriptCommand(mContext, null, scriptUrl);
 		String script = cmd.fetchScript("test");
 		assertThat(script, containsString("<b>There’s no way around it</b>"));
-	}
-
-	public void test7_722_issues() throws Exception {
-		//String script722 = "http://www.eslpod.com/website/show_podcast.php?issue_id=10848015";
-		String script722 = "http://feedproxy.google.com/~r/EnglishAsASecondLanguagePodcast/~3/8YqeQY3nJ2U/show_podcast.php";
-
-		RichScriptCommand cmd = new RichScriptCommand(mContext, null, script722);
-		String script = cmd.fetchScript("722");
-		System.out.println(script);
-		//System.out.println(script);
-		// line 2 <u>Madwomen</u>  -> not mark as headword
-		// line 4 cancelled -> not show in  headword list
-		// line 5 cliffhanger! -> not show in headword list  (cause by '!'?)
-		// line 6 episodes,  -> not show in headword list  (cause by '!'?)
-		// line <u>Reviver</u>   -> not mark as headword
-		// last line <img src=..... with="1"/> -> this line should not in script
-
-
 	}
 
 	public void testGetScript() throws Exception {

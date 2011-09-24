@@ -1,31 +1,31 @@
 package com.kentchiu.eslpod.cmd;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.commons.io.IOUtils;
 
 import android.content.Context;
+import android.util.Log;
 
+import com.google.common.base.Joiner;
 import com.kentchiu.eslpod.provider.Dictionary;
+import com.kentchiu.eslpod.view.EslPodApplication;
 
 public class DreyeDictionaryCommand extends AbstractDictionaryCommand {
 
 	protected DreyeDictionaryCommand(Context context, String query) {
 		super(context, query);
+		this.query = query;
 	}
 
 	@Override
-	public String render(String input) {
-		String base = "http://www.dreye.com/mws";
-		input = input.replaceAll("images/", base + "/images/");
-		input = input.replaceAll("\\<form.*?form\\>", "");
-		input = input.replaceAll("dict\\.php\\?", base + "/dict\\.php\\?");
-		return input;
-	}
-
-	@Override
-	protected String getContent(String word) throws IOException {
-		String url = getQueryUrl(word);
-		String join = readAsOneLine(url, 0);
-		return join;
+	protected String getContent() {
+		String url = getQueryUrl();
+		return readAsOneLine(url, 0);
 	}
 
 	@Override
@@ -34,8 +34,41 @@ public class DreyeDictionaryCommand extends AbstractDictionaryCommand {
 	}
 
 	@Override
-	protected String getQueryUrl(String word) {
-		return "http://www.dreye.com/mws/dict.php?ua=dc_cont&hidden_codepage=01&w=" + word;
+	protected String getQueryUrl() {
+		return "http://www.dreye.com/mws/dict.php?ua=dc_cont&hidden_codepage=01&w=" + query;
+	}
+
+	@Override
+	protected String render(String input) {
+		String extracted = extractDefinition(input);
+		String applyTemplate = applyTemplate(extracted);
+		return applyTemplate;
+	}
+
+	private String applyTemplate(String input) {
+		//InputStream is = DreyeDictionaryCommand.class.getResourceAsStream("/dreye/template.html");
+		try {
+			InputStream is = context.getAssets().open("dreye/template.htm");
+			List<String> lines = IOUtils.readLines(is, "utf8");
+			String template = Joiner.on(" ").join(lines);
+			String replace = template.replace("{1}", getQueryUrl()).replace("{0}", input);
+			return replace;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return input;
+	}
+
+	private String extractDefinition(String input) {
+		String pattern = "<div id=\"KK\" class=\"yinbiao\">.*?</table>";
+		Pattern p = Pattern.compile(pattern, Pattern.DOTALL);
+		Matcher m = p.matcher(input);
+		if (m.find()) {
+			return m.group();
+		} else {
+			Log.e(EslPodApplication.TAG, "Not match for query : " + getQueryUrl());
+			return input;
+		}
 	}
 
 }

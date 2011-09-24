@@ -59,13 +59,13 @@ public abstract class AbstractDictionaryCommand implements Runnable {
 		return cmds;
 	}
 
-	public static String toHtml(String content, int dictId) {
-		return newDictionaryCommand(null, content, dictId).render(content);
+	public static String toHtml(Context context, String query, String content, int dictId) {
+		return newDictionaryCommand(context, query, dictId).render(content);
 	}
 
-	private Context	context;
+	protected Context	context;
 
-	private String	query;
+	protected String	query;
 
 	protected AbstractDictionaryCommand(Context context, String query) {
 		super();
@@ -75,14 +75,14 @@ public abstract class AbstractDictionaryCommand implements Runnable {
 
 	@Override
 	public void run() {
-		String url = getQueryUrl(query);
+		String url = getQueryUrl();
 		String content;
 		try {
 			Log.v(EslPodApplication.TAG, "Start fetch  word [" + query + "] from dictionary " + getDictionaryId());
 			if (StringUtils.isBlank(query)) {
 				content = "";
 			} else {
-				content = getContent(query);
+				content = getContent();
 			}
 
 			Log.v(EslPodApplication.TAG, "End fetch  word [" + query + "] from dictionary " + getDictionaryId());
@@ -101,11 +101,11 @@ public abstract class AbstractDictionaryCommand implements Runnable {
 		}
 	}
 
-	protected abstract String getContent(String word) throws IOException;
+	protected abstract String getContent();
 
 	protected abstract int getDictionaryId();
 
-	protected abstract String getQueryUrl(String word);
+	protected abstract String getQueryUrl();
 
 	protected String readAsOneLine(String urlStr, int retried) {
 		int retry = 3;

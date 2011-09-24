@@ -1,6 +1,5 @@
 package com.kentchiu.eslpod.cmd;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -120,8 +119,8 @@ public class WiktionaryCommand extends AbstractDictionaryCommand {
 	}
 
 	@Override
-	public String getContent(String word) throws IOException {
-		String url = getQueryUrl(word);
+	public String getContent() {
+		String url = getQueryUrl();
 		String join = readAsOneLine(url, 0);
 		return extractContent(join);
 	}
@@ -132,8 +131,8 @@ public class WiktionaryCommand extends AbstractDictionaryCommand {
 	}
 
 	@Override
-	protected String getQueryUrl(String word) {
-		return "http://en.wiktionary.org/w/api.php?action=query&prop=revisions&rvprop=content&format=json&rvexpandtemplates=true&alllinks=true&titles=" + word;
+	protected String getQueryUrl() {
+		return "http://en.wiktionary.org/w/api.php?action=query&prop=revisions&rvprop=content&format=json&rvexpandtemplates=true&alllinks=true&titles=" + query;
 	}
 
 	@Override

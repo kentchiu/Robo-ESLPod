@@ -52,13 +52,12 @@ public class DictFlipActivity extends Activity implements OnGestureListener, OnT
 		flipper = (ViewFlipper) findViewById(R.id.viewFlipper);
 		gestureDetector = new GestureDetector(this, this);
 
-		String word = getIntent().getStringExtra(SearchManager.QUERY);
+		String query = getIntent().getStringExtra(SearchManager.QUERY);
 		input = (TextView) findViewById(R.id.titleTxt);
-		String query = word;
 		input.setText(query);
 
 		initWebView();
-		updateContent(word);
+		updateContent(query);
 		setTitle("● ○ ○          Dr.eye");
 		getApplicationContext();
 	}
@@ -177,7 +176,8 @@ public class DictFlipActivity extends Activity implements OnGestureListener, OnT
 	private void loadContentToWebView(Cursor c, int dictId) {
 		if (c.moveToFirst()) {
 			String content = c.getString(c.getColumnIndex(DictionaryColumns.CONTENT));
-			String html = AbstractDictionaryCommand.toHtml(content, dictId);
+			String word = c.getString(c.getColumnIndex(DictionaryColumns.WORD));
+			String html = AbstractDictionaryCommand.toHtml(this, word, content, dictId);
 			Iterables.get(webViews, dictId - 1).loadDataWithBaseURL("Dictionary", html, "text/html", "utf-8", null);
 			Log.v(EslPodApplication.TAG, "webviews [" + (dictId - 1) + "] loaded content from db");
 		}

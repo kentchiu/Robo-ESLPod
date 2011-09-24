@@ -1,0 +1,600 @@
+<!--?xml version="1.0" ?-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- pt=0(smartphone),lo=DivLayout(div),b=firefox,d=pc,w=1024,h=768 -->
+<html><head>
+<meta name="HandheldFriendly" content="true">
+<meta name="title" content="Dictionary Search: book">
+<meta name="description" content="printed or blank sheets bound together">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, user-scalable=no">
+
+<style type="text/css">
+.chevron {
+    background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAgCAYAAAASYli2AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAALhJREFUeNpi/P//PwM1AeOogaMGDmsDZ82aVQei09LSmig2EGpYI1SsnhJDmaA0G5JYI9CCamp4uQVIIRtUA3RpK0WRAjS0HUhVIMlXAg3toCiWKTWUCYvYFCB+h8TPAVoiRJaBQI3SQOoAEMMMeArEDkAXviMnUmCGqaAZdoecdEgVw0CAWUpKigVIbwViA0oNQ3ahCtSFDJQYhh6GKtC8fGe0PBw1cMgbOGnSJIoMyM3NReEDBBgAr6CR2tWHXeAAAAAASUVORK5CYII=") no-repeat scroll right center transparent;
+}
+input[type="sumbit"] {
+    vertical-align: middle;
+}
+input[type="image"] {
+    vertical-align: middle;
+}
+ul {
+    margin: -4px;
+}
+.complexlist {
+    display: inline-block;
+    vertical-align: middle;
+}
+body {
+    font-family: sans-serif;
+    font-size: 100%;
+}
+hr {
+    margin-bottom: 0;
+    margin-top: 0;
+}
+img {
+    vertical-align: bottom;
+}
+li {
+    cursor: pointer;
+}
+.clrall {
+    clear: both;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+.Bottom_Pad_10 {
+    background-color: #FFFFFF;
+    margin: 0;
+    padding: 0 0 10px;
+}
+.divider_shadow {
+    background-color: #FFFFFF;
+    margin: 0;
+    padding: 0;
+}
+.divider_shadow2 {
+    background: url("/res/dictionary/bbalext/480/divider_shadow_long.png") repeat-x scroll left top transparent;
+    margin: 0;
+    padding: 0;
+}
+.footer_bg {
+    background: url("/res/dictionary/bbalext/480/bg_footer_slice.png") repeat-x scroll left top transparent;
+    margin: 10px 0 0;
+    padding: 0;
+}
+.footer_ref_bg {
+    background-color: #538D0D;
+    margin: 0;
+    padding: 10px 0;
+}
+.footer_thes_bg {
+    background: url("/res/dictionary/bbalext/480/footer_thesaurus.png") repeat-x scroll left top transparent;
+    margin: 10px 0 0;
+    padding: 0;
+}
+.header_dictionary_bg {
+    background: url("/res/dictionary/bbalext/480/header_disctionary_slice.png") repeat-x scroll left top transparent;
+    margin: 0;
+    padding: 0 0 10px;
+}
+.header_reference_bg {
+    background-color: #538D0D;
+    margin: 0;
+    padding: 0;
+}
+.header_thesaurus_bg {
+    background-color: #F49B01;
+    margin: 0;
+    padding: 0;
+}
+.hotword_text {
+    background-color: #FFFFFF;
+    margin: 0 10px;
+    padding: 0;
+}
+.Left_pad_10 {
+    background-color: #FFFFFF;
+    margin: 0;
+    padding: 0 0 0 10px;
+}
+.line_dotted {
+    background: url("/res/dictionary/bbalext/480/line_dotted_slice.png") repeat-x scroll left top transparent;
+    margin: 0;
+    padding: 0;
+}
+.line_dotted2 {
+    background: url("/res/dictionary/bbalext/480/line_dotted_higher2_slice.png") repeat-x scroll left top transparent;
+    margin: 0;
+    padding: 0;
+}
+.Line_Margin_Top_Bottom_10 {
+    background-color: #FFFFFF;
+    margin: 0;
+    padding: 10px 0 10px 10px;
+}
+.More_Content_dotted_Line {
+    background-color: #FFFFFF;
+    margin: 0;
+    padding: 10px;
+}
+.pos_der {
+    background-color: transparent;
+    color: #666666;
+    font-size: 13px;
+    font-weight: bold;
+    margin: 0 0 0 10px;
+    padding: 0;
+}
+.pos_der_header {
+    background-color: transparent;
+    color: #666666;
+    font-size: 13px;
+    font-weight: bold;
+    margin: 0 0 0 10px;
+    padding: 10px 0 0;
+}
+.row_whitebg {
+    background-color: #FFFFFF;
+    margin: 0;
+    padding: 0;
+}
+.search_bar_bg {
+    background: url("/res/dictionary/bbalext/480/bgsearch2.png") repeat-x scroll left top transparent;
+    margin: 0;
+    padding: 0;
+}
+.search_bar_reference {
+    background: url("/res/dictionary/bbalext/480/ref_search_bar_bg.png") repeat-x scroll left top transparent;
+    margin: 0;
+    padding: 0;
+}
+.search_bar_thesaurus {
+    background: url("/res/dictionary/bbalext/480/thes_search_bar_bg.png") repeat-x scroll left top transparent;
+    margin: 0;
+    padding: 0;
+}
+.tab_bg {
+    background: url("/res/dictionary/bbalext/480/tab_bg_slice.png") repeat-x scroll left top transparent;
+    margin: 0;
+    padding: 0;
+}
+.tab_bg_thes {
+    background-color: #F49B01;
+    margin: 0;
+    padding: 0;
+}
+.tb_bg_ref {
+    background-color: #538D0D;
+    margin: 0;
+    padding: 0;
+}
+.Top_Pad_10 {
+    background-color: #FFFFFF;
+    margin: 0;
+    padding: 10px 0 0;
+}
+
+.columbiatitle {
+    font-weight: 900;
+}
+.tabheight {
+    height: 33px;
+    padding-bottom: 10px;
+    width: 90%;
+}
+.rowtest {
+    height: 54px;
+}
+.linebg {
+    border-top: 1px solid #FFFFFF;
+    padding-top: 0;
+    width: 100%;
+}
+.linebg2 {
+    border-top: 1px solid #999999;
+    padding-top: 0;
+    width: 100%;
+}
+.linebg3 {
+    border-top: 1px solid #999999;
+    padding-top: 10px;
+    width: 100%;
+}
+.searchbgdic {
+    background-color: #FFFFFF;
+    border-bottom: 1px solid #999999;
+    border-top: 10px solid #FFFFFF;
+    height: 36px;
+    padding-bottom: 10px;
+    padding-top: 12px;
+    width: 100%;
+}
+.etymology {
+    background-color: #FFFFFF;
+    border-bottom: 5px solid #FFFFFF;
+    border-top: 5px solid #FFFFFF;
+    color: #660000;
+    display: block;
+    font-family: "Lucida Sans Unicode","Arial Unicode MS","Lucida Sans","Lucida Grande",Verdana,Helvetica,Arial,sans-serif;
+    font-size: 12px;
+    padding: 10px;
+}
+.etymology a:link, visited {
+    color: #116699;
+}
+.etymology a:hover, active {
+    background-color: #99FFFF;
+    color: #000000;
+}
+.searchbgthes {
+    background-color: #FFFFFF;
+    border-bottom: 1px solid #999999;
+    border-top: 10px solid #FFFFFF;
+    height: 36px;
+    padding-bottom: 10px;
+    padding-top: 12px;
+    width: 100%;
+}
+.searchbgref {
+    background-color: #FFFFFF;
+    border-bottom: 1px solid #999999;
+    border-top: 10px solid #FFFFFF;
+    height: 36px;
+    padding-bottom: 10px;
+    padding-top: 12px;
+    width: 100%;
+}
+.footerbgblue {
+    background-color: #0E5D90;
+    border-bottom: 10px solid #0E5D90;
+    border-top: 10px solid #FFFFFF;
+    width: 100%;
+}
+.footerbgwhite {
+    background-color: #FFFFFF;
+    border-bottom: 10px solid #FFFFFF;
+    border-top: 10px solid #FFFFFF;
+    height: 60px;
+    width: 100%;
+}
+.adbgwhite {
+    background-color: #0E5D90;
+    border-bottom: 10px solid #FFFFFF;
+    height: 100%;
+    width: 100%;
+}
+.adbgwhitethes {
+    background-color: #F49B01;
+    border-bottom: 10px solid #FFFFFF;
+    height: 100%;
+    width: 100%;
+}
+.adbgwhiteref {
+    background-color: #538D0D;
+    border-bottom: 10px solid #FFFFFF;
+    height: 100%;
+    width: 100%;
+}
+a.link_fullsite {
+    color: #FFFFFF;
+    cursor: pointer;
+    display: inline-block;
+    font-family: arial;
+    font-size: small;
+    font-weight: bold;
+    height: 18px;
+    line-height: 18px;
+    margin-bottom: 6px;
+    margin-top: 15px;
+    text-align: center;
+    text-decoration: none;
+    text-shadow: 0 -1px 0 #000000;
+}
+a.link_footer {
+    color: #FFFFFF;
+    cursor: pointer;
+    display: inline-block;
+    font-family: arial;
+    font-size: small;
+    font-weight: normal;
+    height: 18px;
+    line-height: 18px;
+    margin-bottom: 15px;
+    margin-right: 5px;
+    text-align: center;
+}
+a.link_footer_partners {
+    color: #666666;
+    cursor: pointer;
+    display: inline-block;
+    font-family: arial;
+    font-size: small;
+    font-weight: normal;
+    height: 18px;
+    line-height: 18px;
+    margin-right: 3px;
+    margin-top: 10px;
+    text-align: center;
+}
+a.link_footer_partners2 {
+    color: #666666;
+    cursor: pointer;
+    display: inline-block;
+    font-family: arial;
+    font-size: small;
+    font-weight: normal;
+    height: 18px;
+    line-height: 18px;
+    margin-bottom: 10px;
+    margin-right: 3px;
+    text-align: center;
+}
+.tabdict img {
+    margin: 0;
+    padding: 0;
+    width: 100px;
+}
+.tabthes img {
+    margin: 0;
+    padding: 0;
+    width: 99px;
+}
+.tabref img {
+    margin: 0;
+    padding: 0;
+    width: 101px;
+}
+.sound {
+    display: inline-block;
+    margin-left: 5px;
+    padding: 0;
+    width: 14px;
+}
+.arrow img {
+    display: inline-block;
+    padding-bottom: 2px;
+    padding-right: 5px;
+    vertical-align: middle;
+}
+.more {
+    display: inline-block;
+    line-height: 10px;
+    padding: 5px;
+    vertical-align: middle;
+}
+.more1 {
+    display: inline-block;
+    line-height: 10px;
+    padding-bottom: 10px;
+    padding-left: 10px;
+    vertical-align: middle;
+}
+.clear {
+    display: inline-block;
+    padding: 10px;
+}
+.align {
+    display: inline-block;
+    vertical-align: top;
+}
+.alignm {
+    display: inline-block;
+    vertical-align: middle;
+}
+.aligntop {
+    display: inline-block;
+    vertical-align: middle;
+}
+.alignbot {
+    display: inline-block;
+    vertical-align: bottom;
+}
+.line {
+    display: inline-block;
+    padding-top: 7px;
+    vertical-align: top;
+}
+.line2 {
+    border-top-style: dotted;
+    color: #999999;
+    width: 90%;
+}
+.blog_home_pic {
+    border-color: #777777;
+    border-style: solid;
+    border-width: 1px;
+    display: inline-block;
+    height: 50px;
+    margin-left: 10px;
+    vertical-align: middle;
+    width: 50px;
+}
+.header {
+    color: #666666;
+    display: inline-block;
+    font-family: arial;
+    font-size: large;
+    font-weight: bold;
+    padding: 10px 0 5px;
+}
+.mainheader {
+    color: #666666;
+    display: inline-block;
+    font-family: arial;
+    font-size: large;
+    font-weight: bold;
+    padding: 10px 0 5px 10px;
+}
+.header2 {
+    color: #666666;
+    display: inline-block;
+    font-family: arial;
+    font-size: large;
+    font-weight: bold;
+    padding: 10px 0 0 10px;
+}
+.header3 {
+    color: #666666;
+    display: inline-block;
+    font-family: arial;
+    font-size: large;
+    font-weight: bold;
+    padding-left: 10px;
+    padding-top: 10px;
+}
+.header_blog_home {
+    color: #666666;
+    display: inline-block;
+    font-family: arial;
+    font-size: 18px;
+    font-weight: bold;
+    padding-bottom: 0;
+    padding-top: 10px;
+}
+.headerblog {
+    color: #0066CC;
+    display: inline-block;
+    font-family: arial;
+    font-size: 16px;
+    font-weight: bold;
+    padding-left: 0;
+    padding-right: 0;
+}
+.subheader {
+    color: #0066CC;
+    display: inline-block;
+    font-family: arial;
+    font-size: medium;
+    font-weight: bold;
+    line-height: 15px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+}
+.subheader_blog {
+    color: #0066CC;
+    display: inline-block;
+    font-family: arial;
+    font-size: 15px;
+    font-weight: bold;
+    line-height: 17px;
+    padding-left: 10px;
+}
+.subheader2 {
+    color: #0066CC;
+    display: inline-block;
+    font-family: arial;
+    font-size: medium;
+    font-weight: bold;
+    padding-left: 10px;
+    padding-right: 5px;
+}
+.landing_text {
+    display: inline-block;
+    font-family: arial;
+    font-size: 10px;
+    font-weight: normal;
+    line-height: 10px;
+    padding-left: 10px;
+}
+.words {
+    color: #0066CC;
+    font-family: arial;
+    font-size: 12px;
+}
+.pronunciation {
+    color: #555555;
+    font-size: 9pt;
+}
+.width_back img, input.width_back {
+    padding: 13px 10px 10px;
+    width: 40px;
+}
+.width_dot {
+    color: #FFFFFF;
+    padding: 13px 10px 10px;
+    width: 40px;
+}
+.width_clear img, input.width_clear {
+    padding: 13px 10px 10px;
+    width: 65px;
+}
+.width_nextprev img, input.width_nextprev {
+    padding: 13px 10px 10px;
+    width: 40px;
+}
+.width_more img {
+    width: 44px;
+}
+.width_share img {
+    padding-left: 10px;
+    padding-right: 10px;
+    width: 25px;
+}
+.width_share2 img {
+    margin: 10px;
+    width: 25px;
+}
+.width_arrow img, input.width_arrow {
+    width: 11px;
+}
+.width_text img, input.width_text {
+    width: 320px;
+}
+.width_fav img, input.width_fav {
+    margin-left: 5px;
+    vertical-align: middle;
+    width: 30px;
+}
+.width_headers img {
+    margin-left: 10px;
+    margin-top: 7px;
+    width: 112px;
+}
+.display {
+    display: inline-block;
+}
+.ad_mar {
+    margin-bottom: 8px;
+    margin-top: 10px;
+}
+.translatedropdown {
+}
+.color {
+    color: #0066CC;
+}
+.iconx {
+    height: 20px;
+    margin-left: -25px;
+    padding-top: 17px;
+    position: absolute;
+}
+.iconx img {
+    height: 20px;
+}
+#embed_dresultitem, #embed_tresultitem, #embed_rresultitem2 {
+    padding-left: 10px;
+}
+a.nounderline {
+    text-decoration: none;
+}
+a.nounderline:hover {
+    text-decoration: none;
+}
+a.nounderline:visited {
+    text-decoration: none;
+}
+
+</style>
+</head>
+
+
+<body>
+
+{0}
+
+<hr>
+內容來源:<a href="{1}">譯點通線上字典</a>
+</body>
+</html>

@@ -11,7 +11,7 @@ public class WikiCommandTest extends AndroidTestCase {
 	private WiktionaryCommand	command;
 
 	public void testGetContent() throws Exception {
-		assertThat(command.getContent("test"), containsString("test"));
+		assertThat(command.getContent(), containsString("test"));
 	}
 
 	public void testGetDictionId() throws Exception {
@@ -19,7 +19,7 @@ public class WikiCommandTest extends AndroidTestCase {
 	}
 
 	public void testQueryUri() throws Exception {
-		assertThat(command.getQueryUrl("test"), is("http://en.wiktionary.org/w/api.php?action=query&prop=revisions&rvprop=content&format=json&rvexpandtemplates=true&alllinks=true&titles=" + "test"));
+		assertThat(command.getQueryUrl(), is("http://en.wiktionary.org/w/api.php?action=query&prop=revisions&rvprop=content&format=json&rvexpandtemplates=true&alllinks=true&titles=" + "test"));
 	}
 
 	@Override
