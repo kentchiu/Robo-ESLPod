@@ -1,8 +1,5 @@
 package com.kentchiu.eslpod.provider;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -22,12 +19,13 @@ import com.kentchiu.eslpod.view.EslPodApplication;
 
 public class DictionaryContentProvider extends ContentProvider {
 
-	private static final int		WORDS	= 1;
-	private static final int		WORD	= 2;
-	private UriMatcher				uriMatcher;
-	private DatabaseHelper			databaseHelper;
-	private static ExecutorService	es		= Executors.newFixedThreadPool(3);
-	private Handler					handler;
+	private static final int	WORDS	= 1;
+	private static final int	WORD	= 2;
+	private UriMatcher			uriMatcher;
+	private DatabaseHelper		databaseHelper;
+
+	//private static ExecutorService	es		= Executors.newFixedThreadPool(3);
+	//private Handler					handler;
 
 	@Override
 	public int delete(Uri uri, String selection, String[] selectionArgs) {
@@ -77,7 +75,7 @@ public class DictionaryContentProvider extends ContentProvider {
 		uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 		uriMatcher.addURI(Dictionary.AUTHORITY, "word/", WORDS);
 		uriMatcher.addURI(Dictionary.AUTHORITY, "word/#", WORD);
-		handler = new MyHandler(getContext());
+		//handler = new MyHandler(getContext());
 		return true;
 	}
 
@@ -87,20 +85,6 @@ public class DictionaryContentProvider extends ContentProvider {
 		switch (uriMatcher.match(uri)) {
 		case WORDS:
 			Cursor c = db.query(DatabaseHelper.DICTIONARY_TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
-			/*
-			Set<Integer> dictIds = Sets.newHashSet();
-			while (c.moveToNext()) {
-				dictIds.add(c.getInt(c.getColumnIndex(DictionaryColumns.DICTIONARY_ID)));
-			}
-			HashSet<Integer> allDictIds = listAllDictIds();
-			Iterables.removeAll(allDictIds, dictIds);
-			String query = StringUtils.trim(selectionArgs[0]);
-			Log.v(EslPodApplication.TAG, "There are "+ allDictIds.size() +  " dictionary need to be update for word [" + query + "]");
-			for (Integer each : allDictIds) {
-				es.execute(AbstractDictionaryCommand.newDictionaryCommand(handler, query, each));
-			}
-			c.requery();
-			*/
 			return c;
 		case WORD:
 			long id;

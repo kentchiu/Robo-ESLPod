@@ -40,12 +40,7 @@ public class PodcastListAdapter extends ResourceCursorAdapter {
 			break;
 		case PodcastColumns.MEDIA_STATUS_DOWNLOADING:
 			button.setEnabled(false);
-			//			button.setText(downloadLength + "/" + length);
 			break;
-		//		case PodcastColumns.MEDIA_STATUS_DOWNLOADING:
-		//			button.setEnabled(false);
-		//			button.setText(downloadLength + "/" + length);
-		//			break;
 		case PodcastColumns.MEDIA_STATUS_DOWNLOADABLE:
 		default:
 			button.setEnabled(true);

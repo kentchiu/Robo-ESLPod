@@ -99,7 +99,6 @@ public class DictFlipActivity extends Activity implements OnGestureListener, OnT
 		default:
 			break;
 		}
-
 		return true;
 	}
 

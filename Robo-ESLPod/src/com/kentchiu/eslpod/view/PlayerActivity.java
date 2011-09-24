@@ -32,8 +32,8 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ImageButton;
 import android.widget.MediaController;
 import android.widget.SeekBar;
-import android.widget.TextView;
 import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.widget.TextView;
 
 import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
@@ -53,7 +53,7 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 	private SeekBar				seekBar;
 	private Handler				handler	= new Handler();
 	private MediaPlayer			player;
-	private ImageButton playButton;
+	private ImageButton			playButton;
 	private ServiceConnection	connection;
 
 	@Override
@@ -81,27 +81,6 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 		default:
 			break;
 		}
-	}
-
-	private void updatingPlayPosition() {
-		final TextView playPosition = (TextView) findViewById(R.id.playPosition);
-		final Handler h = new Handler() {
-			@Override
-			public void handleMessage(Message msg) {
-				String pos = String.valueOf(msg.what);
-				playPosition.setText(pos);
-			}
-		};
-
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				while(player.isPlaying()) {
-					h.sendEmptyMessage(player.getCurrentPosition());
-				}
-			}
-
-		}).start();
 	}
 
 	@Override
@@ -228,14 +207,14 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 	}
 
 	@Override
-	protected void onStart() {
-		super.onStart();
-	}
-
-	@Override
 	protected void onDestroy() {
 		unbindService(connection);
 		super.onDestroy();
+	}
+
+	@Override
+	protected void onStart() {
+		super.onStart();
 	}
 
 	private void fetchWord(final Uri uri) {
@@ -307,6 +286,27 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 			}
 		});
 		return filter;
+	}
+
+	private void updatingPlayPosition() {
+		final TextView playPosition = (TextView) findViewById(R.id.playPosition);
+		final Handler h = new Handler() {
+			@Override
+			public void handleMessage(Message msg) {
+				String pos = String.valueOf(msg.what);
+				playPosition.setText(pos);
+			}
+		};
+
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				while (player.isPlaying()) {
+					h.sendEmptyMessage(player.getCurrentPosition());
+				}
+			}
+
+		}).start();
 	}
 
 }

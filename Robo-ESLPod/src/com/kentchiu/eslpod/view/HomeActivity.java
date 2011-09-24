@@ -93,7 +93,7 @@ public class HomeActivity extends ListActivity {
 	private PodcastFetchService		podcastFetchService;
 	private MediaDownloadService	mediaDownloadService;
 
-	public void downloadClickHandler(View view) throws MalformedURLException {
+	public void downloadClickHandler(View view) {
 		Button btn = (Button) view;
 		Uri uri = (Uri) btn.getTag();
 		btn.setEnabled(false);
