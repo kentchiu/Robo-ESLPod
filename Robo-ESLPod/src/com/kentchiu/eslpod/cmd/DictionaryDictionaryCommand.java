@@ -38,7 +38,7 @@ public class DictionaryDictionaryCommand extends AbstractDictionaryCommand {
 
 	@Override
 	protected String render(String input) {
-		String extracted = extractDefinition(input);
+		String extracted = extractDefinition(input).replaceAll("<a.*>(.*)</a>", "$1");
 		return applyTemplate(extracted);
 	}
 

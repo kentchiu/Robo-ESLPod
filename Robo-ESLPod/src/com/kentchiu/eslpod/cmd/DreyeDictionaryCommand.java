@@ -40,13 +40,12 @@ public class DreyeDictionaryCommand extends AbstractDictionaryCommand {
 
 	@Override
 	protected String render(String input) {
-		String extracted = extractDefinition(input);
+		String extracted = extractDefinition(input).replaceAll("images/DIC/PN", "http://www.dreye.com/mws/images/DIC/PN");
 		String applyTemplate = applyTemplate(extracted);
 		return applyTemplate;
 	}
 
 	private String applyTemplate(String input) {
-		//InputStream is = DreyeDictionaryCommand.class.getResourceAsStream("/dreye/template.html");
 		try {
 			InputStream is = context.getAssets().open("dreye/template.htm");
 			List<String> lines = IOUtils.readLines(is, "utf8");
@@ -64,7 +63,8 @@ public class DreyeDictionaryCommand extends AbstractDictionaryCommand {
 		Pattern p = Pattern.compile(pattern, Pattern.DOTALL);
 		Matcher m = p.matcher(input);
 		if (m.find()) {
-			return m.group();
+			String group = m.group();
+			return group;
 		} else {
 			Log.e(EslPodApplication.TAG, "Not match for query : " + getQueryUrl());
 			return input;
