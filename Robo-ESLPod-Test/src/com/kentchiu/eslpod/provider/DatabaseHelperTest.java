@@ -21,7 +21,7 @@ public class DatabaseHelperTest extends TestCase {
 
 	public void testPodcastTable() throws Exception {
 		Cursor c = db.query(DatabaseHelper.PODCAST_TABLE_NAME, null, null, null, null, null, null);
-		assertEquals(13, c.getColumnCount());
+		assertEquals(15, c.getColumnCount());
 	}
 
 	public void testUniquIndex() throws Exception {

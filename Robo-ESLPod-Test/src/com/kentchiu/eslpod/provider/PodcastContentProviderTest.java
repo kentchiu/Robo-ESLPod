@@ -25,7 +25,7 @@ public class PodcastContentProviderTest extends ProviderTestCase2<PodcastContent
 		ContentValues values = new ContentValues();
 		values.put(TITLE, "test");
 		Uri r = getProvider().insert(PODCAST_URI, values);
-		assertEquals("content://com.kentchiu.eslpod.view.provider.Podcast/podcast/4", r.toString());
+		assertEquals("content://com.kentchiu.eslpod.provider.Podcast/podcast/4", r.toString());
 	}
 
 	public void testQuery() throws Exception {
