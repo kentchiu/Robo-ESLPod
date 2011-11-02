@@ -62,7 +62,7 @@ public class HomeActivity extends ListActivity {
 				if (count != 1) {
 					Log.w(EslPodApplication.TAG, "exception row updated but " + count);
 				}
-				Toast.makeText(HomeActivity.this,new File(to).getName() + " download completed", Toast.LENGTH_SHORT).show();
+				Toast.makeText(HomeActivity.this, new File(to).getName() + " download completed", Toast.LENGTH_SHORT).show();
 				break;
 			}
 			PodcastListAdapter adapter = (PodcastListAdapter) getListAdapter();

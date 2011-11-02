@@ -29,11 +29,10 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import android.widget.ImageButton;
-import android.widget.MediaController;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
@@ -53,21 +52,25 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 	private SeekBar				seekBar;
 	private Handler				handler	= new Handler();
 	private MediaPlayer			player;
-	private ImageButton			playButton;
 	private ServiceConnection	connection;
 
 	@Override
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.playButton:
-			if (player.isPlaying()) {
-				player.pause();
-				playButton.setBackgroundResource(R.drawable.playback_play);
-			} else {
+			if (!player.isPlaying()) {
 				player.start();
-				playButton.setBackgroundResource(R.drawable.playback_pause);
+				findViewById(R.id.playButton).setVisibility(View.GONE);
+				findViewById(R.id.pauseButton).setVisibility(View.VISIBLE);
 			}
 			updatingPlayPosition();
+			break;
+		case R.id.pauseButton:
+			if (player.isPlaying()) {
+				player.pause();
+				findViewById(R.id.playButton).setVisibility(View.VISIBLE);
+				findViewById(R.id.pauseButton).setVisibility(View.GONE);
+			}
 			break;
 		case R.id.forwardButton:
 			// action for myButton2 click
@@ -202,8 +205,6 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 			}
 		};
 		bindService(intent, connection, BIND_AUTO_CREATE);
-		playButton = (ImageButton) findViewById(R.id.playButton);
-
 	}
 
 	@Override
@@ -224,7 +225,7 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 	}
 
 	private void initSeekBar() {
-		new MediaController(this);
+		//new MediaController(this);
 		seekBar = (SeekBar) findViewById(R.id.seekBar);
 
 		OnSeekBarChangeListener sbcl = new OnSeekBarChangeListener() {
@@ -234,18 +235,22 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 				Log.d(EslPodApplication.TAG, "progress:" + progress + ", from User:" + fromUser);
 				if (fromUser) {
 					player.seekTo(progress);
+					Toast.makeText(PlayerActivity.this, "seeking -" + seekBar.getProgress(), Toast.LENGTH_SHORT).show();
 				} else {
 					// the event was fired from code and you shouldn't call player.seekTo()
 				}
-
 			}
 
 			@Override
 			public void onStartTrackingTouch(SeekBar seekBar) {
+				Toast.makeText(PlayerActivity.this, "start -" + seekBar.getProgress(), Toast.LENGTH_LONG).show();
+				Log.w(EslPodApplication.TAG, "start -" + seekBar.getProgress());
 			}
 
 			@Override
 			public void onStopTrackingTouch(SeekBar seekBar) {
+				Toast.makeText(PlayerActivity.this, "stop -" + seekBar.getProgress(), Toast.LENGTH_LONG).show();
+				Log.w(EslPodApplication.TAG, "stop -" + seekBar.getProgress());
 			}
 		};
 		seekBar.setOnSeekBarChangeListener(sbcl);
@@ -293,7 +298,8 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 		final Handler h = new Handler() {
 			@Override
 			public void handleMessage(Message msg) {
-				String pos = String.valueOf(msg.what);
+				int sec = msg.what / 1000;
+				String pos = String.format("%02d:%02d", sec / 60, sec % 60);
 				playPosition.setText(pos);
 			}
 		};

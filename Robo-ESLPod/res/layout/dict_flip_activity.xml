@@ -1,14 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="fill_parent" android:id="@+id/RelativeLayout1"
-	android:layout_height="fill_parent" android:baselineAligned="true" android:orientation="vertical" android:weightSum="1">
-	<ViewFlipper android:layout_alignParentLeft="true" android:layout_alignParentTop="true" android:layout_weight="0.94" android:layout_height="match_parent"
-		android:id="@+id/viewFlipper" android:layout_width="match_parent" android:layout_above="@+id/title_bar">
-		<include android:id="@+id/dict1" layout="@layout/dict" />
-		<include android:id="@+id/dict2" layout="@layout/dict" />
-		<include android:id="@+id/dict3" layout="@layout/dict" />
-	</ViewFlipper>
-	<LinearLayout android:orientation="horizontal" android:id="@+id/title_bar" android:gravity="center_vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_alignParentBottom="true">
-		<EditText android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/titleTxt" android:inputType="text" android:layout_weight="0.40"></EditText>
-		<Button android:text="Go" android:layout_height="wrap_content" android:id="@+id/go" android:onClick="onClick" android:layout_width="wrap_content"></Button>
-	</LinearLayout>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/RelativeLayout1"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:baselineAligned="true"
+    android:orientation="vertical"
+    android:weightSum="1" >
+
+    <LinearLayout
+        android:id="@+id/title_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal" >
+
+        <EditText
+            android:id="@+id/titleTxt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.40"
+            android:inputType="text" >
+
+            <requestFocus />
+        </EditText>
+
+        <Button
+            android:id="@+id/go"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onClick"
+            android:text="Go" />
+    </LinearLayout>
+
+    <ViewFlipper
+        android:id="@+id/viewFlipper"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/title_bar"
+        android:layout_weight="0.94" >
+
+        <include
+            android:id="@+id/dict2"
+            layout="@layout/dict" />
+
+        <include
+            android:id="@+id/dict3"
+            layout="@layout/dict" />
+
+        <include
+            android:id="@+id/dict1"
+            layout="@layout/dict" />
+
+    </ViewFlipper>
+
 </RelativeLayout>

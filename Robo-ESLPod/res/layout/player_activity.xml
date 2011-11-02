@@ -8,9 +8,37 @@
 			<SeekBar android:layout_weight="1" android:layout_height="wrap_content" android:layout_width="match_parent" android:id="@+id/seekBar"></SeekBar>
 		</LinearLayout>
 		<LinearLayout android:id="@+id/linearLayout3" android:layout_height="wrap_content" android:layout_width="match_parent">
-			<ImageButton android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/reverseButton" android:onClick="onClick" android:background="@drawable/playback_rew"></ImageButton>
-			<ImageButton android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/playButton" android:onClick="onClick" android:background="@drawable/playback_play"></ImageButton>
-			<ImageButton android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/forwardButton" android:onClick="onClick" android:background="@drawable/playback_ff"></ImageButton>
+
+			<ImageButton
+			    android:id="@+id/reverseButton"
+			    style="@android:style/MediaButton.Rew"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:onClick="onClick" >
+</ImageButton>
+
+			<ImageButton
+			    android:id="@+id/playButton"
+			    style="@android:style/MediaButton.Play"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:onClick="onClick" >
+</ImageButton>
+
+			<ImageButton
+			    android:id="@+id/pauseButton"
+			    style="@android:style/MediaButton.Pause"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:onClick="onClick" android:visibility="gone"/>
+
+			<ImageButton
+			    android:id="@+id/forwardButton"
+			    style="@android:style/MediaButton.Ffwd"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:onClick="onClick" >
+</ImageButton>
 		</LinearLayout>
 	</LinearLayout>
 	<TextView android:text="00:00" android:textAppearance="?android:attr/textAppearanceLarge" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentBottom="true" android:layout_alignParentRight="true" android:id="@+id/playPosition"></TextView>
