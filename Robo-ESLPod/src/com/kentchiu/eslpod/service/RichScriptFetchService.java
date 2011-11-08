@@ -3,7 +3,7 @@ package com.kentchiu.eslpod.service;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import android.app.Service;
 import android.content.ContentUris;

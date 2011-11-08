@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.concurrent.RejectedExecutionException;
 
+import roboguice.activity.RoboListActivity;
 import android.app.Dialog;
-import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.ContentValues;
@@ -33,7 +33,7 @@ import com.kentchiu.eslpod.service.MediaDownloadService;
 import com.kentchiu.eslpod.service.PodcastFetchService;
 import com.kentchiu.eslpod.service.RichScriptFetchService;
 
-public class HomeActivity extends ListActivity {
+public class HomeActivity extends RoboListActivity {
 
 	private class DownloadHandler extends Handler {
 		@Override
@@ -71,7 +71,7 @@ public class HomeActivity extends ListActivity {
 		}
 	}
 
-	private final class ImportHandler extends Handler {
+	private class ImportHandler extends Handler {
 		@Override
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
@@ -89,9 +89,49 @@ public class HomeActivity extends ListActivity {
 		}
 	}
 
+	private class MediaConnection implements ServiceConnection {
+
+		@SuppressWarnings("synthetic-access")
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			mediaDownloadService = ((LocalBinder<MediaDownloadService>) service).getService();
+			mediaDownloadService.refreshStatus();
+			mediaDownloadService.setDownloadHandler(new DownloadHandler());
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+		}
+	};
+
+	private class PodcastConnection implements ServiceConnection {
+		@SuppressWarnings("synthetic-access")
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			podcastFetchService = ((LocalBinder<PodcastFetchService>) service).getService();
+			final Cursor cursor = managedQuery(PodcastColumns.PODCAST_URI, null, null, null, null);
+			if (cursor.getCount() < PodcastFetchService.LOCAL_PODCAST_COUNT) {
+				// parse exists podcast xml to db
+				podcastFetchService.importLocal(new ImportHandler());
+			} else {
+				try {
+					podcastFetchService.fetchNew(null);
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+		}
+	}
+
 	private static final int		DIALOG_IMPORT	= 0;
-	private ServiceConnection		mediaConn;
-	private ServiceConnection		podcastConn;
+	private MediaConnection			mediaConn		= new MediaConnection();
+	private PodcastConnection		podcastConn		= new PodcastConnection();
 	private PodcastFetchService		podcastFetchService;
 	private MediaDownloadService	mediaDownloadService;
 
@@ -138,8 +178,8 @@ public class HomeActivity extends ListActivity {
 		super.onStart();
 		Intent intent = new Intent(this, RichScriptFetchService.class);
 		startService(intent);
-		bindPodcastFetchService();
-		bindMediadownloadService();
+		bindService(new Intent(this, PodcastFetchService.class), podcastConn, BIND_AUTO_CREATE);
+		bindService(new Intent(this, MediaDownloadService.class), mediaConn, BIND_AUTO_CREATE);
 	}
 
 	@Override
@@ -147,52 +187,5 @@ public class HomeActivity extends ListActivity {
 		super.onStop();
 		unbindService(mediaConn);
 		unbindService(podcastConn);
-	}
-
-	private void bindMediadownloadService() {
-		mediaConn = new ServiceConnection() {
-
-			@SuppressWarnings("synthetic-access")
-			@Override
-			public void onServiceConnected(ComponentName name, IBinder service) {
-				mediaDownloadService = ((LocalBinder<MediaDownloadService>) service).getService();
-				mediaDownloadService.refreshStatus();
-				mediaDownloadService.setDownloadHandler(new DownloadHandler());
-			}
-
-			@Override
-			public void onServiceDisconnected(ComponentName name) {
-			}
-		};
-		bindService(new Intent(this, MediaDownloadService.class), mediaConn, BIND_AUTO_CREATE);
-	}
-
-	private void bindPodcastFetchService() {
-		podcastConn = new ServiceConnection() {
-			@SuppressWarnings("synthetic-access")
-			@Override
-			public void onServiceConnected(ComponentName name, IBinder service) {
-				podcastFetchService = ((LocalBinder<PodcastFetchService>) service).getService();
-				final Cursor cursor = managedQuery(PodcastColumns.PODCAST_URI, null, null, null, null);
-				if (cursor.getCount() < PodcastFetchService.LOCAL_PODCAST_COUNT) {
-					// parse exists podcast xml to db
-					podcastFetchService.importLocal(new ImportHandler());
-				} else {
-					try {
-						podcastFetchService.fetchNew(null);
-					} catch (MalformedURLException e) {
-						e.printStackTrace();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-
-			@Override
-			public void onServiceDisconnected(ComponentName name) {
-
-			}
-		};
-		bindService(new Intent(this, PodcastFetchService.class), podcastConn, BIND_AUTO_CREATE);
 	}
 }

@@ -5,7 +5,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import android.app.Service;
+import roboguice.service.RoboService;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
@@ -13,7 +13,7 @@ import android.os.IBinder;
 import com.kentchiu.eslpod.R;
 import com.kentchiu.eslpod.cmd.PodcastCommand;
 
-public class PodcastFetchService extends Service {
+public class PodcastFetchService extends RoboService {
 
 	public static int	LOCAL_PODCAST_COUNT	= 5;
 

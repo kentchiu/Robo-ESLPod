@@ -2,7 +2,7 @@ package com.kentchiu.eslpod.view;
 
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import android.content.Context;
 import android.graphics.Color;

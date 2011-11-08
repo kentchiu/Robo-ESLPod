@@ -3,9 +3,10 @@ package com.kentchiu.eslpod.view;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
-import android.app.ListActivity;
+import roboguice.activity.RoboListActivity;
+import roboguice.inject.InjectView;
 import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -46,13 +47,61 @@ import com.kentchiu.eslpod.service.LocalBinder;
 import com.kentchiu.eslpod.service.MediaService;
 import com.kentchiu.eslpod.service.WordFetchService;
 
-public class PlayerActivity extends ListActivity implements OnTouchListener, OnGestureListener, OnClickListener {
+public class PlayerActivity extends RoboListActivity implements OnTouchListener, OnGestureListener, OnClickListener {
 
-	private GestureDetector		gd;
-	private SeekBar				seekBar;
-	private Handler				handler	= new Handler();
-	private MediaPlayer			player;
-	private ServiceConnection	connection;
+	private class MediaConnection implements ServiceConnection {
+
+		@Override
+		public void onServiceConnected(ComponentName className, IBinder service) {
+			MediaService s = ((LocalBinder<MediaService>) service).getService();
+			s.prepare(getIntent().getData());
+			player = s.getPlayer();
+			initSeekBar();
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName className) {
+			// As our service is in the same process, this should never be called
+		}
+
+	}
+
+	private class MySeekbarChangeListener implements OnSeekBarChangeListener {
+
+		@Override
+		public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+			Log.d(EslPodApplication.TAG, "progress:" + progress + ", from User:" + fromUser);
+			if (fromUser) {
+				player.seekTo(progress);
+				Toast.makeText(PlayerActivity.this, "seeking -" + seekBar.getProgress(), Toast.LENGTH_SHORT).show();
+			} else {
+				// the event was fired from code and you shouldn't call player.seekTo()
+			}
+		}
+
+		@Override
+		public void onStartTrackingTouch(SeekBar seekBar) {
+			Toast.makeText(PlayerActivity.this, "start -" + seekBar.getProgress(), Toast.LENGTH_LONG).show();
+			Log.w(EslPodApplication.TAG, "start -" + seekBar.getProgress());
+		}
+
+		@Override
+		public void onStopTrackingTouch(SeekBar seekBar) {
+			Toast.makeText(PlayerActivity.this, "stop -" + seekBar.getProgress(), Toast.LENGTH_LONG).show();
+			Log.w(EslPodApplication.TAG, "stop -" + seekBar.getProgress());
+		}
+	}
+
+	private GestureDetector			gd;
+	@InjectView(R.id.seekBar)
+	private SeekBar					seekBar;
+	private Handler					handler					= new Handler();
+
+	private MediaPlayer				player;
+
+	private MediaConnection			mediaConn				= new MediaConnection();
+
+	private MySeekbarChangeListener	seekbarChangeListener	= new MySeekbarChangeListener();
 
 	@Override
 	public void onClick(View v) {
@@ -189,27 +238,12 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 		fetchWord(uri);
 
 		Intent intent = new Intent(this, MediaService.class);
-		connection = new ServiceConnection() {
-
-			@Override
-			public void onServiceConnected(ComponentName className, IBinder service) {
-				MediaService s = ((LocalBinder<MediaService>) service).getService();
-				s.prepare(getIntent().getData());
-				player = s.getPlayer();
-				initSeekBar();
-			}
-
-			@Override
-			public void onServiceDisconnected(ComponentName className) {
-				// As our service is in the same process, this should never be called
-			}
-		};
-		bindService(intent, connection, BIND_AUTO_CREATE);
+		bindService(intent, mediaConn, BIND_AUTO_CREATE);
 	}
 
 	@Override
 	protected void onDestroy() {
-		unbindService(connection);
+		unbindService(mediaConn);
 		super.onDestroy();
 	}
 
@@ -225,35 +259,8 @@ public class PlayerActivity extends ListActivity implements OnTouchListener, OnG
 	}
 
 	private void initSeekBar() {
-		//new MediaController(this);
-		seekBar = (SeekBar) findViewById(R.id.seekBar);
 
-		OnSeekBarChangeListener sbcl = new OnSeekBarChangeListener() {
-
-			@Override
-			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-				Log.d(EslPodApplication.TAG, "progress:" + progress + ", from User:" + fromUser);
-				if (fromUser) {
-					player.seekTo(progress);
-					Toast.makeText(PlayerActivity.this, "seeking -" + seekBar.getProgress(), Toast.LENGTH_SHORT).show();
-				} else {
-					// the event was fired from code and you shouldn't call player.seekTo()
-				}
-			}
-
-			@Override
-			public void onStartTrackingTouch(SeekBar seekBar) {
-				Toast.makeText(PlayerActivity.this, "start -" + seekBar.getProgress(), Toast.LENGTH_LONG).show();
-				Log.w(EslPodApplication.TAG, "start -" + seekBar.getProgress());
-			}
-
-			@Override
-			public void onStopTrackingTouch(SeekBar seekBar) {
-				Toast.makeText(PlayerActivity.this, "stop -" + seekBar.getProgress(), Toast.LENGTH_LONG).show();
-				Log.w(EslPodApplication.TAG, "stop -" + seekBar.getProgress());
-			}
-		};
-		seekBar.setOnSeekBarChangeListener(sbcl);
+		seekBar.setOnSeekBarChangeListener(seekbarChangeListener);
 
 		gd = new GestureDetector(this);
 		getListView().setLongClickable(true);
