@@ -15,7 +15,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
-import com.kentchiu.eslpod.view.EslPodApplication;
+import com.kentchiu.eslpod.EslPodApplication;
 
 public class MediaCommand implements Runnable {
 

@@ -24,6 +24,7 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.R;
 import com.kentchiu.eslpod.cmd.MediaCommand;
 import com.kentchiu.eslpod.cmd.PodcastCommand;
@@ -32,6 +33,7 @@ import com.kentchiu.eslpod.service.LocalBinder;
 import com.kentchiu.eslpod.service.MediaDownloadService;
 import com.kentchiu.eslpod.service.PodcastFetchService;
 import com.kentchiu.eslpod.service.RichScriptFetchService;
+import com.kentchiu.eslpod.view.adapter.PodcastListAdapter;
 
 public class HomeActivity extends RoboListActivity {
 

@@ -1,4 +1,4 @@
-package com.kentchiu.eslpod.view;
+package com.kentchiu.eslpod.view.adapter;
 
 import android.content.ContentUris;
 import android.content.Context;

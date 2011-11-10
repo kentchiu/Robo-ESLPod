@@ -12,8 +12,8 @@ import android.content.Context;
 import android.util.Log;
 
 import com.google.common.base.Joiner;
+import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.provider.Dictionary;
-import com.kentchiu.eslpod.view.EslPodApplication;
 
 public class DictionaryDictionaryCommand extends AbstractDictionaryCommand {
 

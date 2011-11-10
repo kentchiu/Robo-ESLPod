@@ -19,11 +19,12 @@ import android.widget.ViewFlipper;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.R;
 import com.kentchiu.eslpod.cmd.AbstractDictionaryCommand;
 import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
 
-public class DictFlipActivity extends Activity implements OnGestureListener, OnTouchListener, OnClickListener {
+public class DictFlipActivity extends Activity implements   OnClickListener {
 
 	private ViewFlipper			flipper;
 	private GestureDetector		gestureDetector;
@@ -36,7 +37,6 @@ public class DictFlipActivity extends Activity implements OnGestureListener, OnT
 		case R.id.go:
 			updateContent(input.getText().toString());
 			break;
-
 		default:
 			break;
 		}
@@ -50,7 +50,7 @@ public class DictFlipActivity extends Activity implements OnGestureListener, OnT
 		setContentView(R.layout.dict_flip_activity);
 
 		flipper = (ViewFlipper) findViewById(R.id.viewFlipper);
-		gestureDetector = new GestureDetector(this, this);
+		gestureDetector = new GestureDetector(this, new MyOnGestureListener());
 
 		String query = getIntent().getStringExtra(SearchManager.QUERY);
 		input = (TextView) findViewById(R.id.titleTxt);
@@ -59,74 +59,84 @@ public class DictFlipActivity extends Activity implements OnGestureListener, OnT
 		initWebView();
 		updateContent(query);
 		setTitle("● ○ ○          Dr.eye");
-		getApplicationContext();
 	}
 
-	@Override
-	public boolean onDown(MotionEvent e) {
-		return false;
-	}
 
-	@Override
-	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-		if (e1.getX() - e2.getX() > 200) {//move to left
-			flipper.setInAnimation(getApplicationContext(), R.anim.push_left_in);
-			flipper.setOutAnimation(getApplicationContext(), R.anim.push_left_out);
-			flipper.showNext();
-			flipper.setInAnimation(getApplicationContext(), R.anim.push_right_in);
-			flipper.setOutAnimation(getApplicationContext(), R.anim.push_right_out);
-		} else if (e2.getX() - e1.getX() > 200) {
-			flipper.setInAnimation(getApplicationContext(), R.anim.push_right_in);
-			flipper.setOutAnimation(getApplicationContext(), R.anim.push_right_out);
-			flipper.showPrevious();
-			flipper.setInAnimation(getApplicationContext(), R.anim.push_left_in);
-			flipper.setOutAnimation(getApplicationContext(), R.anim.push_left_out);
+
+
+	class MyOnGestureListener implements OnGestureListener {
+
+		@Override
+		public boolean onDown(MotionEvent e) {
+			return false;
 		}
 
-		View currentView = flipper.getCurrentView();
-		switch (currentView.getId()) {
-		case R.id.dict1:
-			setTitle("● ○ ○          Dr.eye");
-			break;
-		case R.id.dict2:
-			setTitle("○ ● ○          Dictionary");
-			break;
-		case R.id.dict3:
-			setTitle("○ ○ ●          Witionary");
-			break;
 
-		default:
-			break;
+		@Override
+		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+			if (e1.getX() - e2.getX() > 200) {//move to left
+				flipper.setInAnimation(getApplicationContext(), R.anim.push_left_in);
+				flipper.setOutAnimation(getApplicationContext(), R.anim.push_left_out);
+				flipper.showNext();
+				flipper.setInAnimation(getApplicationContext(), R.anim.push_right_in);
+				flipper.setOutAnimation(getApplicationContext(), R.anim.push_right_out);
+			} else if (e2.getX() - e1.getX() > 200) {
+				flipper.setInAnimation(getApplicationContext(), R.anim.push_right_in);
+				flipper.setOutAnimation(getApplicationContext(), R.anim.push_right_out);
+				flipper.showPrevious();
+				flipper.setInAnimation(getApplicationContext(), R.anim.push_left_in);
+				flipper.setOutAnimation(getApplicationContext(), R.anim.push_left_out);
+			}
+
+			View currentView = flipper.getCurrentView();
+			switch (currentView.getId()) {
+			case R.id.dict1:
+				setTitle("● ○ ○          Dr.eye");
+				break;
+			case R.id.dict2:
+				setTitle("○ ● ○          Dictionary");
+				break;
+			case R.id.dict3:
+				setTitle("○ ○ ●          Witionary");
+				break;
+
+			default:
+				break;
+			}
+			return true;
 		}
-		return true;
+
+		@Override
+		public void onLongPress(MotionEvent e) {
+
+		}
+
+		@Override
+		public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+			return false;
+		}
+
+		@Override
+		public void onShowPress(MotionEvent e) {
+
+		}
+
+		@Override
+		public boolean onSingleTapUp(MotionEvent e) {
+			return false;
+		}
+
 	}
 
-	@Override
-	public void onLongPress(MotionEvent e) {
 
+	class MyOnTouchListener implements OnTouchListener {
+		@Override
+		public boolean onTouch(View v, MotionEvent event) {
+			return gestureDetector.onTouchEvent(event);
+		}
 	}
 
-	@Override
-	public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
 
-		return false;
-	}
-
-	@Override
-	public void onShowPress(MotionEvent e) {
-
-	}
-
-	@Override
-	public boolean onSingleTapUp(MotionEvent e) {
-
-		return false;
-	}
-
-	@Override
-	public boolean onTouch(View v, MotionEvent event) {
-		return gestureDetector.onTouchEvent(event);
-	}
 
 	void updateContent(final String query) {
 		for (int dictId = 1; dictId < 4; dictId++) {
@@ -167,7 +177,7 @@ public class DictFlipActivity extends Activity implements OnGestureListener, OnT
 			View viewGroup = findViewById(each);
 			final WebView webView = (WebView) viewGroup.findViewById(R.id.webview);
 			webView.loadDataWithBaseURL("Dictionary", "查詢中....", "text/html", "utf-8", null);
-			webView.setOnTouchListener(this);
+			webView.setOnTouchListener(new MyOnTouchListener());
 			webView.setLongClickable(true);
 			((List<WebView>) webViews).add(webView);
 		}

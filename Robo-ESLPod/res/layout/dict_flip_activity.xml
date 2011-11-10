@@ -41,15 +41,15 @@
         android:layout_weight="0.94" >
 
         <include
+            android:id="@+id/dict1"
+            layout="@layout/dict" />
+
+        <include
             android:id="@+id/dict2"
             layout="@layout/dict" />
 
         <include
             android:id="@+id/dict3"
-            layout="@layout/dict" />
-
-        <include
-            android:id="@+id/dict1"
             layout="@layout/dict" />
 
     </ViewFlipper>

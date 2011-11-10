@@ -23,7 +23,6 @@ import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.GestureDetector;
-import android.view.GestureDetector.OnGestureListener;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -39,6 +38,7 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.R;
 import com.kentchiu.eslpod.cmd.RichScriptCommand;
 import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
@@ -46,8 +46,9 @@ import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 import com.kentchiu.eslpod.service.LocalBinder;
 import com.kentchiu.eslpod.service.MediaService;
 import com.kentchiu.eslpod.service.WordFetchService;
+import com.kentchiu.eslpod.view.adapter.ScriptListAdapter;
 
-public class PlayerActivity extends RoboListActivity implements OnTouchListener, OnGestureListener, OnClickListener {
+public class PlayerActivity extends RoboListActivity implements  OnClickListener {
 
 	private class MediaConnection implements ServiceConnection {
 
@@ -73,7 +74,6 @@ public class PlayerActivity extends RoboListActivity implements OnTouchListener,
 			Log.d(EslPodApplication.TAG, "progress:" + progress + ", from User:" + fromUser);
 			if (fromUser) {
 				player.seekTo(progress);
-				Toast.makeText(PlayerActivity.this, "seeking -" + seekBar.getProgress(), Toast.LENGTH_SHORT).show();
 			} else {
 				// the event was fired from code and you shouldn't call player.seekTo()
 			}
@@ -81,13 +81,11 @@ public class PlayerActivity extends RoboListActivity implements OnTouchListener,
 
 		@Override
 		public void onStartTrackingTouch(SeekBar seekBar) {
-			Toast.makeText(PlayerActivity.this, "start -" + seekBar.getProgress(), Toast.LENGTH_LONG).show();
 			Log.w(EslPodApplication.TAG, "start -" + seekBar.getProgress());
 		}
 
 		@Override
 		public void onStopTrackingTouch(SeekBar seekBar) {
-			Toast.makeText(PlayerActivity.this, "stop -" + seekBar.getProgress(), Toast.LENGTH_LONG).show();
 			Log.w(EslPodApplication.TAG, "stop -" + seekBar.getProgress());
 		}
 	}
@@ -95,12 +93,8 @@ public class PlayerActivity extends RoboListActivity implements OnTouchListener,
 	private GestureDetector			gd;
 	@InjectView(R.id.seekBar)
 	private SeekBar					seekBar;
-	private Handler					handler					= new Handler();
-
 	private MediaPlayer				player;
-
 	private MediaConnection			mediaConn				= new MediaConnection();
-
 	private MySeekbarChangeListener	seekbarChangeListener	= new MySeekbarChangeListener();
 
 	@Override
@@ -157,38 +151,6 @@ public class PlayerActivity extends RoboListActivity implements OnTouchListener,
 		}
 	}
 
-	@Override
-	public boolean onDown(MotionEvent e) {
-		return false;
-	}
-
-	@Override
-	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-		return false;
-	}
-
-	@Override
-	public void onLongPress(MotionEvent e) {
-	}
-
-	@Override
-	public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-		return false;
-	}
-
-	@Override
-	public void onShowPress(MotionEvent e) {
-	}
-
-	@Override
-	public boolean onSingleTapUp(MotionEvent e) {
-		return false;
-	}
-
-	@Override
-	public boolean onTouch(View v, MotionEvent event) {
-		return gd.onTouchEvent(event);
-	}
 
 	@Override
 	public void onWindowFocusChanged(boolean hasFocus) {
@@ -223,7 +185,7 @@ public class PlayerActivity extends RoboListActivity implements OnTouchListener,
 		registerForContextMenu(getListView());
 		final Uri uri = getIntent().getData();
 		Log.i(EslPodApplication.TAG, "working uri:" + uri);
-		getContentResolver().registerContentObserver(uri, false, new ContentObserver(handler) {
+		getContentResolver().registerContentObserver(uri, false, new ContentObserver(new Handler()) {
 			@Override
 			public void onChange(boolean selfChange) {
 				Log.i(EslPodApplication.TAG, "reset adapter");
@@ -262,9 +224,9 @@ public class PlayerActivity extends RoboListActivity implements OnTouchListener,
 
 		seekBar.setOnSeekBarChangeListener(seekbarChangeListener);
 
-		gd = new GestureDetector(this);
+
 		getListView().setLongClickable(true);
-		getListView().setOnTouchListener(this);
+		//getListView().setOnTouchListener(this);
 
 		Thread syncSeekBarThread = new Thread(new Runnable() {
 			@Override
@@ -323,3 +285,4 @@ public class PlayerActivity extends RoboListActivity implements OnTouchListener,
 	}
 
 }
+

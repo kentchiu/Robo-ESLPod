@@ -1,4 +1,4 @@
-package com.kentchiu.eslpod.view;
+package com.kentchiu.eslpod;
 
 import android.app.Application;
 

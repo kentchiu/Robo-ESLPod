@@ -25,9 +25,9 @@ import android.util.Log;
 
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.cmd.MediaCommand;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
-import com.kentchiu.eslpod.view.EslPodApplication;
 
 public class MediaDownloadService extends Service {
 	private static final int				MAX_TASK	= 10;

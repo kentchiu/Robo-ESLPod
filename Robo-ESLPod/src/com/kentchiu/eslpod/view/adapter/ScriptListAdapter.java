@@ -1,4 +1,4 @@
-package com.kentchiu.eslpod.view;
+package com.kentchiu.eslpod.view.adapter;
 
 import java.util.List;
 
