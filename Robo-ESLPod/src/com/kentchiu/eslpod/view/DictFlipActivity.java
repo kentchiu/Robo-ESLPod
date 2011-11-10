@@ -2,7 +2,8 @@ package com.kentchiu.eslpod.view;
 
 import java.util.List;
 
-import android.app.Activity;
+import roboguice.activity.RoboActivity;
+import roboguice.inject.InjectView;
 import android.app.SearchManager;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -24,45 +25,7 @@ import com.kentchiu.eslpod.R;
 import com.kentchiu.eslpod.cmd.AbstractDictionaryCommand;
 import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
 
-public class DictFlipActivity extends Activity implements   OnClickListener {
-
-	private ViewFlipper			flipper;
-	private GestureDetector		gestureDetector;
-	private Iterable<WebView>	webViews;
-	private TextView			input;
-
-	@Override
-	public void onClick(View v) {
-		switch (v.getId()) {
-		case R.id.go:
-			updateContent(input.getText().toString());
-			break;
-		default:
-			break;
-		}
-
-	}
-
-	/** Called when the activity is first created. */
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.dict_flip_activity);
-
-		flipper = (ViewFlipper) findViewById(R.id.viewFlipper);
-		gestureDetector = new GestureDetector(this, new MyOnGestureListener());
-
-		String query = getIntent().getStringExtra(SearchManager.QUERY);
-		input = (TextView) findViewById(R.id.titleTxt);
-		input.setText(query);
-
-		initWebView();
-		updateContent(query);
-		setTitle("● ○ ○          Dr.eye");
-	}
-
-
-
+public class DictFlipActivity extends RoboActivity implements OnClickListener {
 
 	class MyOnGestureListener implements OnGestureListener {
 
@@ -70,7 +33,6 @@ public class DictFlipActivity extends Activity implements   OnClickListener {
 		public boolean onDown(MotionEvent e) {
 			return false;
 		}
-
 
 		@Override
 		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
@@ -128,7 +90,6 @@ public class DictFlipActivity extends Activity implements   OnClickListener {
 
 	}
 
-
 	class MyOnTouchListener implements OnTouchListener {
 		@Override
 		public boolean onTouch(View v, MotionEvent event) {
@@ -136,7 +97,39 @@ public class DictFlipActivity extends Activity implements   OnClickListener {
 		}
 	}
 
+	@InjectView(R.id.viewFlipper)
+	private ViewFlipper			flipper;
+	private GestureDetector		gestureDetector;
 
+	private Iterable<WebView>	webViews;
+
+	@InjectView(R.id.titleTxt)
+	private TextView			input;
+
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+		case R.id.go:
+			updateContent(input.getText().toString());
+			break;
+		default:
+			break;
+		}
+
+	}
+
+	/** Called when the activity is first created. */
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.dict_flip_activity);
+		gestureDetector = new GestureDetector(this, new MyOnGestureListener());
+		String query = getIntent().getStringExtra(SearchManager.QUERY);
+		input.setText(query);
+		initWebView();
+		updateContent(query);
+		setTitle("● ○ ○          Dr.eye");
+	}
 
 	void updateContent(final String query) {
 		for (int dictId = 1; dictId < 4; dictId++) {

@@ -14,7 +14,10 @@
 				<data android:mimeType="vnd.android.cursor.item/vnd.eslpod.podcast" />
 			</intent-filter>
 		</activity>
-		<activity android:name=".view.DictFlipActivity" android:launchMode="singleTop"  android:screenOrientation="portrait" >
+		<activity android:name=".view.DictFlipActivity" android:launchMode="singleTop"  android:screenOrientation="portrait"
+		      android:windowSoftInputMode="adjustUnspecified|stateHidden"
+              android:configChanges="orientation|keyboardHidden">
+		    >
 			<intent-filter>
 				<action android:name="android.intent.action.VIEW" />
 				<category android:name="android.intent.category.DEFAULT" />

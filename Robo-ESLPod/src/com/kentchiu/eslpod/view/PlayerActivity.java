@@ -24,15 +24,12 @@ import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.GestureDetector;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnTouchListener;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
@@ -48,7 +45,7 @@ import com.kentchiu.eslpod.service.MediaService;
 import com.kentchiu.eslpod.service.WordFetchService;
 import com.kentchiu.eslpod.view.adapter.ScriptListAdapter;
 
-public class PlayerActivity extends RoboListActivity implements  OnClickListener {
+public class PlayerActivity extends RoboListActivity implements OnClickListener {
 
 	private class MediaConnection implements ServiceConnection {
 
@@ -151,7 +148,6 @@ public class PlayerActivity extends RoboListActivity implements  OnClickListener
 		}
 	}
 
-
 	@Override
 	public void onWindowFocusChanged(boolean hasFocus) {
 		super.onWindowFocusChanged(hasFocus);
@@ -224,7 +220,6 @@ public class PlayerActivity extends RoboListActivity implements  OnClickListener
 
 		seekBar.setOnSeekBarChangeListener(seekbarChangeListener);
 
-
 		getListView().setLongClickable(true);
 		//getListView().setOnTouchListener(this);
 
@@ -285,4 +280,3 @@ public class PlayerActivity extends RoboListActivity implements  OnClickListener
 	}
 
 }
-
