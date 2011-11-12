@@ -221,7 +221,6 @@ public class PlayerActivity extends RoboListActivity implements OnClickListener 
 		seekBar.setOnSeekBarChangeListener(seekbarChangeListener);
 
 		getListView().setLongClickable(true);
-		//getListView().setOnTouchListener(this);
 
 		Thread syncSeekBarThread = new Thread(new Runnable() {
 			@Override
@@ -231,10 +230,7 @@ public class PlayerActivity extends RoboListActivity implements OnClickListener 
 				seekBar.setMax(total);
 				while (player != null && currentPosition < total) {
 					try {
-						Thread.sleep(1000);
 						currentPosition = player.getCurrentPosition();
-					} catch (InterruptedException e) {
-						return;
 					} catch (Exception e) {
 						return;
 					}
