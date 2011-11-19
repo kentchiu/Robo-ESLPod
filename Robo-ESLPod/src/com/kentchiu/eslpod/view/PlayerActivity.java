@@ -65,12 +65,20 @@ public class PlayerActivity extends RoboListActivity implements OnClickListener 
 	}
 
 	private class MySeekbarChangeListener implements OnSeekBarChangeListener {
+		private boolean	dragging	= false;
+
+		public boolean isDragging() {
+			return dragging;
+		}
 
 		@Override
 		public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 			Log.d(EslPodApplication.TAG, "progress:" + progress + ", from User:" + fromUser);
 			if (fromUser) {
 				player.seekTo(progress);
+				int sec = progress / 1000;
+				String pos = String.format("%02d:%02d", sec / 60, sec % 60);
+				playPosition.setText(pos);
 			} else {
 				// the event was fired from code and you shouldn't call player.seekTo()
 			}
@@ -78,21 +86,51 @@ public class PlayerActivity extends RoboListActivity implements OnClickListener 
 
 		@Override
 		public void onStartTrackingTouch(SeekBar seekBar) {
+			dragging = true;
 			Log.w(EslPodApplication.TAG, "start -" + seekBar.getProgress());
 		}
 
 		@Override
 		public void onStopTrackingTouch(SeekBar seekBar) {
+			dragging = false;
+			handler.removeMessages(SHOW_PROGRESS);
+			Message m = handler.obtainMessage();
+			m.what = SHOW_PROGRESS;
+			m.arg1 = player.getCurrentPosition();
+			handler.sendMessage(m);
 			Log.w(EslPodApplication.TAG, "stop -" + seekBar.getProgress());
 		}
 	}
 
+	private class SyncHandler extends Handler {
+		@SuppressWarnings("synthetic-access")
+		@Override
+		public void handleMessage(Message msg) {
+			if (SHOW_PROGRESS == msg.what) {
+				int current = msg.arg1;
+				seekBar.setProgress(current);
+				if (!seekbarChangeListener.isDragging()) {
+					Message m = obtainMessage();
+					m.what = SHOW_PROGRESS;
+					m.arg1 = player.getCurrentPosition();
+					sendMessageDelayed(m, 1000 - player.getCurrentPosition() % 1000);
+				}
+			} else {
+				throw new IllegalArgumentException("Unkonw msg : " + msg);
+			}
+		}
+	}
+
 	private GestureDetector			gd;
+	private Handler					handler					= new SyncHandler();
+	private MediaConnection			mediaConn				= new MediaConnection();
+	private MediaPlayer				player;
+	@InjectView(R.id.playPosition)
+	private TextView				playPosition;
 	@InjectView(R.id.seekBar)
 	private SeekBar					seekBar;
-	private MediaPlayer				player;
-	private MediaConnection			mediaConn				= new MediaConnection();
 	private MySeekbarChangeListener	seekbarChangeListener	= new MySeekbarChangeListener();
+	private static final int		SHOW_PROGRESS			= 1;
 
 	@Override
 	public void onClick(View v) {
@@ -103,7 +141,11 @@ public class PlayerActivity extends RoboListActivity implements OnClickListener 
 				findViewById(R.id.playButton).setVisibility(View.GONE);
 				findViewById(R.id.pauseButton).setVisibility(View.VISIBLE);
 			}
-			updatingPlayPosition();
+			seekBar.setMax(player.getDuration());
+			Message m = handler.obtainMessage();
+			m.what = SHOW_PROGRESS;
+			m.arg1 = player.getCurrentPosition();
+			handler.sendMessage(m);
 			break;
 		case R.id.pauseButton:
 			if (player.isPlaying()) {
@@ -217,28 +259,8 @@ public class PlayerActivity extends RoboListActivity implements OnClickListener 
 	}
 
 	private void initSeekBar() {
-
 		seekBar.setOnSeekBarChangeListener(seekbarChangeListener);
-
 		getListView().setLongClickable(true);
-
-		Thread syncSeekBarThread = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				int currentPosition = 0;
-				int total = player.getDuration();
-				seekBar.setMax(total);
-				while (player != null && currentPosition < total) {
-					try {
-						currentPosition = player.getCurrentPosition();
-					} catch (Exception e) {
-						return;
-					}
-					seekBar.setProgress(currentPosition);
-				}
-			}
-		});
-		syncSeekBarThread.start();
 	}
 
 	private Iterable<String> listWordsMatchToMenuItem(Iterable<String> words, final String item) {
@@ -252,27 +274,4 @@ public class PlayerActivity extends RoboListActivity implements OnClickListener 
 		});
 		return filter;
 	}
-
-	private void updatingPlayPosition() {
-		final TextView playPosition = (TextView) findViewById(R.id.playPosition);
-		final Handler h = new Handler() {
-			@Override
-			public void handleMessage(Message msg) {
-				int sec = msg.what / 1000;
-				String pos = String.format("%02d:%02d", sec / 60, sec % 60);
-				playPosition.setText(pos);
-			}
-		};
-
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				while (player.isPlaying()) {
-					h.sendEmptyMessage(player.getCurrentPosition());
-				}
-			}
-
-		}).start();
-	}
-
 }
