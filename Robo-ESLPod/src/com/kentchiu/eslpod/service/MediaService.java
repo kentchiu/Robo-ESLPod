@@ -4,12 +4,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-import org.apache.commons.lang3.StringUtils;
-
 import android.app.Service;
 import android.content.Intent;
 import android.database.Cursor;
 import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnPreparedListener;
 import android.net.Uri;
 import android.os.IBinder;
 import android.util.Log;
@@ -22,9 +21,11 @@ public class MediaService extends Service {
 
 	private MediaPlayer	player;
 
+
 	public MediaPlayer getPlayer() {
 		return player;
 	}
+
 
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -35,7 +36,6 @@ public class MediaService extends Service {
 	public void onCreate() {
 		super.onCreate();
 		player = new MediaPlayer();
-
 	}
 
 	@Override
@@ -45,32 +45,24 @@ public class MediaService extends Service {
 		player.release();
 	}
 
-	public void prepare(Uri uri) {
+	public void prepare(Uri uri,  OnPreparedListener listener) {
 		Log.i(EslPodApplication.TAG, "working uri:" + uri);
 		Preconditions.checkNotNull(uri);
 		Cursor c = getContentResolver().query(uri, null, null, null, null);
 		c.moveToFirst();
 		String url = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URL_LOCAL));
-		String path = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URL));
-		prepare(url, path);
+		prepare(url, listener);
 	}
 
-	private void prepare(String url, String path) {
+	private void prepare(String url, OnPreparedListener listener) {
+		if (url == null) return ;
 		try {
-			if (StringUtils.isNotBlank(url)) {
-				File file = new File(url);
-				if (file.exists()) {
-					player.setDataSource(new FileInputStream(file).getFD());
-					player.prepareAsync();
-				} else {
-					player.setDataSource(path);
-					player.prepareAsync();
-				}
-			} else {
-				player.setDataSource(path);
+			File file = new File(url);
+			if (file.exists()) {
+				player.setDataSource(new FileInputStream(file).getFD());
 				player.prepareAsync();
+				player.setOnPreparedListener(listener);
 			}
-			Log.d(EslPodApplication.TAG, "media url : " + path);
 		} catch (IllegalArgumentException e1) {
 			e1.printStackTrace();
 		} catch (IllegalStateException e1) {

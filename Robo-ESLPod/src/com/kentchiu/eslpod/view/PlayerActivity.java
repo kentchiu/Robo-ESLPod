@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import roboguice.activity.RoboListActivity;
 import roboguice.inject.InjectView;
+import roboguice.util.Ln;
 import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -14,6 +15,7 @@ import android.content.ServiceConnection;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnPreparedListener;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -27,9 +29,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
@@ -52,9 +56,17 @@ public class PlayerActivity extends RoboListActivity implements OnClickListener 
 		@Override
 		public void onServiceConnected(ComponentName className, IBinder service) {
 			MediaService s = ((LocalBinder<MediaService>) service).getService();
-			s.prepare(getIntent().getData());
+			s.prepare(getIntent().getData(), new OnPreparedListener() {
+
+				@Override
+				public void onPrepared(MediaPlayer mp) {
+					prepared= true;
+					Log.i(EslPodApplication.TAG, "MP3 is ready");
+				}
+			});
 			player = s.getPlayer();
 			initSeekBar();
+			Log.i(EslPodApplication.TAG, "is MP3 prepared :" + prepared);
 		}
 
 		@Override
@@ -73,7 +85,7 @@ public class PlayerActivity extends RoboListActivity implements OnClickListener 
 
 		@Override
 		public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-			Log.d(EslPodApplication.TAG, "progress:" + progress + ", from User:" + fromUser);
+			Ln.v("progress:%d, from User:%s" ,progress, fromUser);
 			if (fromUser) {
 				player.seekTo(progress);
 				int sec = progress / 1000;
@@ -87,7 +99,7 @@ public class PlayerActivity extends RoboListActivity implements OnClickListener 
 		@Override
 		public void onStartTrackingTouch(SeekBar seekBar) {
 			dragging = true;
-			Log.w(EslPodApplication.TAG, "start -" + seekBar.getProgress());
+			Ln.w("start - %d" , seekBar.getProgress());
 		}
 
 		@Override
@@ -131,15 +143,25 @@ public class PlayerActivity extends RoboListActivity implements OnClickListener 
 	private SeekBar					seekBar;
 	private MySeekbarChangeListener	seekbarChangeListener	= new MySeekbarChangeListener();
 	private static final int		SHOW_PROGRESS			= 1;
+	@InjectView(R.id.playButton)
+	private ImageButton playButton;
+	@InjectView(R.id.pauseButton)
+	private ImageButton pauseButton;
+	private boolean prepared;
 
 	@Override
 	public void onClick(View v) {
+		seekBar.setEnabled(prepared);
+		if (!prepared) {
+			Toast.makeText(PlayerActivity.this, "Download first", Toast.LENGTH_SHORT).show();
+			return;
+		}
 		switch (v.getId()) {
 		case R.id.playButton:
 			if (!player.isPlaying()) {
 				player.start();
-				findViewById(R.id.playButton).setVisibility(View.GONE);
-				findViewById(R.id.pauseButton).setVisibility(View.VISIBLE);
+				playButton.setVisibility(View.GONE);
+				pauseButton.setVisibility(View.VISIBLE);
 			}
 			seekBar.setMax(player.getDuration());
 			Message m = handler.obtainMessage();
@@ -150,8 +172,8 @@ public class PlayerActivity extends RoboListActivity implements OnClickListener 
 		case R.id.pauseButton:
 			if (player.isPlaying()) {
 				player.pause();
-				findViewById(R.id.playButton).setVisibility(View.VISIBLE);
-				findViewById(R.id.pauseButton).setVisibility(View.GONE);
+				playButton.setVisibility(View.VISIBLE);
+				pauseButton.setVisibility(View.GONE);
 			}
 			break;
 		case R.id.forwardButton:
@@ -216,8 +238,15 @@ public class PlayerActivity extends RoboListActivity implements OnClickListener 
 	}
 
 	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		Log.e(EslPodApplication.TAG, "==== onActivityResult ====");
+		super.onActivityResult(requestCode, resultCode, data);
+	}
+
+	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Log.e(EslPodApplication.TAG, "==== onCreate ====");
 		setContentView(R.layout.player_activity);
 
 		registerForContextMenu(getListView());
@@ -239,17 +268,40 @@ public class PlayerActivity extends RoboListActivity implements OnClickListener 
 
 		Intent intent = new Intent(this, MediaService.class);
 		bindService(intent, mediaConn, BIND_AUTO_CREATE);
+		seekBar.setEnabled(prepared);
 	}
 
 	@Override
 	protected void onDestroy() {
+		Log.e(EslPodApplication.TAG, "==== onDestroy ====");
 		unbindService(mediaConn);
 		super.onDestroy();
 	}
 
 	@Override
+	protected void onPause() {
+		Log.e(EslPodApplication.TAG, "==== onPause ====");
+		super.onPause();
+	}
+	@Override
+	protected void onRestart() {
+		Log.e(EslPodApplication.TAG, "==== onRestart ====");
+		super.onRestart();
+	}
+	@Override
+	protected void onResume() {
+		Log.e(EslPodApplication.TAG, "==== onResume ====");
+		super.onResume();
+	}
+	@Override
 	protected void onStart() {
+		Log.e(EslPodApplication.TAG, "==== onStart ====");
 		super.onStart();
+	}
+	@Override
+	protected void onStop() {
+		Log.e(EslPodApplication.TAG, "==== onStop ====");
+		super.onStop();
 	}
 
 	private void fetchWord(final Uri uri) {
