@@ -10,12 +10,10 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 
+import roboguice.util.Ln;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
-
-import com.kentchiu.eslpod.EslPodApplication;
 
 public class MediaCommand implements Runnable {
 
@@ -66,7 +64,7 @@ public class MediaCommand implements Runnable {
 			m.setData(createBundle());
 			m.sendToTarget();
 		} else {
-			Log.w(EslPodApplication.TAG, "try to sending but handler is null");
+			Ln.w("try to sending but handler is null");
 		}
 	}
 
@@ -92,7 +90,7 @@ public class MediaCommand implements Runnable {
 	}
 
 	private void downloadFile() throws IOException, FileNotFoundException {
-		Log.i(EslPodApplication.TAG, "Downloading file from " + from.toString());
+		Ln.i("Downloading file from " + from.toString());
 		sendMessage(DOWNLOAD_START, 0, 0);
 
 		URLConnection conn = from.openConnection();
@@ -100,9 +98,9 @@ public class MediaCommand implements Runnable {
 		conn.connect();
 		// this will be useful so that you can show a typical 0-100% progress bar
 		long lenghtOfFile = conn.getContentLength();
-		Log.v(EslPodApplication.TAG, "file length : " + lenghtOfFile);
+		Ln.v("file length : " + lenghtOfFile);
 		if (to.exists() && to.length() == lenghtOfFile) {
-			Log.i(EslPodApplication.TAG, to.getAbsolutePath() + " exists");
+			Ln.i(to.getAbsolutePath() + " exists");
 			sendMessage(DOWNLOAD_COMPLETED, (int) lenghtOfFile, (int) lenghtOfFile);
 		} else {
 			// downloading the file
@@ -125,7 +123,7 @@ public class MediaCommand implements Runnable {
 			output.close();
 			input.close();
 			sendMessage(DOWNLOAD_COMPLETED, cache, (int) lenghtOfFile);
-			Log.i(EslPodApplication.TAG, "Downloaded file " + to.toString() + " completed");
+			Ln.i("Downloaded file " + to.toString() + " completed");
 		}
 	}
 

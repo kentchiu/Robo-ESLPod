@@ -1,12 +1,11 @@
 package com.kentchiu.eslpod.provider;
 
+import roboguice.util.Ln;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
-import android.util.Log;
 
-import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
@@ -45,7 +44,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		String sql2= "CREATE UNIQUE INDEX [IDX_DICT_DICTIONID_WORD] ON [" + DICTIONARY_TABLE_NAME + "]([" + DictionaryColumns.DICTIONARY_ID + "]  DESC, [" + DictionaryColumns.WORD + "]  DESC)";
 
 		// @formatter:on
-		Log.i(EslPodApplication.TAG, sql);
+		Ln.i(sql);
 		sqLiteDatabase.execSQL(sql);
 		// create unique index
 		sqLiteDatabase.execSQL(sql2);
@@ -71,7 +70,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		PodcastColumns.PARAGRAPH_INDEX + " TEXT " +
 		");";
 		// @formatter:on
-		Log.i(EslPodApplication.TAG, sql);
+		Ln.i(sql);
 		sqLiteDatabase.execSQL(sql);
 	}
 }

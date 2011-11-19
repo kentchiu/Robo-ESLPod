@@ -11,12 +11,12 @@ import java.util.Set;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import roboguice.util.Ln;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
-import android.util.Log;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Function;
@@ -26,7 +26,6 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
-import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.R;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
@@ -167,7 +166,7 @@ public class RichScriptCommand implements Runnable {
 				}
 			}
 		} else {
-			Log.v(EslPodApplication.TAG, "rich script for url [" + scriptUrl + "] already exists");
+			Ln.v("rich script for url [%s] already exists", scriptUrl);
 		}
 	}
 
@@ -179,7 +178,7 @@ public class RichScriptCommand implements Runnable {
 		List<String> lines = ImmutableList.of();
 
 		try {
-			Log.d(EslPodApplication.TAG, "Start fetching script of " + title + " form : " + scriptUrl);
+			Ln.d("Start fetching script of %s form : ", scriptUrl);
 			// ===== The ascii 146 issues ====
 			// Ascii 146 (or 0x92) is render as ’ (Right single quotation mark) ref : http://www.ascii-code.com/
 			// But ascii 146 is not exists in any encoding which I can found
@@ -196,7 +195,7 @@ public class RichScriptCommand implements Runnable {
 					sb.append((char) c);
 				}
 			}
-			Log.d(EslPodApplication.TAG, "End fetching script of " + title + " form : " + scriptUrl);
+			Ln.d("End fetching script of %s form : %s", title, scriptUrl);
 			lines = ImmutableList.copyOf(Splitter.on("\n").split(sb.toString()));
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -219,7 +218,7 @@ public class RichScriptCommand implements Runnable {
 	protected void updateDatabase(String richScript) {
 		ContentValues values = new ContentValues();
 		values.put(PodcastColumns.RICH_SCRIPT, richScript);
-		Log.i(EslPodApplication.TAG, "update rich script");
+		Ln.i("update rich script");
 		getContext().getContentResolver().update(podcastUri, values, null, null);
 	}
 

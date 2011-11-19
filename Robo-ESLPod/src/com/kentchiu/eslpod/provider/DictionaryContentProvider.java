@@ -1,5 +1,6 @@
 package com.kentchiu.eslpod.provider;
 
+import roboguice.util.Ln;
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -12,9 +13,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.BaseColumns;
-import android.util.Log;
 
-import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
 
 public class DictionaryContentProvider extends ContentProvider {
@@ -59,7 +58,7 @@ public class DictionaryContentProvider extends ContentProvider {
 		switch (uriMatcher.match(uri)) {
 		case WORDS:
 			id = db.insert(DatabaseHelper.DICTIONARY_TABLE_NAME, null, values);
-			Log.v(EslPodApplication.TAG, "save word [" + values.getAsString(DictionaryColumns.WORD) + "] to dictionary " + values.getAsLong(DictionaryColumns.DICTIONARY_ID));
+			Ln.v("save word [%s] to dictionary %d ", values.getAsString(DictionaryColumns.WORD), values.getAsLong(DictionaryColumns.DICTIONARY_ID));
 			getContext().getContentResolver().notifyChange(DictionaryColumns.DICTIONARY_URI, null);
 			break;
 		default:
@@ -122,7 +121,7 @@ class MyHandler extends Handler {
 		int dictId = b.getInt(DictionaryColumns.DICTIONARY_ID);
 		String query = b.getString(DictionaryColumns.WORD);
 		String content = b.getString(DictionaryColumns.CONTENT);
-		Log.v(EslPodApplication.TAG, "save word definition of [" + query + "] to dictionary " + dictId);
+		Ln.v("save word definition of [%s] to dictionary %d", query, dictId);
 		ContentValues cv = new ContentValues();
 		cv.put(DictionaryColumns.DICTIONARY_ID, dictId);
 		cv.put(DictionaryColumns.WORD, query);

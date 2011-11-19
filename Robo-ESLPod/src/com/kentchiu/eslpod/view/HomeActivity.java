@@ -6,6 +6,7 @@ import java.net.MalformedURLException;
 import java.util.concurrent.RejectedExecutionException;
 
 import roboguice.activity.RoboListActivity;
+import roboguice.util.Ln;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
@@ -18,13 +19,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.R;
 import com.kentchiu.eslpod.cmd.MediaCommand;
 import com.kentchiu.eslpod.cmd.PodcastCommand;
@@ -43,7 +42,7 @@ public class HomeActivity extends RoboListActivity {
 			String from = msg.getData().getString("from");
 			String to = msg.getData().getString("to");
 			if (from == null) {
-				Log.w(EslPodApplication.TAG, "Download fail with illegal message " + msg);
+				Ln.w("Download fail with illegal message %s", msg);
 				return;
 			}
 			ContentValues cv = new ContentValues();
@@ -53,7 +52,7 @@ public class HomeActivity extends RoboListActivity {
 				cv.put(PodcastColumns.MEDIA_DOWNLOAD_LENGTH, msg.arg1);
 				int count = getContentResolver().update(PodcastColumns.PODCAST_URI, cv, PodcastColumns.MEDIA_URL + "=?", new String[] { from });
 				if (count != 1) {
-					Log.w(EslPodApplication.TAG, "exception row updated but " + count);
+					Ln.w("exception row updated but " + count);
 				}
 				break;
 			case MediaCommand.DOWNLOAD_COMPLETED:
@@ -62,7 +61,7 @@ public class HomeActivity extends RoboListActivity {
 				cv.put(PodcastColumns.MEDIA_DOWNLOAD_STATUS, PodcastColumns.MEDIA_STATUS_DOWNLOADED);
 				count = getContentResolver().update(PodcastColumns.PODCAST_URI, cv, PodcastColumns.MEDIA_URL + "=?", new String[] { from });
 				if (count != 1) {
-					Log.w(EslPodApplication.TAG, "exception row updated but " + count);
+					Ln.w("exception row updated but %d", count);
 				}
 				Toast.makeText(HomeActivity.this, new File(to).getName() + " download completed", Toast.LENGTH_SHORT).show();
 				break;
@@ -148,7 +147,7 @@ public class HomeActivity extends RoboListActivity {
 			btn.setEnabled(true);
 		} catch (MalformedURLException e) {
 			Toast.makeText(HomeActivity.this, "Download fail, invalid url", Toast.LENGTH_SHORT).show();
-			Log.e(EslPodApplication.TAG, "Download fail, invalid url , the source uri is " + uri);
+			Ln.e("Download fail, invalid url , the source uri is %s", uri);
 			btn.setEnabled(true);
 		}
 

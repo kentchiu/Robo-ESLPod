@@ -15,12 +15,12 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import roboguice.util.Ln;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
@@ -28,7 +28,6 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
 public class PodcastCommand implements Runnable {
@@ -58,7 +57,7 @@ public class PodcastCommand implements Runnable {
 		InputSource inputSource = new InputSource(inputStream);
 		NodeList nodes = (NodeList) xpath.evaluate("//channel/item/title", inputSource, XPathConstants.NODESET);
 		int length = nodes.getLength();
-		Log.d(EslPodApplication.TAG, "Count of nodes is " + length);
+		Ln.d("Count of nodes is %d", length);
 		List<Node> results = Lists.newArrayList();
 		for (int i = 0; i < length; i++) {
 			Node item = nodes.item(i);
@@ -83,7 +82,7 @@ public class PodcastCommand implements Runnable {
 				titles.add(c.getString(c.getColumnIndex(PodcastColumns.TITLE)));
 			}
 			List<Node> nodes = getItemNodes();
-			Log.d(EslPodApplication.TAG, nodes.size() + " need to be saved");
+			Ln.d("%d need to be saved", nodes.size());
 			int count = 1;
 			sendMessage(START_IMPORT, 0, nodes.size());
 			for (Node item : nodes) {
@@ -98,11 +97,11 @@ public class PodcastCommand implements Runnable {
 			}
 			sendMessage(END_IMPORT, count, nodes.size());
 
-			Log.i(EslPodApplication.TAG, count + " podcast saved");
+			Ln.i(count + " podcast saved");
 		} catch (XPathExpressionException e) {
-			Log.w(EslPodApplication.TAG, "rss parse fail", e);
+			Ln.w("rss parse fail", e);
 		} catch (IllegalStateException e) {
-			Log.w(EslPodApplication.TAG, "get podcast rss fail", e);
+			Ln.w("get podcast rss fail", e);
 		}
 	}
 

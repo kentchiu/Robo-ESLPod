@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 
+import roboguice.util.Ln;
 import android.app.Service;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -21,11 +22,9 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.provider.BaseColumns;
-import android.util.Log;
 
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.cmd.MediaCommand;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
@@ -47,7 +46,7 @@ public class MediaDownloadService extends Service {
 			// executorService.execute(cmd) will not execute command immediately, we need send download start message as soon as possible when download() invoked.
 			cmd.sendMessage(MediaCommand.DOWNLOAD_START, 0, 0);
 			executorService.execute(cmd);
-			Log.d(EslPodApplication.TAG, "add download task, there are " + commandQueue.size() + " in queue");
+			Ln.d("add download task, there are %d in queue", commandQueue.size());
 		}
 	}
 
@@ -87,7 +86,7 @@ public class MediaDownloadService extends Service {
 
 			int newStatus = getFileStatus(path, length);
 			if (newStatus != status) {
-				Log.d(EslPodApplication.TAG, "update download status of uri to " + newStatus);
+				Ln.d("update download status of uri to %s", newStatus);
 				Uri uri = ContentUris.withAppendedId(PodcastColumns.PODCAST_URI, id);
 				ContentValues values = new ContentValues();
 				values.put(PodcastColumns.MEDIA_DOWNLOAD_STATUS, newStatus);
@@ -107,7 +106,7 @@ public class MediaDownloadService extends Service {
 		if (StringUtils.equals(Environment.MEDIA_MOUNTED, state)) {
 			return getExternalCacheDir();
 		} else {
-			Log.w(EslPodApplication.TAG, "SD card no found, save to internl storage");
+			Ln.w("SD card no found, save to internl storage");
 			return getCacheDir();
 		}
 	}

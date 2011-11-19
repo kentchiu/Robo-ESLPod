@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import roboguice.util.Ln;
 import android.app.Service;
 import android.content.Intent;
 import android.database.Cursor;
@@ -11,21 +12,17 @@ import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.net.Uri;
 import android.os.IBinder;
-import android.util.Log;
 
 import com.google.common.base.Preconditions;
-import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
 public class MediaService extends Service {
 
 	private MediaPlayer	player;
 
-
 	public MediaPlayer getPlayer() {
 		return player;
 	}
-
 
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -45,8 +42,8 @@ public class MediaService extends Service {
 		player.release();
 	}
 
-	public void prepare(Uri uri,  OnPreparedListener listener) {
-		Log.i(EslPodApplication.TAG, "working uri:" + uri);
+	public void prepare(Uri uri, OnPreparedListener listener) {
+		Ln.i("working uri: %s", uri);
 		Preconditions.checkNotNull(uri);
 		Cursor c = getContentResolver().query(uri, null, null, null, null);
 		c.moveToFirst();
@@ -55,7 +52,9 @@ public class MediaService extends Service {
 	}
 
 	private void prepare(String url, OnPreparedListener listener) {
-		if (url == null) return ;
+		if (url == null) {
+			return;
+		}
 		try {
 			File file = new File(url);
 			if (file.exists()) {

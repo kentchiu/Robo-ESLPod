@@ -1,5 +1,6 @@
 package com.kentchiu.eslpod.provider;
 
+import roboguice.util.Ln;
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -8,9 +9,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.provider.BaseColumns;
-import android.util.Log;
 
-import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
 public class PodcastContentProvider extends ContentProvider {
@@ -49,7 +48,7 @@ public class PodcastContentProvider extends ContentProvider {
 		switch (uriMatcher.match(uri)) {
 		case PODCASTS:
 			long rowId = db.insert(DatabaseHelper.PODCAST_TABLE_NAME, null, values);
-			Log.v(EslPodApplication.TAG, "insert pocast data as id " + rowId);
+			Ln.v("insert pocast data as id %d", rowId);
 			Uri result = ContentUris.withAppendedId(PodcastColumns.PODCAST_URI, rowId);
 			getContext().getContentResolver().notifyChange(result, null);
 			return result;
@@ -70,7 +69,7 @@ public class PodcastContentProvider extends ContentProvider {
 
 	@Override
 	public Cursor query(Uri uri, String[] projection, String where, String[] whereArgs, String sortOrder) {
-		Log.v(EslPodApplication.TAG, "query uri :" + uri);
+		Ln.v("query uri : %s", uri);
 		SQLiteDatabase db = databaseHelper.getWritableDatabase();
 		final Cursor c;
 		switch (uriMatcher.match(uri)) {
@@ -89,7 +88,7 @@ public class PodcastContentProvider extends ContentProvider {
 
 	@Override
 	public int update(Uri uri, ContentValues values, String where, String[] whereArgs) {
-		Log.v(EslPodApplication.TAG, "update uri : " + uri);
+		Ln.v("update uri : %s", uri);
 		SQLiteDatabase db = databaseHelper.getWritableDatabase();
 		int result;
 		switch (uriMatcher.match(uri)) {

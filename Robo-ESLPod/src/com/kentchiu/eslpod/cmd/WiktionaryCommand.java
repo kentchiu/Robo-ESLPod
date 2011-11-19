@@ -10,11 +10,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import roboguice.util.Ln;
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Log;
 
-import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.provider.Dictionary;
 
 public class WiktionaryCommand extends AbstractDictionaryCommand {
@@ -191,7 +190,7 @@ public class WiktionaryCommand extends AbstractDictionaryCommand {
 			JSONObject revision = revisions.getJSONObject(0);
 			return revision.getString("*");
 		} catch (JSONException e) {
-			Log.w(EslPodApplication.TAG, "Extract json content fiil", e);
+			Ln.w("Extract json content fiil", e);
 			return "";
 		}
 	}

@@ -9,15 +9,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 
+import roboguice.util.Ln;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.util.Log;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.provider.Dictionary;
 import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
 
@@ -50,7 +49,7 @@ public abstract class AbstractDictionaryCommand implements Runnable {
 		allDictIds.add(Dictionary.DICTIONARY_WIKITIONARY);
 		Iterables.removeAll(allDictIds, dictIds);
 		String query = StringUtils.trim(w);
-		Log.v(EslPodApplication.TAG, "There are " + allDictIds.size() + " dictionary need to be update for word [" + query + "]");
+		Ln.v("There are %d dictionary need to be update for word [%s]", allDictIds.size(), query);
 		List<AbstractDictionaryCommand> cmds = Lists.newArrayList();
 		for (Integer each : allDictIds) {
 			AbstractDictionaryCommand cmd = newDictionaryCommand(context, query, each);
@@ -78,26 +77,26 @@ public abstract class AbstractDictionaryCommand implements Runnable {
 		String url = getQueryUrl();
 		String content;
 		try {
-			Log.v(EslPodApplication.TAG, "Start fetch  word [" + query + "] from dictionary " + getDictionaryId());
+			Ln.v("Start fetch  word [%s] from dictionary ", query);
 			if (StringUtils.isBlank(query)) {
 				content = "";
 			} else {
 				content = getContent();
 			}
 
-			Log.v(EslPodApplication.TAG, "End fetch  word [" + query + "] from dictionary " + getDictionaryId());
+			Ln.v("End fetch  word [%d] from dictionary ", getDictionaryId());
 			if (StringUtils.isNotBlank(content)) {
 				ContentValues cv = new ContentValues();
 				cv.put(DictionaryColumns.DICTIONARY_ID, getDictionaryId());
 				cv.put(DictionaryColumns.WORD, query);
 				cv.put(DictionaryColumns.CONTENT, content);
 				context.getContentResolver().insert(DictionaryColumns.DICTIONARY_URI, cv);
-				Log.v(EslPodApplication.TAG, "Save word [" + query + "] to dictionary " + getDictionaryId());
+				Ln.v("Save word [%s] to dictionary %d", query, getDictionaryId());
 			} else {
-				Log.w(EslPodApplication.TAG, "fetch word [" + query + "] fail form dictionary " + getDictionaryId() + ", url:" + url);
+				Ln.w("fetch word [%d] fail form dictionary  %d, url:%s", getDictionaryId(), url);
 			}
 		} catch (Exception e) {
-			Log.w(EslPodApplication.TAG, "fetch word [" + query + "] fail form dictionary " + getDictionaryId() + ", url:" + url, e);
+			Ln.w("fetch word [" + query + "] fail form dictionary " + getDictionaryId() + ", url:" + url, e);
 		}
 	}
 
@@ -119,7 +118,7 @@ public abstract class AbstractDictionaryCommand implements Runnable {
 			e.printStackTrace();
 			// 如果發生SocketTimeout時，可以這樣進行retry
 			if (retried < retry) {
-				Log.w(EslPodApplication.TAG, "Retry to fetch from " + url);
+				Ln.w("Retry to fetch from " + url);
 				return readAsOneLine(url, retried + 1);
 			}
 		} catch (Exception e) {

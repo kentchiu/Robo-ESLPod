@@ -4,7 +4,6 @@ import android.test.AndroidTestCase;
 
 import com.google.common.collect.ImmutableList;
 import com.kentchiu.eslpod.R;
-import com.kentchiu.eslpod.view.adapter.ScriptListAdapter;
 
 public class ScriptListAdapterTest extends AndroidTestCase {
 

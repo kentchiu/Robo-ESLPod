@@ -4,10 +4,10 @@ import java.util.List;
 
 import roboguice.activity.RoboActivity;
 import roboguice.inject.InjectView;
+import roboguice.util.Ln;
 import android.app.SearchManager;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
@@ -20,7 +20,6 @@ import android.widget.ViewFlipper;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.R;
 import com.kentchiu.eslpod.cmd.AbstractDictionaryCommand;
 import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
@@ -143,7 +142,7 @@ public class DictFlipActivity extends RoboActivity implements OnClickListener {
 	}
 
 	private void fetchContent(final String query, int dictId, final Cursor c) {
-		Log.d(EslPodApplication.TAG, "Fetching content [" + query + "] from dict id = " + dictId);
+		Ln.d("Fetching content [%s] from dict id = %d", query, dictId);
 		final int dictId2 = dictId;
 		final AbstractDictionaryCommand cmd = AbstractDictionaryCommand.newDictionaryCommand(this, query, dictId);
 		Thread t = new Thread(new Runnable() {
@@ -182,7 +181,7 @@ public class DictFlipActivity extends RoboActivity implements OnClickListener {
 			String word = c.getString(c.getColumnIndex(DictionaryColumns.WORD));
 			String html = AbstractDictionaryCommand.toHtml(this, word, content, dictId);
 			Iterables.get(webViews, dictId - 1).loadDataWithBaseURL("Dictionary", html, "text/html", "utf-8", null);
-			Log.v(EslPodApplication.TAG, "webviews [" + (dictId - 1) + "] loaded content from db");
+			Ln.v("webviews [%d] loaded content from db", dictId - 1);
 		}
 	}
 

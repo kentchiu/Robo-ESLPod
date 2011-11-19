@@ -21,7 +21,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.GestureDetector;
@@ -39,7 +38,6 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.R;
 import com.kentchiu.eslpod.cmd.RichScriptCommand;
 import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
@@ -60,13 +58,13 @@ public class PlayerActivity extends RoboListActivity implements OnClickListener 
 
 				@Override
 				public void onPrepared(MediaPlayer mp) {
-					prepared= true;
-					Log.i(EslPodApplication.TAG, "MP3 is ready");
+					prepared = true;
+					Ln.i("MP3 is ready");
 				}
 			});
 			player = s.getPlayer();
 			initSeekBar();
-			Log.i(EslPodApplication.TAG, "is MP3 prepared :" + prepared);
+			Ln.i("is MP3 prepared : %s", prepared);
 		}
 
 		@Override
@@ -85,7 +83,7 @@ public class PlayerActivity extends RoboListActivity implements OnClickListener 
 
 		@Override
 		public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-			Ln.v("progress:%d, from User:%s" ,progress, fromUser);
+			Ln.v("progress:%d, from User:%s", progress, fromUser);
 			if (fromUser) {
 				player.seekTo(progress);
 				int sec = progress / 1000;
@@ -99,7 +97,7 @@ public class PlayerActivity extends RoboListActivity implements OnClickListener 
 		@Override
 		public void onStartTrackingTouch(SeekBar seekBar) {
 			dragging = true;
-			Ln.w("start - %d" , seekBar.getProgress());
+			Ln.w("start - %d", seekBar.getProgress());
 		}
 
 		@Override
@@ -110,7 +108,7 @@ public class PlayerActivity extends RoboListActivity implements OnClickListener 
 			m.what = SHOW_PROGRESS;
 			m.arg1 = player.getCurrentPosition();
 			handler.sendMessage(m);
-			Log.w(EslPodApplication.TAG, "stop -" + seekBar.getProgress());
+			Ln.w("stop - %d", seekBar.getProgress());
 		}
 	}
 
@@ -144,10 +142,10 @@ public class PlayerActivity extends RoboListActivity implements OnClickListener 
 	private MySeekbarChangeListener	seekbarChangeListener	= new MySeekbarChangeListener();
 	private static final int		SHOW_PROGRESS			= 1;
 	@InjectView(R.id.playButton)
-	private ImageButton playButton;
+	private ImageButton				playButton;
 	@InjectView(R.id.pauseButton)
-	private ImageButton pauseButton;
-	private boolean prepared;
+	private ImageButton				pauseButton;
+	private boolean					prepared;
 
 	@Override
 	public void onClick(View v) {
@@ -239,23 +237,23 @@ public class PlayerActivity extends RoboListActivity implements OnClickListener 
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		Log.e(EslPodApplication.TAG, "==== onActivityResult ====");
+		Ln.e("==== onActivityResult ====");
 		super.onActivityResult(requestCode, resultCode, data);
 	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Log.e(EslPodApplication.TAG, "==== onCreate ====");
+		Ln.e("==== onCreate ====");
 		setContentView(R.layout.player_activity);
 
 		registerForContextMenu(getListView());
 		final Uri uri = getIntent().getData();
-		Log.i(EslPodApplication.TAG, "working uri:" + uri);
+		Ln.i("working uri:" + uri);
 		getContentResolver().registerContentObserver(uri, false, new ContentObserver(new Handler()) {
 			@Override
 			public void onChange(boolean selfChange) {
-				Log.i(EslPodApplication.TAG, "reset adapter");
+				Ln.i("reset adapter");
 				setListAdapter(createAdapter(uri));
 			}
 		});
@@ -273,34 +271,38 @@ public class PlayerActivity extends RoboListActivity implements OnClickListener 
 
 	@Override
 	protected void onDestroy() {
-		Log.e(EslPodApplication.TAG, "==== onDestroy ====");
+		Ln.e("==== onDestroy ====");
 		unbindService(mediaConn);
 		super.onDestroy();
 	}
 
 	@Override
 	protected void onPause() {
-		Log.e(EslPodApplication.TAG, "==== onPause ====");
+		Ln.e("==== onPause ====");
 		super.onPause();
 	}
+
 	@Override
 	protected void onRestart() {
-		Log.e(EslPodApplication.TAG, "==== onRestart ====");
+		Ln.e("==== onRestart ====");
 		super.onRestart();
 	}
+
 	@Override
 	protected void onResume() {
-		Log.e(EslPodApplication.TAG, "==== onResume ====");
+		Ln.e("==== onResume ====");
 		super.onResume();
 	}
+
 	@Override
 	protected void onStart() {
-		Log.e(EslPodApplication.TAG, "==== onStart ====");
+		Ln.e("==== onStart ====");
 		super.onStart();
 	}
+
 	@Override
 	protected void onStop() {
-		Log.e(EslPodApplication.TAG, "==== onStop ====");
+		Ln.e("==== onStop ====");
 		super.onStop();
 	}
 

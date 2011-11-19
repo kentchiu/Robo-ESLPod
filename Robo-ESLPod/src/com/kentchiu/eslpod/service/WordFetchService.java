@@ -10,20 +10,19 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 
+import roboguice.util.Ln;
 import android.app.Service;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.cmd.AbstractDictionaryCommand;
 import com.kentchiu.eslpod.cmd.RichScriptCommand;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
@@ -64,7 +63,7 @@ public class WordFetchService extends Service {
 			Iterable<String> words = RichScriptCommand.extractWord(richScript);
 			List<AbstractDictionaryCommand> cmds = prepareCommands(words);
 			fetchCmds.addAll(cmds);
-			Log.v(EslPodApplication.TAG, "Add " + Iterables.size(cmds) + " new command, total command is" + Iterables.size(fetchCmds));
+			Ln.v("Add %d new command, total command is %d", Iterables.size(cmds), Iterables.size(fetchCmds));
 		}
 		executeWordCommands(fetchCmds);
 		return super.onStartCommand(intent, flags, startId);
@@ -83,7 +82,7 @@ public class WordFetchService extends Service {
 	private void executeWordCommands(final List<AbstractDictionaryCommand> fetchCmds) {
 		final int addtion = Iterables.size(fetchCmds);
 		final int total = commandQueue.size() + addtion;
-		Log.i(EslPodApplication.TAG, "Queue size " + total + "(+" + addtion + ")");
+		Ln.i("Queue size %d(%d)", total, addtion);
 		String msg = "There are " + total + "(+" + addtion + ")" + " entries be downloaded";
 		if (total != 0) {
 			showMessage(msg, Toast.LENGTH_SHORT);
@@ -94,7 +93,7 @@ public class WordFetchService extends Service {
 					@Override
 					public void run() {
 						each.run();
-						Log.v(EslPodApplication.TAG, "queue size : " + commandQueue.size());
+						Ln.v("queue size : %d", commandQueue.size());
 						if (commandQueue.isEmpty()) {
 							showMessage("Dictionary entry download completed.", Toast.LENGTH_LONG);
 						}

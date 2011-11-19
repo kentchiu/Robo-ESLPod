@@ -8,11 +8,10 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 
+import roboguice.util.Ln;
 import android.content.Context;
-import android.util.Log;
 
 import com.google.common.base.Joiner;
-import com.kentchiu.eslpod.EslPodApplication;
 import com.kentchiu.eslpod.provider.Dictionary;
 
 public class DictionaryDictionaryCommand extends AbstractDictionaryCommand {
@@ -61,7 +60,7 @@ public class DictionaryDictionaryCommand extends AbstractDictionaryCommand {
 		if (m.find()) {
 			return m.group();
 		} else {
-			Log.e(EslPodApplication.TAG, "Not match for query : " + getQueryUrl());
+			Ln.e("Not match for query : %s", getQueryUrl());
 			return input;
 		}
 	}
