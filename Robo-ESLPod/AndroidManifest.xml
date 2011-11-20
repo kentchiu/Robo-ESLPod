@@ -1,49 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.kentchiu.eslpod" android:versionCode="1" android:versionName="1.0">
-	<application android:icon="@drawable/icon" android:label="@string/app_name" android:debuggable="true">
-		<activity android:name=".view.HomeActivity" android:label="@string/app_name" android:launchMode="singleTask"  android:screenOrientation="portrait">
-			<intent-filter>
-				<action android:name="android.intent.action.MAIN" />
-				<category android:name="android.intent.category.LAUNCHER" />
-			</intent-filter>
-		</activity>
-		<activity android:name=".view.PlayerActivity" android:launchMode="singleTask" android:screenOrientation="portrait">
-			<intent-filter>
-				<action android:name="android.intent.action.VIEW" />
-				<category android:name="android.intent.category.DEFAULT" />
-				<data android:mimeType="vnd.android.cursor.item/vnd.eslpod.podcast" />
-			</intent-filter>
-		</activity>
-		<activity android:name=".view.DictFlipActivity" android:launchMode="singleTop"  android:screenOrientation="portrait"
-		      android:windowSoftInputMode="adjustUnspecified|stateHidden"
-              android:configChanges="orientation|keyboardHidden">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.kentchiu.eslpod"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <application
+        android:debuggable="true"
+        android:icon="@drawable/icon"
+        android:label="@string/app_name"
+        android:theme="@style/app_theme" >
+        <activity
+            android:label="@string/app_name"
+            android:launchMode="singleTask"
+            android:name=".view.HomeActivity"
+            android:screenOrientation="portrait" >
+            <intent-filter >
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:launchMode="singleTask"
+            android:name=".view.PlayerActivity"
+            android:screenOrientation="portrait" >
+            <intent-filter >
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="vnd.android.cursor.item/vnd.eslpod.podcast" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:configChanges="orientation|keyboardHidden"
+            android:launchMode="singleTop"
+            android:name=".view.DictFlipActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustUnspecified|stateHidden" >
+
 		    >
-			<intent-filter>
-				<action android:name="android.intent.action.VIEW" />
-				<category android:name="android.intent.category.DEFAULT" />
-				<data android:mimeType="vnd.android.cursor.item/vnd.eslpod.word" />
-			</intent-filter>
-			<intent-filter>
-				<action android:name="android.intent.action.VIEW" />
-				<category android:name="android.intent.category.DEFAULT" />
-				<data android:mimeType="vnd.android.cursor.dir/vnd.eslpod.word" />
-			</intent-filter>
-		</activity>
-		<service android:name=".service.PodcastFetchService">
-		</service>
-		<service android:name=".service.RichScriptFetchService">
-		</service>
-		<service android:name=".service.WordFetchService">
-		</service>
-		<service android:name=".service.MediaService">
-		</service>
-		<service android:name=".service.MediaDownloadService">
-		</service>
-		<provider android:name=".provider.DictionaryContentProvider" android:authorities="com.kentchiu.eslpod.provider.Dictionary" />
-		<provider android:name=".provider.PodcastContentProvider" android:authorities="com.kentchiu.eslpod.provider.Podcast" />
-	</application>
-	<uses-permission android:name="android.permission.INTERNET" />
-	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-	<uses-sdk android:targetSdkVersion="10" android:minSdkVersion="10">
-	</uses-sdk>
+
+            <intent-filter >
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="vnd.android.cursor.item/vnd.eslpod.word" />
+            </intent-filter>
+            <intent-filter >
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="vnd.android.cursor.dir/vnd.eslpod.word" />
+            </intent-filter>
+        </activity>
+
+        <service android:name=".service.PodcastFetchService" >
+        </service>
+        <service android:name=".service.RichScriptFetchService" >
+        </service>
+        <service android:name=".service.WordFetchService" >
+        </service>
+        <service android:name=".service.MediaService" >
+        </service>
+        <service android:name=".service.MediaDownloadService" >
+        </service>
+
+        <provider
+            android:authorities="com.kentchiu.eslpod.provider.Dictionary"
+            android:name=".provider.DictionaryContentProvider" />
+        <provider
+            android:authorities="com.kentchiu.eslpod.provider.Podcast"
+            android:name=".provider.PodcastContentProvider" />
+    </application>
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <uses-sdk
+        android:minSdkVersion="10"
+        android:targetSdkVersion="10" >
+    </uses-sdk>
+
 </manifest>
