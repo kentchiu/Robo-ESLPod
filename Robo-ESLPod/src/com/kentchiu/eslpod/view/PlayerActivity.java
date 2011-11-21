@@ -224,8 +224,9 @@ public class PlayerActivity extends RoboListActivity implements OnClickListener 
 			if (StringUtils.isBlank(richScript)) {
 				new Thread(new RichScriptCommand(this, uri, link)).start();
 			}
-			Iterable<String> lines = Splitter.on("\n").trimResults().split(script);
-			ScriptListAdapter result = new ScriptListAdapter(this, R.layout.script_list_item, R.id.scriptLine, ImmutableList.copyOf(lines));
+			Iterable<String> lines = Splitter.on("\n").trimResults().split(StringUtils.substringBefore(script, "Script by Dr. Lucy Tse"));
+			ImmutableList<String> copyOf = ImmutableList.copyOf(lines);
+			ScriptListAdapter result = new ScriptListAdapter(this, R.layout.script_list_item, R.id.scriptLine, copyOf);
 			if (StringUtils.isNotBlank(richScript)) {
 				result.setRichScript(richScript);
 			}
