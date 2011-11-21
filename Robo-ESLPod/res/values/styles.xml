@@ -7,6 +7,8 @@
     </style>
     <style name="TransparentListView" parent="@android:style/Widget.ListView">
         <item name="android:cacheColorHint">@android:color/transparent</item>
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:listSelector">@android:drawable/list_selector_background</item>
     </style>
     <style name="TransparentExpandableListView" parent="@android:style/Widget.ExpandableListView">
         <item name="android:cacheColorHint">@android:color/transparent</item>
