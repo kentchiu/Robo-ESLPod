@@ -8,6 +8,9 @@ import org.apache.commons.lang3.StringUtils;
 import roboguice.activity.RoboListActivity;
 import roboguice.inject.InjectView;
 import roboguice.util.Ln;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -38,6 +41,7 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.google.inject.Inject;
 import com.kentchiu.eslpod.R;
 import com.kentchiu.eslpod.cmd.RichScriptCommand;
 import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
@@ -141,12 +145,17 @@ public class PlayerActivity extends RoboListActivity implements OnClickListener 
 	private SeekBar					seekBar;
 	private MySeekbarChangeListener	seekbarChangeListener	= new MySeekbarChangeListener();
 	private static final int		SHOW_PROGRESS			= 1;
+	private static final int		PLAYER_ID				= 0;
 	@InjectView(R.id.playButton)
 	private ImageButton				playButton;
 	@InjectView(R.id.pauseButton)
 	private ImageButton				pauseButton;
 	private boolean					prepared;
+	@Inject
+	private NotificationManager		manager;
+	private String					title;
 
+	// TODO using it's own liseneter
 	@Override
 	public void onClick(View v) {
 		seekBar.setEnabled(prepared);
@@ -166,6 +175,12 @@ public class PlayerActivity extends RoboListActivity implements OnClickListener 
 			m.what = SHOW_PROGRESS;
 			m.arg1 = player.getCurrentPosition();
 			handler.sendMessage(m);
+			PendingIntent contentIntent = PendingIntent.getActivity(getApplicationContext(), 0, getIntent(), 0);
+			//Create notification with the time it was fired
+			Notification notification = new Notification(R.drawable.ic_launcher, title, System.currentTimeMillis());
+			//Set notification information
+			notification.setLatestEventInfo(getApplicationContext(), "Robo-ESLPod", title, contentIntent);
+			manager.notify(PLAYER_ID, notification);
 			break;
 		case R.id.pauseButton:
 			if (player.isPlaying()) {
@@ -173,6 +188,7 @@ public class PlayerActivity extends RoboListActivity implements OnClickListener 
 				playButton.setVisibility(View.VISIBLE);
 				pauseButton.setVisibility(View.GONE);
 			}
+			manager.cancel(PLAYER_ID);
 			break;
 		case R.id.forwardButton:
 			// action for myButton2 click
@@ -260,7 +276,7 @@ public class PlayerActivity extends RoboListActivity implements OnClickListener 
 		});
 		final Cursor c = getContentResolver().query(uri, null, null, null, null);
 		c.moveToFirst();
-		String title = c.getString(c.getColumnIndex(PodcastColumns.TITLE));
+		title = c.getString(c.getColumnIndex(PodcastColumns.TITLE));
 		setTitle(title);
 		setListAdapter(createAdapter(uri));
 		fetchWord(uri);
@@ -304,6 +320,7 @@ public class PlayerActivity extends RoboListActivity implements OnClickListener 
 	@Override
 	protected void onStop() {
 		Ln.e("==== onStop ====");
+		handler.removeMessages(SHOW_PROGRESS);
 		super.onStop();
 	}
 
