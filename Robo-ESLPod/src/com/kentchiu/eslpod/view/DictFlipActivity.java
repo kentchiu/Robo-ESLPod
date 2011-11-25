@@ -99,7 +99,6 @@ public class DictFlipActivity extends RoboActivity implements OnClickListener {
 	@InjectView(R.id.viewFlipper)
 	private ViewFlipper			flipper;
 	private GestureDetector		gestureDetector;
-
 	private Iterable<WebView>	webViews;
 
 	@InjectView(R.id.titleTxt)
@@ -168,7 +167,7 @@ public class DictFlipActivity extends RoboActivity implements OnClickListener {
 		for (int each : new int[] { R.id.dict1, R.id.dict2, R.id.dict3 }) {
 			View viewGroup = findViewById(each);
 			final WebView webView = (WebView) viewGroup.findViewById(R.id.webview);
-			webView.loadDataWithBaseURL("Dictionary", "查詢中....", "text/html", "utf-8", null);
+			webView.loadDataWithBaseURL("Dictionary", "Searching....", "text/html", "utf-8", null);
 			webView.setOnTouchListener(new MyOnTouchListener());
 			webView.setLongClickable(true);
 			((List<WebView>) webViews).add(webView);

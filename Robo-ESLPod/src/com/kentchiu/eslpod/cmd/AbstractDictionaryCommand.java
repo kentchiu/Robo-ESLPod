@@ -63,7 +63,6 @@ public abstract class AbstractDictionaryCommand implements Runnable {
 	}
 
 	protected Context	context;
-
 	protected String	query;
 
 	protected AbstractDictionaryCommand(Context context, String query) {
@@ -116,7 +115,7 @@ public abstract class AbstractDictionaryCommand implements Runnable {
 			return page;
 		} catch (IOException e) {
 			e.printStackTrace();
-			// 如果發生SocketTimeout時，可以這樣進行retry
+			// retry to fetch, if timeout
 			if (retried < retry) {
 				Ln.w("Retry to fetch from " + url);
 				return readAsOneLine(url, retried + 1);

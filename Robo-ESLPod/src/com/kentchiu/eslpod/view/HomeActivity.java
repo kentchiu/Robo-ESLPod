@@ -131,8 +131,8 @@ public class HomeActivity extends RoboListActivity {
 	}
 
 	private static final int		DIALOG_IMPORT	= 0;
-	private MediaConnection			mediaConn		= new MediaConnection();
-	private PodcastConnection		podcastConn		= new PodcastConnection();
+	private MediaConnection			mediaConn		= new MediaConnection();	// TODO refectory to Local Serice
+	private PodcastConnection		podcastConn		= new PodcastConnection();	// TODO refectory to Local Serice
 	private PodcastFetchService		podcastFetchService;
 	private MediaDownloadService	mediaDownloadService;
 

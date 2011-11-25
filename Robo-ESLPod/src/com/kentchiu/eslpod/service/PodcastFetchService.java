@@ -20,7 +20,7 @@ public class PodcastFetchService extends RoboService {
 	public void fetchNew(Handler handler) throws MalformedURLException, IOException {
 		InputStream is = new URL(PodcastCommand.RSS_URI).openStream();
 		PodcastCommand podcastCommand = new PodcastCommand(PodcastFetchService.this, is, handler);
-		// doInBackground is already in work thread, no need to using a new one
+		// doInBackground is already in worker thread, no need to using a new one
 		Thread t = new Thread(podcastCommand);
 		t.start();
 	}
@@ -28,7 +28,7 @@ public class PodcastFetchService extends RoboService {
 	public void importLocal(Handler handler) {
 		InputStream is = getResources().openRawResource(R.raw.podcast_680_685);
 		PodcastCommand podcastCommand = new PodcastCommand(PodcastFetchService.this, is, handler);
-		// doInBackground is already in work thread, no need to using a new one
+		// doInBackground is already in worker thread, no need to using a new one
 		Thread t = new Thread(podcastCommand);
 		t.start();
 	}

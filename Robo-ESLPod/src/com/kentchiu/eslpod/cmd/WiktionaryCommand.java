@@ -190,7 +190,7 @@ public class WiktionaryCommand extends AbstractDictionaryCommand {
 			JSONObject revision = revisions.getJSONObject(0);
 			return revision.getString("*");
 		} catch (JSONException e) {
-			Ln.w("Extract json content fiil", e);
+			Ln.w("Extract json content fail", e);
 			return "";
 		}
 	}

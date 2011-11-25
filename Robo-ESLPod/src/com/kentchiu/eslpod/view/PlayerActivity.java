@@ -155,7 +155,7 @@ public class PlayerActivity extends RoboListActivity implements OnClickListener 
 	private NotificationManager		manager;
 	private String					title;
 
-	// TODO using it's own liseneter
+	// TODO using it's own listener
 	@Override
 	public void onClick(View v) {
 		seekBar.setEnabled(prepared);
@@ -216,7 +216,7 @@ public class PlayerActivity extends RoboListActivity implements OnClickListener 
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
 		ScriptListAdapter adapter = (ScriptListAdapter) getListAdapter();
-		menu.setHeaderTitle("字典搜尋");
+		menu.setHeaderTitle("Headword");
 		final String item = (String) adapter.getItem(info.position);
 		Iterable<String> words = RichScriptCommand.extractWord(adapter.getRichScript());
 		Iterable<String> filter = listWordsMatchToMenuItem(words, item);
@@ -253,15 +253,8 @@ public class PlayerActivity extends RoboListActivity implements OnClickListener 
 	}
 
 	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		Ln.e("==== onActivityResult ====");
-		super.onActivityResult(requestCode, resultCode, data);
-	}
-
-	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Ln.e("==== onCreate ====");
 		setContentView(R.layout.player_activity);
 
 		registerForContextMenu(getListView());
@@ -294,32 +287,7 @@ public class PlayerActivity extends RoboListActivity implements OnClickListener 
 	}
 
 	@Override
-	protected void onPause() {
-		Ln.e("==== onPause ====");
-		super.onPause();
-	}
-
-	@Override
-	protected void onRestart() {
-		Ln.e("==== onRestart ====");
-		super.onRestart();
-	}
-
-	@Override
-	protected void onResume() {
-		Ln.e("==== onResume ====");
-		super.onResume();
-	}
-
-	@Override
-	protected void onStart() {
-		Ln.e("==== onStart ====");
-		super.onStart();
-	}
-
-	@Override
 	protected void onStop() {
-		Ln.e("==== onStop ====");
 		handler.removeMessages(SHOW_PROGRESS);
 		super.onStop();
 	}

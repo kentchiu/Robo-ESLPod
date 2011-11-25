@@ -49,7 +49,7 @@ public class RichScriptCommand implements Runnable {
 		}
 	}
 
-	private static class ContainPredicate implements Predicate<String> {
+	private class ContainPredicate implements Predicate<String> {
 
 		private String	token;
 

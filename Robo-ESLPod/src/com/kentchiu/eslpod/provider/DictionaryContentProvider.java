@@ -23,16 +23,10 @@ public class DictionaryContentProvider extends ContentProvider {
 	private UriMatcher			uriMatcher;
 	private DatabaseHelper		databaseHelper;
 
-	//private static ExecutorService	es		= Executors.newFixedThreadPool(3);
-	//private Handler					handler;
-
 	@Override
 	public int delete(Uri uri, String selection, String[] selectionArgs) {
-		switch (uriMatcher.match(uri)) {
-		case WORDS:
-		default:
-			return 0;
-		}
+		// do nothing
+		return 0;
 	}
 
 	public DatabaseHelper getDatabaseHelper() {
@@ -74,7 +68,6 @@ public class DictionaryContentProvider extends ContentProvider {
 		uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 		uriMatcher.addURI(Dictionary.AUTHORITY, "word/", WORDS);
 		uriMatcher.addURI(Dictionary.AUTHORITY, "word/#", WORD);
-		//handler = new MyHandler(getContext());
 		return true;
 	}
 
