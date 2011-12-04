@@ -281,8 +281,9 @@ public class PlayerActivity extends RoboListActivity implements OnClickListener 
 
 	@Override
 	protected void onDestroy() {
-		Ln.e("==== onDestroy ====");
-		unbindService(mediaConn);
+		if (mediaConn != null) {
+			unbindService(mediaConn);
+		}
 		super.onDestroy();
 	}
 

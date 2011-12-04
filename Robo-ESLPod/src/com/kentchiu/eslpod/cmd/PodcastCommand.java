@@ -90,9 +90,13 @@ public class PodcastCommand implements Runnable {
 				ContentValues cv = convert(item);
 				String title = cv.getAsString(PodcastColumns.TITLE);
 				if (StringUtils.isNotBlank(title) && !titles.contains(title)) {
-					context.getContentResolver().insert(PodcastColumns.PODCAST_URI, cv);
-					sendMessage(IMPORTING, count, nodes.size());
-					count++;
+					try {
+						context.getContentResolver().insert(PodcastColumns.PODCAST_URI, cv);
+						sendMessage(IMPORTING, count, nodes.size());
+						count++;
+					} catch (Exception e) {
+						Ln.w("insert podcast fail %s", title);
+					}
 				}
 			}
 			sendMessage(END_IMPORT, count, nodes.size());

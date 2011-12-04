@@ -5,7 +5,7 @@
     android:versionName="1.0" >
 
     <application
-        android:debuggable="true"
+        android:debuggable="false"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/app_theme" >
@@ -44,7 +44,7 @@
 		    >
 
 
-            
+
             <intent-filter >
                 <action android:name="android.intent.action.VIEW" />
 
