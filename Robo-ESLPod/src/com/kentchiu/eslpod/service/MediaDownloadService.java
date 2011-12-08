@@ -71,13 +71,13 @@ public class MediaDownloadService extends Service {
 	private int getFileStatus(String path, long length) {
 		int newStatus = 0;
 		if (StringUtils.isBlank(path)) {
-			newStatus = PodcastColumns.MEDIA_STATUS_DOWNLOADABLE;
+			newStatus = PodcastColumns.STATUS_DOWNLOADABLE;
 		} else {
 			File file = new File(path);
 			if (file.exists() && file.length() == length) {
-				newStatus = PodcastColumns.MEDIA_STATUS_DOWNLOADED;
+				newStatus = PodcastColumns.STATUS_DOWNLOADED;
 			} else {
-				newStatus = PodcastColumns.MEDIA_STATUS_DOWNLOADABLE;
+				newStatus = PodcastColumns.STATUS_DOWNLOADABLE;
 			}
 		}
 		return newStatus;

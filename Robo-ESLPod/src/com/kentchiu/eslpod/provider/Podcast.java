@@ -9,9 +9,9 @@ public class Podcast {
 		public static final Uri		PODCAST_URI					= Uri.parse("content://" + Podcast.AUTHORITY + "/podcast");
 		public static final String	CONTENT_TYPE_PODCASTS		= "vnd.android.cursor.dir/vnd.eslpod.podcast";
 		public static final String	CONTENT_TYPE_PODCAST		= "vnd.android.cursor.item/vnd.eslpod.podcast";
-		public static final int		MEDIA_STATUS_DOWNLOADABLE	= 0;														// not yet download
-		public static final int		MEDIA_STATUS_DOWNLOADED		= 1;
-		public static final int		MEDIA_STATUS_DOWNLOADING	= 2;
+		public static final int		STATUS_DOWNLOADABLE	= 0;														// not yet download
+		public static final int		STATUS_DOWNLOADED		= 1;
+		public static final int		STATUS_DOWNLOADING	= 2;
 
 		/*
 		 * column name
@@ -38,12 +38,12 @@ public class Podcast {
 		public static final String	MEDIA_LENGTH				= "media_length";
 		/**
 		 * <P>Type: INTEGER</P>
-		 * {@link #MEDIA_STATUS_DOWNLOADABLE} or {@link #MEDIA_STATUS_DOWNLOADING} or {@link #MEDIA_STATUS_DOWNLOADED}
+		 * {@link #STATUS_DOWNLOADABLE} or {@link #STATUS_DOWNLOADING} or {@link #STATUS_DOWNLOADED}
 		 */
 		public static final String	MEDIA_DOWNLOAD_STATUS		= "media_download_status";
 		/**
 		 * <P>Type: INTEGER</P>
-		 * {@link #MEDIA_STATUS_DOWNLOADABLE} or {@link #MEDIA_STATUS_DOWNLOADING} or {@link #MEDIA_STATUS_DOWNLOADED}
+		 * {@link #STATUS_DOWNLOADABLE} or {@link #STATUS_DOWNLOADING} or {@link #STATUS_DOWNLOADED}
 		 */
 		public static final String	MEDIA_DOWNLOAD_LENGTH		= "media_download_length";
 		/**
