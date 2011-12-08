@@ -39,7 +39,9 @@
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustUnspecified|stateHidden" >
 
+
 		    >
+            
             
             <intent-filter >
                 <action android:name="android.intent.action.VIEW" />
@@ -61,6 +63,11 @@
         <service android:name=".service.WordFetchService" />
         <service android:name=".service.MediaService" />
         <service android:name=".service.MediaDownloadService" />
+        <service android:name=".service.MusicService" >
+            <intent-filter >
+                <action android:name="PLAY" />
+            </intent-filter>
+        </service>
 
         <provider
             android:authorities="com.kentchiu.eslpod.provider.Dictionary"

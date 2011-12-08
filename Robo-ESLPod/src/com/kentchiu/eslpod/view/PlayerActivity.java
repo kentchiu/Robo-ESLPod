@@ -1,159 +1,74 @@
 package com.kentchiu.eslpod.view;
 
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 
 import roboguice.activity.RoboListActivity;
-import roboguice.inject.InjectView;
 import roboguice.util.Ln;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.SearchManager;
-import android.content.ComponentName;
 import android.content.Intent;
-import android.content.ServiceConnection;
+import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.database.Cursor;
-import android.media.MediaPlayer;
-import android.media.MediaPlayer.OnPreparedListener;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
-import android.os.Message;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.view.GestureDetector;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import android.widget.ImageButton;
+import android.widget.MediaController;
+import android.widget.MediaController.MediaPlayerControl;
 import android.widget.SeekBar;
-import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.google.inject.Inject;
 import com.kentchiu.eslpod.R;
 import com.kentchiu.eslpod.cmd.RichScriptCommand;
 import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
-import com.kentchiu.eslpod.service.LocalBinder;
-import com.kentchiu.eslpod.service.MediaService;
+import com.kentchiu.eslpod.service.MusicService;
 import com.kentchiu.eslpod.service.WordFetchService;
 import com.kentchiu.eslpod.view.adapter.ScriptListAdapter;
 
-public class PlayerActivity extends RoboListActivity implements OnClickListener {
+/**
+ * @author Sapan
+ */
+public class PlayerActivity extends RoboListActivity implements MediaPlayerControl, SeekBar.OnSeekBarChangeListener {
 
-	private class MediaConnection implements ServiceConnection {
+	MediaController		ctrl;
+	//ImageView			songPicture;
+	String				mUrl;
+	Resources			res;
+	//TextView			songNameView;
+	TextView			musicCurLoc;
+	TextView			musicDuration;
+	SeekBar				musicSeekBar;
+	//ToggleButton		playPauseButton;
 
-		@Override
-		public void onServiceConnected(ComponentName className, IBinder service) {
-			MediaService s = ((LocalBinder<MediaService>) service).getService();
-			s.prepare(getIntent().getData(), new OnPreparedListener() {
+	protected boolean	musicThreadFinished	= false;
 
-				@Override
-				public void onPrepared(MediaPlayer mp) {
-					prepared = true;
-					Ln.i("MP3 is ready");
-				}
-			});
-			player = s.getPlayer();
-			initSeekBar();
-			Ln.i("is MP3 prepared : %s", prepared);
-		}
-
-		@Override
-		public void onServiceDisconnected(ComponentName className) {
-			// As our service is in the same process, this should never be called
-		}
-
+	@Override
+	public boolean canPause() {
+		return true;
 	}
 
-	private class MySeekbarChangeListener implements OnSeekBarChangeListener {
-		private boolean	dragging	= false;
-
-		public boolean isDragging() {
-			return dragging;
-		}
-
-		@Override
-		public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-			Ln.v("progress:%d, from User:%s", progress, fromUser);
-			if (fromUser) {
-				player.seekTo(progress);
-				int sec = progress / 1000;
-				String pos = String.format("%02d:%02d", sec / 60, sec % 60);
-				playPosition.setText(pos);
-			} else {
-				// the event was fired from code and you shouldn't call player.seekTo()
-			}
-		}
-
-		@Override
-		public void onStartTrackingTouch(SeekBar seekBar) {
-			dragging = true;
-			Ln.w("start - %d", seekBar.getProgress());
-		}
-
-		@Override
-		public void onStopTrackingTouch(SeekBar seekBar) {
-			dragging = false;
-			handler.removeMessages(SHOW_PROGRESS);
-			Message m = handler.obtainMessage();
-			m.what = SHOW_PROGRESS;
-			m.arg1 = player.getCurrentPosition();
-			handler.sendMessage(m);
-			Ln.w("stop - %d", seekBar.getProgress());
-		}
+	@Override
+	public boolean canSeekBackward() {
+		return true;
 	}
 
-	private class SyncHandler extends Handler {
-		@SuppressWarnings("synthetic-access")
-		@Override
-		public void handleMessage(Message msg) {
-			if (SHOW_PROGRESS == msg.what) {
-				int current = msg.arg1;
-				seekBar.setProgress(current);
-				if (!seekbarChangeListener.isDragging()) {
-					Message m = obtainMessage();
-					m.what = SHOW_PROGRESS;
-					m.arg1 = player.getCurrentPosition();
-					sendMessageDelayed(m, 1000 - player.getCurrentPosition() % 1000);
-				}
-			} else {
-				throw new IllegalArgumentException("Unkonw msg : " + msg);
-			}
-		}
+	@Override
+	public boolean canSeekForward() {
+		return true;
 	}
-
-	private GestureDetector			gd;
-	private Handler					handler					= new SyncHandler();
-	private MediaConnection			mediaConn				= new MediaConnection();
-	private MediaPlayer				player;
-	@InjectView(R.id.playPosition)
-	private TextView				playPosition;
-	@InjectView(R.id.seekBar)
-	private SeekBar					seekBar;
-	private MySeekbarChangeListener	seekbarChangeListener	= new MySeekbarChangeListener();
-	private static final int		SHOW_PROGRESS			= 1;
-	private static final int		PLAYER_ID				= 0;
-	@InjectView(R.id.playButton)
-	private ImageButton				playButton;
-	@InjectView(R.id.pauseButton)
-	private ImageButton				pauseButton;
-	private boolean					prepared;
-	@Inject
-	private NotificationManager		manager;
-	private String					title;
 
 	ScriptListAdapter createAdapter(final Uri uri) {
 		Cursor c = getContentResolver().query(uri, null, null, null, null);
@@ -182,9 +97,48 @@ public class PlayerActivity extends RoboListActivity implements OnClickListener 
 		startService(intent);
 	}
 
-	private void initSeekBar() {
-		seekBar.setOnSeekBarChangeListener(seekbarChangeListener);
-		getListView().setLongClickable(true);
+	@SuppressWarnings("boxing")
+	protected String getAsTime(int t) {
+		return String.format("%02d:%02d", TimeUnit.MILLISECONDS.toSeconds(t) / 60, TimeUnit.MILLISECONDS.toSeconds(t) - TimeUnit.MILLISECONDS.toSeconds(t) / 60 * 60);
+	}
+
+	@Override
+	public int getBufferPercentage() {
+		if (MusicService.getInstance() != null) {
+			return MusicService.getInstance().getBufferPercentage();
+		}
+		return 0;
+	}
+
+	@Override
+	public int getCurrentPosition() {
+		if (MusicService.getInstance() != null) {
+			return MusicService.getInstance().getCurrentPosition();
+		}
+		return 0;
+	}
+
+	@Override
+	public int getDuration() {
+		if (MusicService.getInstance() != null) {
+			return MusicService.getInstance().getMusicDuration();
+		}
+		return 0;
+	}
+
+	// @Override
+	// public boolean onTouchEvent(MotionEvent event) {
+	// // the MediaController will hide after 3 seconds - tap the screen to make it appear again
+	// ctrl.show();
+	// return false;
+	// }
+
+	@Override
+	public boolean isPlaying() {
+		if (MusicService.getInstance() != null) {
+			return MusicService.getInstance().isPlaying();
+		}
+		return false;
 	}
 
 	private Iterable<String> listWordsMatchToMenuItem(Iterable<String> words, final String item) {
@@ -197,55 +151,6 @@ public class PlayerActivity extends RoboListActivity implements OnClickListener 
 			}
 		});
 		return filter;
-	}
-
-	// TODO using it's own listener
-	@Override
-	public void onClick(View v) {
-		seekBar.setEnabled(prepared);
-		if (!prepared) {
-			Toast.makeText(PlayerActivity.this, "Download first", Toast.LENGTH_SHORT).show();
-			return;
-		}
-		switch (v.getId()) {
-		case R.id.playButton:
-			if (!player.isPlaying()) {
-				player.start();
-				playButton.setVisibility(View.GONE);
-				pauseButton.setVisibility(View.VISIBLE);
-			}
-			seekBar.setMax(player.getDuration());
-			Message m = handler.obtainMessage();
-			m.what = SHOW_PROGRESS;
-			m.arg1 = player.getCurrentPosition();
-			handler.sendMessage(m);
-			PendingIntent contentIntent = PendingIntent.getActivity(getApplicationContext(), 0, getIntent(), 0);
-			//Create notification with the time it was fired
-			Notification notification = new Notification(R.drawable.ic_launcher, title, System.currentTimeMillis());
-			//Set notification information
-			notification.setLatestEventInfo(getApplicationContext(), "Robo-ESLPod", title, contentIntent);
-			manager.notify(PLAYER_ID, notification);
-			break;
-		case R.id.pauseButton:
-			if (player.isPlaying()) {
-				player.pause();
-				playButton.setVisibility(View.VISIBLE);
-				pauseButton.setVisibility(View.GONE);
-			}
-			manager.cancel(PLAYER_ID);
-			break;
-		case R.id.forwardButton:
-			// action for myButton2 click
-			int pos = player.getCurrentPosition();
-			player.seekTo(pos + 10 * 1000);
-			break;
-		case R.id.reverseButton:
-			int pos2 = player.getCurrentPosition();
-			player.seekTo(pos2 - 10 * 1000);
-			break;
-		default:
-			break;
-		}
 	}
 
 	@Override
@@ -273,14 +178,93 @@ public class PlayerActivity extends RoboListActivity implements OnClickListener 
 		});
 		final Cursor c = getContentResolver().query(uri, null, null, null, null);
 		c.moveToFirst();
-		title = c.getString(c.getColumnIndex(PodcastColumns.TITLE));
+		String title = c.getString(c.getColumnIndex(PodcastColumns.TITLE));
 		setTitle(title);
 		setListAdapter(createAdapter(uri));
 		fetchWord(uri);
 
-		Intent intent = new Intent(this, MediaService.class);
-		bindService(intent, mediaConn, BIND_AUTO_CREATE);
-		seekBar.setEnabled(prepared);
+		ctrl = new MediaController(this);
+		ctrl.setMediaPlayer(this);
+		//ctrl.setAnchorView(songPicture);
+
+		musicCurLoc = (TextView) findViewById(R.id.musicCurrentLoc);
+		musicDuration = (TextView) findViewById(R.id.musicDuration);
+		musicSeekBar = (SeekBar) findViewById(R.id.musicSeekBar);
+		//playPauseButton = (ToggleButton) findViewById(R.id.playPauseButton);
+		musicSeekBar.setOnSeekBarChangeListener(this);
+
+		//		playPauseButton.setOnClickListener(new OnClickListener() {
+		//			@Override
+		//			public void onClick(View v) {
+		//				// Perform action on clicks
+		//				if (playPauseButton.isChecked()) { // Checked -> Pause icon visible
+		//					start();
+		//				} else { // Unchecked -> Play icon visible
+		//					pause();
+		//				}
+		//			}
+		//		});
+
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				int currentPosition = 0;
+				while (!musicThreadFinished) {
+					try {
+						Thread.sleep(1000);
+						currentPosition = getCurrentPosition();
+					} catch (InterruptedException e) {
+						return;
+					} catch (Exception e) {
+						return;
+					}
+					final int total = getDuration();
+
+					final String totalTime = getAsTime(total);
+					final String curTime = getAsTime(currentPosition);
+
+					musicSeekBar.setMax(total);
+					musicSeekBar.setProgress(currentPosition);
+					musicSeekBar.setSecondaryProgress(getBufferPercentage());
+					runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							//							if (isPlaying()) {
+							//								if (!playPauseButton.isChecked()) {
+							//									playPauseButton.setChecked(true);
+							//								}
+							//							} else {
+							//								if (playPauseButton.isChecked()) {
+							//									playPauseButton.setChecked(false);
+							//								}
+							//							}
+							musicDuration.setText(totalTime);
+							musicCurLoc.setText(curTime);
+						}
+					});
+
+				}
+			}
+		}).start();
+
+		//mUrl = "http://www.vorbis.com/music/Epoq-Lepidoptera.ogg";
+		String localUrl = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URL_LOCAL));
+		String url = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URL));
+		if (StringUtils.isNotBlank(localUrl)) {
+			mUrl = localUrl;
+		} else {
+			mUrl = url;
+		}
+		MusicService.setSong(mUrl, "Temp Song");
+
+		new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				startService(new Intent("PLAY"));
+			}
+		}).start();
+
 	}
 
 	@Override
@@ -298,21 +282,43 @@ public class PlayerActivity extends RoboListActivity implements OnClickListener 
 	}
 
 	@Override
-	protected void onDestroy() {
-		if (mediaConn != null) {
-			unbindService(mediaConn);
+	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+		if (fromUser) {
+			seekTo(progress);
 		}
-		super.onDestroy();
 	}
 
 	@Override
-	protected void onStop() {
-		handler.removeMessages(SHOW_PROGRESS);
-		super.onStop();
+	public void onStartTrackingTouch(SeekBar seekBar) {
+		// TODO Auto-generated method stub
+
 	}
 
 	@Override
-	public void onWindowFocusChanged(boolean hasFocus) {
-		super.onWindowFocusChanged(hasFocus);
+	public void onStopTrackingTouch(SeekBar seekBar) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void pause() {
+		if (MusicService.getInstance() != null) {
+			MusicService.getInstance().pauseMusic();
+		}
+	}
+
+	@Override
+	public void seekTo(int pos) {
+		if (MusicService.getInstance() != null) {
+			MusicService.getInstance().seekMusicTo(pos);
+		}
+
+	}
+
+	@Override
+	public void start() {
+		if (MusicService.getInstance() != null) {
+			MusicService.getInstance().startMusic();
+		}
 	}
 }

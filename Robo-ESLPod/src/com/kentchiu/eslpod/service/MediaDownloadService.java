@@ -85,7 +85,7 @@ public class MediaDownloadService extends Service {
 
 	@Override
 	public IBinder onBind(Intent intent) {
-		return new LocalBinder<MediaDownloadService>(this);
+		return null;
 	}
 
 	@Override

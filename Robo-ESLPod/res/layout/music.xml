@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <LinearLayout
+	    	xmlns:android="http://schemas.android.com/apk/res/android"
+	        android:orientation="vertical"
+	        android:layout_width="fill_parent"
+	        android:layout_height="fill_parent"
+	        android:padding="5dp">
+	     <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout1" android:layout_width="fill_parent">
+	     	<ToggleButton android:textOn="" android:textOff="" android:layout_marginLeft="5px" android:id="@+id/playPauseButton" android:layout_width="30px" android:background="@drawable/ic_play_pause" android:layout_marginTop="5px" android:layout_height="30px"></ToggleButton>
+	     	<TextView android:id="@+id/musicCurrentLoc" android:layout_marginLeft="5px" android:layout_marginTop="5px" android:layout_width="wrap_content" android:layout_height="wrap_content"></TextView>
+	     	<SeekBar android:layout_height="wrap_content" android:layout_marginLeft="5px" android:layout_weight="1" android:id="@+id/musicSeekBar" android:layout_width="fill_parent"></SeekBar>
+	     	<TextView android:id="@+id/musicDuration" android:layout_marginLeft="5px" android:layout_marginTop="5px" android:layout_width="wrap_content" android:layout_height="wrap_content"></TextView>
+	     </LinearLayout>
+     </LinearLayout>
