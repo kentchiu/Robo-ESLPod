@@ -42,15 +42,6 @@ public class MediaService extends Service {
 		player.release();
 	}
 
-	public void prepare(Uri uri, OnPreparedListener listener) {
-		Ln.i("working uri: %s", uri);
-		Preconditions.checkNotNull(uri);
-		Cursor c = getContentResolver().query(uri, null, null, null, null);
-		c.moveToFirst();
-		String url = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URL_LOCAL));
-		prepare(url, listener);
-	}
-
 	private void prepare(String url, OnPreparedListener listener) {
 		if (url == null) {
 			return;
@@ -69,6 +60,15 @@ public class MediaService extends Service {
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
+	}
+
+	public void prepare(Uri uri, OnPreparedListener listener) {
+		Ln.i("working uri: %s", uri);
+		Preconditions.checkNotNull(uri);
+		Cursor c = getContentResolver().query(uri, null, null, null, null);
+		c.moveToFirst();
+		String url = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URL_LOCAL));
+		prepare(url, listener);
 	}
 
 }

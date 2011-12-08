@@ -21,29 +21,6 @@ public class DreyeDictionaryCommand extends AbstractDictionaryCommand {
 		this.query = query;
 	}
 
-	@Override
-	protected String getContent() {
-		String url = getQueryUrl();
-		return readAsOneLine(url, 0);
-	}
-
-	@Override
-	protected int getDictionaryId() {
-		return Dictionary.DICTIONARY_DREYE_DICTIONARY;
-	}
-
-	@Override
-	protected String getQueryUrl() {
-		return "http://www.dreye.com/mws/dict.php?ua=dc_cont&hidden_codepage=01&w=" + query;
-	}
-
-	@Override
-	protected String render(String input) {
-		String extracted = extractDefinition(input).replaceAll("images/DIC/PN", "http://www.dreye.com/mws/images/DIC/PN");
-		String applyTemplate = applyTemplate(extracted);
-		return applyTemplate;
-	}
-
 	private String applyTemplate(String input) {
 		try {
 			InputStream is = context.getAssets().open("dreye/template.htm");
@@ -68,6 +45,29 @@ public class DreyeDictionaryCommand extends AbstractDictionaryCommand {
 			Ln.e("Not match for query : %s", getQueryUrl());
 			return input;
 		}
+	}
+
+	@Override
+	protected String getContent() {
+		String url = getQueryUrl();
+		return readAsOneLine(url, 0);
+	}
+
+	@Override
+	protected int getDictionaryId() {
+		return Dictionary.DICTIONARY_DREYE_DICTIONARY;
+	}
+
+	@Override
+	protected String getQueryUrl() {
+		return "http://www.dreye.com/mws/dict.php?ua=dc_cont&hidden_codepage=01&w=" + query;
+	}
+
+	@Override
+	protected String render(String input) {
+		String extracted = extractDefinition(input).replaceAll("images/DIC/PN", "http://www.dreye.com/mws/images/DIC/PN");
+		String applyTemplate = applyTemplate(extracted);
+		return applyTemplate;
 	}
 
 }

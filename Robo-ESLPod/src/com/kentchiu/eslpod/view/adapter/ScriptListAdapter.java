@@ -42,10 +42,6 @@ public class ScriptListAdapter extends ArrayAdapter {
 		return view;
 	}
 
-	public void setRichScript(String richScript) {
-		this.richScript = richScript;
-	}
-
 	protected CharSequence richText(String source, Iterable<String> words) {
 		SpannableStringBuilder style = new SpannableStringBuilder(source);
 		for (String each : words) {
@@ -58,6 +54,10 @@ public class ScriptListAdapter extends ArrayAdapter {
 			}
 		}
 		return style;
+	}
+
+	public void setRichScript(String richScript) {
+		this.richScript = richScript;
 	}
 
 }

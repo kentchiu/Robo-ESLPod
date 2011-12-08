@@ -35,51 +35,6 @@ public class MediaCommand implements Runnable {
 		this.handler = handler;
 	}
 
-	public URL getFrom() {
-		return from;
-	}
-
-	public Handler getHandler() {
-		return handler;
-	}
-
-	public File getTo() {
-		return to;
-	}
-
-	@Override
-	public void run() {
-		try {
-			downloadFile();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public void sendMessage(int what, long process, long total) {
-		if (handler != null) {
-			Message m = handler.obtainMessage(what, (int) process, (int) total);
-			m.setData(createBundle());
-			m.sendToTarget();
-		} else {
-			Ln.w("try to sending but handler is null");
-		}
-	}
-
-	public void setFrom(URL from) {
-		this.from = from;
-	}
-
-	public void setHandler(Handler handler) {
-		this.handler = handler;
-	}
-
-	public void setTo(File to) {
-		this.to = to;
-	}
-
 	private Bundle createBundle() {
 		String f = from.toString();
 		String t = to.toString();
@@ -125,6 +80,51 @@ public class MediaCommand implements Runnable {
 			sendMessage(DOWNLOAD_COMPLETED, cache, (int) lenghtOfFile);
 			Ln.i("Downloaded file " + to.toString() + " completed");
 		}
+	}
+
+	public URL getFrom() {
+		return from;
+	}
+
+	public Handler getHandler() {
+		return handler;
+	}
+
+	public File getTo() {
+		return to;
+	}
+
+	@Override
+	public void run() {
+		try {
+			downloadFile();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void sendMessage(int what, long process, long total) {
+		if (handler != null) {
+			Message m = handler.obtainMessage(what, (int) process, (int) total);
+			m.setData(createBundle());
+			m.sendToTarget();
+		} else {
+			Ln.w("try to sending but handler is null");
+		}
+	}
+
+	public void setFrom(URL from) {
+		this.from = from;
+	}
+
+	public void setHandler(Handler handler) {
+		this.handler = handler;
+	}
+
+	public void setTo(File to) {
+		this.to = to;
 	}
 
 }

@@ -71,34 +71,6 @@ public abstract class AbstractDictionaryCommand implements Runnable {
 		this.query = query;
 	}
 
-	@Override
-	public void run() {
-		String url = getQueryUrl();
-		String content;
-		try {
-			Ln.v("Start fetch  word [%s] from dictionary ", query);
-			if (StringUtils.isBlank(query)) {
-				content = "";
-			} else {
-				content = getContent();
-			}
-
-			Ln.v("End fetch  word [%d] from dictionary ", getDictionaryId());
-			if (StringUtils.isNotBlank(content)) {
-				ContentValues cv = new ContentValues();
-				cv.put(DictionaryColumns.DICTIONARY_ID, getDictionaryId());
-				cv.put(DictionaryColumns.WORD, query);
-				cv.put(DictionaryColumns.CONTENT, content);
-				context.getContentResolver().insert(DictionaryColumns.DICTIONARY_URI, cv);
-				Ln.v("Save word [%s] to dictionary %d", query, getDictionaryId());
-			} else {
-				Ln.w("fetch word [%d] fail form dictionary  %d, url:%s", getDictionaryId(), url);
-			}
-		} catch (Exception e) {
-			Ln.w("fetch word [" + query + "] fail form dictionary " + getDictionaryId() + ", url:" + url, e);
-		}
-	}
-
 	protected abstract String getContent();
 
 	protected abstract int getDictionaryId();
@@ -129,5 +101,33 @@ public abstract class AbstractDictionaryCommand implements Runnable {
 
 	protected String render(String input) {
 		return input;
+	}
+
+	@Override
+	public void run() {
+		String url = getQueryUrl();
+		String content;
+		try {
+			Ln.v("Start fetch  word [%s] from dictionary ", query);
+			if (StringUtils.isBlank(query)) {
+				content = "";
+			} else {
+				content = getContent();
+			}
+
+			Ln.v("End fetch  word [%d] from dictionary ", getDictionaryId());
+			if (StringUtils.isNotBlank(content)) {
+				ContentValues cv = new ContentValues();
+				cv.put(DictionaryColumns.DICTIONARY_ID, getDictionaryId());
+				cv.put(DictionaryColumns.WORD, query);
+				cv.put(DictionaryColumns.CONTENT, content);
+				context.getContentResolver().insert(DictionaryColumns.DICTIONARY_URI, cv);
+				Ln.v("Save word [%s] to dictionary %d", query, getDictionaryId());
+			} else {
+				Ln.w("fetch word [%d] fail form dictionary  %d, url:%s", getDictionaryId(), url);
+			}
+		} catch (Exception e) {
+			Ln.w("fetch word [" + query + "] fail form dictionary " + getDictionaryId() + ", url:" + url, e);
+		}
 	}
 }

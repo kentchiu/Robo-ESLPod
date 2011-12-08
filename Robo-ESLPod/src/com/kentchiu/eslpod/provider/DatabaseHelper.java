@@ -19,20 +19,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		super(context, name, factory, DATABASE_VERSION);
 	}
 
-	@Override
-	public void onCreate(SQLiteDatabase sqLiteDatabase) {
-		createPodcastTable(sqLiteDatabase);
-		createDictionaryTable(sqLiteDatabase);
-	}
-
-	@Override
-	public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldv, int newv) {
-		sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + PODCAST_TABLE_NAME + ";");
-		sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + DICTIONARY_TABLE_NAME + ";");
-		createPodcastTable(sqLiteDatabase);
-		createDictionaryTable(sqLiteDatabase);
-	}
-
 	private void createDictionaryTable(SQLiteDatabase sqLiteDatabase) {
 		// @formatter:off
 		String sql = "CREATE TABLE " + DICTIONARY_TABLE_NAME + " (" +
@@ -72,5 +58,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		// @formatter:on
 		Ln.i(sql);
 		sqLiteDatabase.execSQL(sql);
+	}
+
+	@Override
+	public void onCreate(SQLiteDatabase sqLiteDatabase) {
+		createPodcastTable(sqLiteDatabase);
+		createDictionaryTable(sqLiteDatabase);
+	}
+
+	@Override
+	public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldv, int newv) {
+		sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + PODCAST_TABLE_NAME + ";");
+		sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + DICTIONARY_TABLE_NAME + ";");
+		createPodcastTable(sqLiteDatabase);
+		createDictionaryTable(sqLiteDatabase);
 	}
 }

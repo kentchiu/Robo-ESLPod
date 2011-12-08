@@ -21,6 +21,11 @@ public class RichScriptFetchService extends Service {
 
 	private ExecutorService	executorService;
 
+	private void fetchScript(Cursor c, String link) {
+		RichScriptCommand richScriptCmd = new RichScriptCommand(this, ContentUris.withAppendedId(PodcastColumns.PODCAST_URI, c.getInt(c.getColumnIndex(BaseColumns._ID))), link);
+		executorService.execute(richScriptCmd);
+	}
+
 	@Override
 	public IBinder onBind(Intent intent) {
 		return null;
@@ -55,11 +60,6 @@ public class RichScriptFetchService extends Service {
 			}
 		}
 		return super.onStartCommand(intent, flags, startId);
-	}
-
-	private void fetchScript(Cursor c, String link) {
-		RichScriptCommand richScriptCmd = new RichScriptCommand(this, ContentUris.withAppendedId(PodcastColumns.PODCAST_URI, c.getInt(c.getColumnIndex(BaseColumns._ID))), link);
-		executorService.execute(richScriptCmd);
 	}
 
 }

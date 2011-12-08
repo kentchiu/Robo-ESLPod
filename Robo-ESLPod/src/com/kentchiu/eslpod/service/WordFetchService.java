@@ -34,6 +34,33 @@ public class WordFetchService extends Service {
 	private ExecutorService					executorService;
 	private ArrayBlockingQueue<Runnable>	commandQueue;
 
+	private void executeWordCommands(final List<AbstractDictionaryCommand> fetchCmds) {
+		final int addtion = Iterables.size(fetchCmds);
+		final int total = commandQueue.size() + addtion;
+		Ln.i("Queue size %d(%d)", total, addtion);
+		String msg = "There are " + total + "(+" + addtion + ")" + " entries be downloaded";
+		if (total != 0) {
+			showMessage(msg, Toast.LENGTH_SHORT);
+		}
+		try {
+			for (final AbstractDictionaryCommand each : fetchCmds) {
+				executorService.execute(new Runnable() {
+					@Override
+					public void run() {
+						each.run();
+						Ln.v("queue size : %d", commandQueue.size());
+						if (commandQueue.isEmpty()) {
+							showMessage("Dictionary entry download completed.", Toast.LENGTH_LONG);
+						}
+					}
+				});
+			}
+		} catch (RejectedExecutionException e) {
+			final String text = "Only " + MAX_TASK + " tasks allow, tyr it later";
+			showMessage(text, Toast.LENGTH_LONG);
+		}
+	}
+
 	@Override
 	public IBinder onBind(Intent intent) {
 		return null;
@@ -69,43 +96,6 @@ public class WordFetchService extends Service {
 		return super.onStartCommand(intent, flags, startId);
 	}
 
-	void showMessage(final String text, final int lengthLong) {
-		handler.post(new Runnable() {
-
-			@Override
-			public void run() {
-				Toast.makeText(WordFetchService.this, text, lengthLong).show();
-			}
-		});
-	}
-
-	private void executeWordCommands(final List<AbstractDictionaryCommand> fetchCmds) {
-		final int addtion = Iterables.size(fetchCmds);
-		final int total = commandQueue.size() + addtion;
-		Ln.i("Queue size %d(%d)", total, addtion);
-		String msg = "There are " + total + "(+" + addtion + ")" + " entries be downloaded";
-		if (total != 0) {
-			showMessage(msg, Toast.LENGTH_SHORT);
-		}
-		try {
-			for (final AbstractDictionaryCommand each : fetchCmds) {
-				executorService.execute(new Runnable() {
-					@Override
-					public void run() {
-						each.run();
-						Ln.v("queue size : %d", commandQueue.size());
-						if (commandQueue.isEmpty()) {
-							showMessage("Dictionary entry download completed.", Toast.LENGTH_LONG);
-						}
-					}
-				});
-			}
-		} catch (RejectedExecutionException e) {
-			final String text = "Only " + MAX_TASK + " tasks allow, tyr it later";
-			showMessage(text, Toast.LENGTH_LONG);
-		}
-	}
-
 	private List<AbstractDictionaryCommand> prepareCommands(Iterable<String> words) {
 		List<AbstractDictionaryCommand> results = Lists.newArrayList();
 		Iterable<String> headword = RichScriptCommand.headword(this, words);
@@ -120,6 +110,16 @@ public class WordFetchService extends Service {
 			}
 		}
 		return results;
+	}
+
+	void showMessage(final String text, final int lengthLong) {
+		handler.post(new Runnable() {
+
+			@Override
+			public void run() {
+				Toast.makeText(WordFetchService.this, text, lengthLong).show();
+			}
+		});
 	}
 
 }

@@ -51,6 +51,41 @@ public class PodcastCommand implements Runnable {
 		this.handler = handler;
 	}
 
+	ContentValues convert(Node item) {
+		NodeList children = item.getChildNodes();
+		ContentValues result = new ContentValues();
+		for (int i = 0; i < children.getLength(); i++) {
+			Node node = children.item(i);
+			if (StringUtils.equals(PodcastColumns.TITLE, node.getNodeName())) {
+				result.put(PodcastColumns.TITLE, node.getTextContent());
+			} else if (StringUtils.equals(PodcastColumns.DURATION, node.getNodeName())) {
+				result.put(PodcastColumns.DURATION, node.getTextContent());
+			} else if (StringUtils.equals("pubDate", node.getNodeName())) {
+				result.put(PodcastColumns.PUBLISHED, node.getTextContent());
+			} else if (StringUtils.equals("link", node.getNodeName())) {
+				result.put(PodcastColumns.LINK, node.getTextContent());
+			} else if (StringUtils.endsWith("enclosure", node.getNodeName())) {
+				NamedNodeMap attributes = node.getAttributes();
+				String url = attributes.getNamedItem("url").getNodeValue();
+				String length = attributes.getNamedItem("length").getNodeValue();
+				result.put(PodcastColumns.MEDIA_URL, url);
+				result.put(PodcastColumns.MEDIA_LENGTH, length);
+			} else if (StringUtils.equals("description", node.getNodeName())) {
+				String desc = node.getTextContent();
+				String cleanText = desc.replaceAll("\n", "").replaceAll("<br />", ",").replaceAll("<p>", "");
+				// subtitle
+				Iterable<String> lines = Splitter.on("</p>").split(cleanText);
+				String subtitle = Iterables.get(lines, 0);
+				result.put(PodcastColumns.SUBTITLE, subtitle.trim());
+				Splitter.on(",").split(Iterables.get(lines, 1));
+				result.put(PodcastColumns.PARAGRAPH_INDEX, Iterables.get(lines, 1));
+				List<String> scripts = Lists.newArrayList(lines).subList(2, Iterables.size(lines));
+				result.put(PodcastColumns.SCRIPT, Joiner.on("\n").join(scripts).trim());
+			}
+		}
+		return result;
+	}
+
 	public List<Node> getItemNodes() throws XPathExpressionException {
 		sendMessage(START_GET_ITEM_NODES, 0, 0);
 		XPath xpath = XPathFactory.newInstance().newXPath();
@@ -107,41 +142,6 @@ public class PodcastCommand implements Runnable {
 		} catch (IllegalStateException e) {
 			Ln.w("get podcast rss fail", e);
 		}
-	}
-
-	ContentValues convert(Node item) {
-		NodeList children = item.getChildNodes();
-		ContentValues result = new ContentValues();
-		for (int i = 0; i < children.getLength(); i++) {
-			Node node = children.item(i);
-			if (StringUtils.equals(PodcastColumns.TITLE, node.getNodeName())) {
-				result.put(PodcastColumns.TITLE, node.getTextContent());
-			} else if (StringUtils.equals(PodcastColumns.DURATION, node.getNodeName())) {
-				result.put(PodcastColumns.DURATION, node.getTextContent());
-			} else if (StringUtils.equals("pubDate", node.getNodeName())) {
-				result.put(PodcastColumns.PUBLISHED, node.getTextContent());
-			} else if (StringUtils.equals("link", node.getNodeName())) {
-				result.put(PodcastColumns.LINK, node.getTextContent());
-			} else if (StringUtils.endsWith("enclosure", node.getNodeName())) {
-				NamedNodeMap attributes = node.getAttributes();
-				String url = attributes.getNamedItem("url").getNodeValue();
-				String length = attributes.getNamedItem("length").getNodeValue();
-				result.put(PodcastColumns.MEDIA_URL, url);
-				result.put(PodcastColumns.MEDIA_LENGTH, length);
-			} else if (StringUtils.equals("description", node.getNodeName())) {
-				String desc = node.getTextContent();
-				String cleanText = desc.replaceAll("\n", "").replaceAll("<br />", ",").replaceAll("<p>", "");
-				// subtitle
-				Iterable<String> lines = Splitter.on("</p>").split(cleanText);
-				String subtitle = Iterables.get(lines, 0);
-				result.put(PodcastColumns.SUBTITLE, subtitle.trim());
-				Splitter.on(",").split(Iterables.get(lines, 1));
-				result.put(PodcastColumns.PARAGRAPH_INDEX, Iterables.get(lines, 1));
-				List<String> scripts = Lists.newArrayList(lines).subList(2, Iterables.size(lines));
-				result.put(PodcastColumns.SCRIPT, Joiner.on("\n").join(scripts).trim());
-			}
-		}
-		return result;
 	}
 
 	private void sendMessage(int what, int arg1, int arg2) {

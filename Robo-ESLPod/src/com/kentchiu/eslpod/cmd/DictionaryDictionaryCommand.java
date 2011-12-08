@@ -20,27 +20,6 @@ public class DictionaryDictionaryCommand extends AbstractDictionaryCommand {
 		super(context, query);
 	}
 
-	@Override
-	protected String getContent() {
-		return readAsOneLine(getQueryUrl(), 0);
-	}
-
-	@Override
-	protected int getDictionaryId() {
-		return Dictionary.DICTIONARY_DICTIONARY_DICTIONARY;
-	}
-
-	@Override
-	protected String getQueryUrl() {
-		return " http://m.dictionary.com/?submit-result-SEARCHD=Search&q=" + query;
-	}
-
-	@Override
-	protected String render(String input) {
-		String extracted = extractDefinition(input).replaceAll("<a.*>(.*)</a>", "$1");
-		return applyTemplate(extracted);
-	}
-
 	private String applyTemplate(String input) {
 		try {
 			InputStream is = context.getAssets().open("dictionary/template.htm");
@@ -63,6 +42,27 @@ public class DictionaryDictionaryCommand extends AbstractDictionaryCommand {
 			Ln.e("Not match for query : %s", getQueryUrl());
 			return input;
 		}
+	}
+
+	@Override
+	protected String getContent() {
+		return readAsOneLine(getQueryUrl(), 0);
+	}
+
+	@Override
+	protected int getDictionaryId() {
+		return Dictionary.DICTIONARY_DICTIONARY_DICTIONARY;
+	}
+
+	@Override
+	protected String getQueryUrl() {
+		return " http://m.dictionary.com/?submit-result-SEARCHD=Search&q=" + query;
+	}
+
+	@Override
+	protected String render(String input) {
+		String extracted = extractDefinition(input).replaceAll("<a.*>(.*)</a>", "$1");
+		return applyTemplate(extracted);
 	}
 
 }

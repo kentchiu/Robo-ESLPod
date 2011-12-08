@@ -66,6 +66,13 @@ public class DictFlipActivity extends RoboActivity {
 	@InjectView(R.id.go)
 	private Button			go;
 
+	private void createDictView(final int dictId) {
+		final DictWebView dictView = new DictWebView(DictFlipActivity.this, dictId);
+		dictView.setOnTouchListener(new MyOnTouchListener());
+		dictView.query(input.getText().toString().trim());
+		flipper.addView(dictView);
+	}
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -89,13 +96,6 @@ public class DictFlipActivity extends RoboActivity {
 
 			}
 		});
-	}
-
-	private void createDictView(final int dictId) {
-		final DictWebView dictView = new DictWebView(DictFlipActivity.this, dictId);
-		dictView.setOnTouchListener(new MyOnTouchListener());
-		dictView.query(input.getText().toString().trim());
-		flipper.addView(dictView);
 	}
 
 	private void updateTitle() {

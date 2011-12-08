@@ -155,6 +155,50 @@ public class PlayerActivity extends RoboListActivity implements OnClickListener 
 	private NotificationManager		manager;
 	private String					title;
 
+	ScriptListAdapter createAdapter(final Uri uri) {
+		Cursor c = getContentResolver().query(uri, null, null, null, null);
+		if (c.moveToFirst()) {
+			String script = c.getString(c.getColumnIndex(PodcastColumns.SCRIPT));
+			String richScript = c.getString(c.getColumnIndex(PodcastColumns.RICH_SCRIPT));
+			String link = c.getString(c.getColumnIndex(PodcastColumns.LINK));
+			if (StringUtils.isBlank(richScript)) {
+				new Thread(new RichScriptCommand(this, uri, link)).start();
+			}
+			Iterable<String> lines = Splitter.on("\n").trimResults().split(StringUtils.substringBefore(script, "Script by Dr. Lucy Tse"));
+			ImmutableList<String> copyOf = ImmutableList.copyOf(lines);
+			ScriptListAdapter result = new ScriptListAdapter(this, R.layout.script_list_item, R.id.scriptLine, copyOf);
+			if (StringUtils.isNotBlank(richScript)) {
+				result.setRichScript(richScript);
+			}
+			return result;
+		} else {
+			return new ScriptListAdapter(this, R.layout.script_list_item, R.id.scriptLine, ImmutableList.<String> of());
+		}
+	}
+
+	private void fetchWord(final Uri uri) {
+		Intent intent = new Intent(this, WordFetchService.class);
+		intent.setData(uri);
+		startService(intent);
+	}
+
+	private void initSeekBar() {
+		seekBar.setOnSeekBarChangeListener(seekbarChangeListener);
+		getListView().setLongClickable(true);
+	}
+
+	private Iterable<String> listWordsMatchToMenuItem(Iterable<String> words, final String item) {
+		Iterable<String> filter = Iterables.filter(words, new Predicate<String>() {
+
+			@Override
+			public boolean apply(String input) {
+				Matcher matcher = Pattern.compile("\\b" + input + "\\b").matcher(item);
+				return matcher.find();
+			}
+		});
+		return filter;
+	}
+
 	// TODO using it's own listener
 	@Override
 	public void onClick(View v) {
@@ -213,46 +257,6 @@ public class PlayerActivity extends RoboListActivity implements OnClickListener 
 	}
 
 	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-		AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
-		ScriptListAdapter adapter = (ScriptListAdapter) getListAdapter();
-		menu.setHeaderTitle("Headword");
-		final String item = (String) adapter.getItem(info.position);
-		Iterable<String> words = RichScriptCommand.extractWord(adapter.getRichScript());
-		Iterable<String> filter = listWordsMatchToMenuItem(words, item);
-		int i = 1;
-		for (String each : RichScriptCommand.headword(PlayerActivity.this, filter)) {
-			menu.add(0, i++, 0, each);
-		}
-	}
-
-	@Override
-	public void onWindowFocusChanged(boolean hasFocus) {
-		super.onWindowFocusChanged(hasFocus);
-	}
-
-	ScriptListAdapter createAdapter(final Uri uri) {
-		Cursor c = getContentResolver().query(uri, null, null, null, null);
-		if (c.moveToFirst()) {
-			String script = c.getString(c.getColumnIndex(PodcastColumns.SCRIPT));
-			String richScript = c.getString(c.getColumnIndex(PodcastColumns.RICH_SCRIPT));
-			String link = c.getString(c.getColumnIndex(PodcastColumns.LINK));
-			if (StringUtils.isBlank(richScript)) {
-				new Thread(new RichScriptCommand(this, uri, link)).start();
-			}
-			Iterable<String> lines = Splitter.on("\n").trimResults().split(StringUtils.substringBefore(script, "Script by Dr. Lucy Tse"));
-			ImmutableList<String> copyOf = ImmutableList.copyOf(lines);
-			ScriptListAdapter result = new ScriptListAdapter(this, R.layout.script_list_item, R.id.scriptLine, copyOf);
-			if (StringUtils.isNotBlank(richScript)) {
-				result.setRichScript(richScript);
-			}
-			return result;
-		} else {
-			return new ScriptListAdapter(this, R.layout.script_list_item, R.id.scriptLine, ImmutableList.<String> of());
-		}
-	}
-
-	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.player_activity);
@@ -280,6 +284,20 @@ public class PlayerActivity extends RoboListActivity implements OnClickListener 
 	}
 
 	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
+		ScriptListAdapter adapter = (ScriptListAdapter) getListAdapter();
+		menu.setHeaderTitle("Headword");
+		final String item = (String) adapter.getItem(info.position);
+		Iterable<String> words = RichScriptCommand.extractWord(adapter.getRichScript());
+		Iterable<String> filter = listWordsMatchToMenuItem(words, item);
+		int i = 1;
+		for (String each : RichScriptCommand.headword(PlayerActivity.this, filter)) {
+			menu.add(0, i++, 0, each);
+		}
+	}
+
+	@Override
 	protected void onDestroy() {
 		if (mediaConn != null) {
 			unbindService(mediaConn);
@@ -293,26 +311,8 @@ public class PlayerActivity extends RoboListActivity implements OnClickListener 
 		super.onStop();
 	}
 
-	private void fetchWord(final Uri uri) {
-		Intent intent = new Intent(this, WordFetchService.class);
-		intent.setData(uri);
-		startService(intent);
-	}
-
-	private void initSeekBar() {
-		seekBar.setOnSeekBarChangeListener(seekbarChangeListener);
-		getListView().setLongClickable(true);
-	}
-
-	private Iterable<String> listWordsMatchToMenuItem(Iterable<String> words, final String item) {
-		Iterable<String> filter = Iterables.filter(words, new Predicate<String>() {
-
-			@Override
-			public boolean apply(String input) {
-				Matcher matcher = Pattern.compile("\\b" + input + "\\b").matcher(item);
-				return matcher.find();
-			}
-		});
-		return filter;
+	@Override
+	public void onWindowFocusChanged(boolean hasFocus) {
+		super.onWindowFocusChanged(hasFocus);
 	}
 }

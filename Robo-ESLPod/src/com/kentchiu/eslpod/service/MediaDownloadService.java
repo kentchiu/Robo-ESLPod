@@ -54,8 +54,33 @@ public class MediaDownloadService extends Service {
 		return commandQueue;
 	}
 
+	private File getDownloadFolder() {
+		String state = Environment.getExternalStorageState();
+		if (StringUtils.equals(Environment.MEDIA_MOUNTED, state)) {
+			return getExternalCacheDir();
+		} else {
+			Ln.w("SD card no found, save to internl storage");
+			return getCacheDir();
+		}
+	}
+
 	public Handler getDownloadHandler() {
 		return downloadHandler;
+	}
+
+	private int getFileStatus(String path, long length) {
+		int newStatus = 0;
+		if (StringUtils.isBlank(path)) {
+			newStatus = PodcastColumns.MEDIA_STATUS_DOWNLOADABLE;
+		} else {
+			File file = new File(path);
+			if (file.exists() && file.length() == length) {
+				newStatus = PodcastColumns.MEDIA_STATUS_DOWNLOADED;
+			} else {
+				newStatus = PodcastColumns.MEDIA_STATUS_DOWNLOADABLE;
+			}
+		}
+		return newStatus;
 	}
 
 	@Override
@@ -99,31 +124,6 @@ public class MediaDownloadService extends Service {
 
 	public void setDownloadHandler(Handler downloadHandler) {
 		this.downloadHandler = downloadHandler;
-	}
-
-	private File getDownloadFolder() {
-		String state = Environment.getExternalStorageState();
-		if (StringUtils.equals(Environment.MEDIA_MOUNTED, state)) {
-			return getExternalCacheDir();
-		} else {
-			Ln.w("SD card no found, save to internl storage");
-			return getCacheDir();
-		}
-	}
-
-	private int getFileStatus(String path, long length) {
-		int newStatus = 0;
-		if (StringUtils.isBlank(path)) {
-			newStatus = PodcastColumns.MEDIA_STATUS_DOWNLOADABLE;
-		} else {
-			File file = new File(path);
-			if (file.exists() && file.length() == length) {
-				newStatus = PodcastColumns.MEDIA_STATUS_DOWNLOADED;
-			} else {
-				newStatus = PodcastColumns.MEDIA_STATUS_DOWNLOADABLE;
-			}
-		}
-		return newStatus;
 	}
 
 }

@@ -117,6 +117,22 @@ public class WiktionaryCommand extends AbstractDictionaryCommand {
 		super(context, query);
 	}
 
+	private synchronized String extractContent(String content) {
+		try {
+			// Drill into the JSON response to find the content body
+			JSONObject response = new JSONObject(content);
+			JSONObject query = response.getJSONObject("query");
+			JSONObject pages = query.getJSONObject("pages");
+			JSONObject page = pages.getJSONObject((String) pages.keys().next());
+			JSONArray revisions = page.getJSONArray("revisions");
+			JSONObject revision = revisions.getJSONObject(0);
+			return revision.getString("*");
+		} catch (JSONException e) {
+			Ln.w("Extract json content fail", e);
+			return "";
+		}
+	}
+
 	@Override
 	public String getContent() {
 		String url = getQueryUrl();
@@ -176,22 +192,6 @@ public class WiktionaryCommand extends AbstractDictionaryCommand {
 			return STYLE_SHEET + input;
 		} else {
 			return null;
-		}
-	}
-
-	private synchronized String extractContent(String content) {
-		try {
-			// Drill into the JSON response to find the content body
-			JSONObject response = new JSONObject(content);
-			JSONObject query = response.getJSONObject("query");
-			JSONObject pages = query.getJSONObject("pages");
-			JSONObject page = pages.getJSONObject((String) pages.keys().next());
-			JSONArray revisions = page.getJSONArray("revisions");
-			JSONObject revision = revisions.getJSONObject(0);
-			return revision.getString("*");
-		} catch (JSONException e) {
-			Ln.w("Extract json content fail", e);
-			return "";
 		}
 	}
 

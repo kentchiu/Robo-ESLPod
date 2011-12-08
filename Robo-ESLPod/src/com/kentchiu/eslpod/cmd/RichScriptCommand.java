@@ -30,6 +30,21 @@ import com.kentchiu.eslpod.R;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
 public class RichScriptCommand implements Runnable {
+	private class ContainPredicate implements Predicate<String> {
+
+		private String	token;
+
+		public ContainPredicate(String token) {
+			super();
+			this.token = token;
+		}
+
+		@Override
+		public boolean apply(String input) {
+			return StringUtils.contains(input, token);
+		}
+	}
+
 	static final class Trim implements Function<String, String> {
 		@Override
 		public String apply(String input) {
@@ -46,21 +61,6 @@ public class RichScriptCommand implements Runnable {
 				result = result.substring(1, result.length());
 			}
 			return result;
-		}
-	}
-
-	private class ContainPredicate implements Predicate<String> {
-
-		private String	token;
-
-		public ContainPredicate(String token) {
-			super();
-			this.token = token;
-		}
-
-		@Override
-		public boolean apply(String input) {
-			return StringUtils.contains(input, token);
 		}
 	}
 
@@ -143,37 +143,6 @@ public class RichScriptCommand implements Runnable {
 		}
 	}
 
-	public Context getContext() {
-		return context;
-	}
-
-	@Override
-	public void run() {
-		Cursor c = context.getContentResolver().query(PodcastColumns.PODCAST_URI, null, PodcastColumns.LINK + "=?", new String[] { scriptUrl.toString() }, null);
-		String richScript = "";
-		String link = "";
-		String title = "";
-		if (c.moveToFirst()) {
-			richScript = c.getString(c.getColumnIndex(PodcastColumns.RICH_SCRIPT));
-			link = c.getString(c.getColumnIndex(PodcastColumns.LINK));
-			title = c.getString(c.getColumnIndex(PodcastColumns.TITLE));
-		}
-		if (StringUtils.isBlank(richScript)) {
-			if (StringUtils.isNotBlank(link)) {
-				String script = fetchScript(title);
-				if (StringUtils.isNotBlank(script)) {
-					updateDatabase(script);
-				}
-			}
-		} else {
-			Ln.v("rich script for url [%s] already exists", scriptUrl);
-		}
-	}
-
-	public void setContext(Context context) {
-		this.context = context;
-	}
-
 	protected String fetchScript(String title) {
 		List<String> lines = ImmutableList.of();
 
@@ -213,6 +182,37 @@ public class RichScriptCommand implements Runnable {
 			return "";
 		}
 
+	}
+
+	public Context getContext() {
+		return context;
+	}
+
+	@Override
+	public void run() {
+		Cursor c = context.getContentResolver().query(PodcastColumns.PODCAST_URI, null, PodcastColumns.LINK + "=?", new String[] { scriptUrl.toString() }, null);
+		String richScript = "";
+		String link = "";
+		String title = "";
+		if (c.moveToFirst()) {
+			richScript = c.getString(c.getColumnIndex(PodcastColumns.RICH_SCRIPT));
+			link = c.getString(c.getColumnIndex(PodcastColumns.LINK));
+			title = c.getString(c.getColumnIndex(PodcastColumns.TITLE));
+		}
+		if (StringUtils.isBlank(richScript)) {
+			if (StringUtils.isNotBlank(link)) {
+				String script = fetchScript(title);
+				if (StringUtils.isNotBlank(script)) {
+					updateDatabase(script);
+				}
+			}
+		} else {
+			Ln.v("rich script for url [%s] already exists", scriptUrl);
+		}
+	}
+
+	public void setContext(Context context) {
+		this.context = context;
 	}
 
 	protected void updateDatabase(String richScript) {

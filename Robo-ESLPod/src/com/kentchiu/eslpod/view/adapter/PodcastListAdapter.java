@@ -1,13 +1,10 @@
 package com.kentchiu.eslpod.view.adapter;
 
-import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
-import android.net.Uri;
-import android.provider.BaseColumns;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ResourceCursorAdapter;
 import android.widget.TextView;
 
@@ -22,29 +19,25 @@ public class PodcastListAdapter extends ResourceCursorAdapter {
 
 	@Override
 	public void bindView(View view, Context context, Cursor cursor) {
-		int id = cursor.getInt(cursor.getColumnIndex(BaseColumns._ID));
-		Uri uri = ContentUris.withAppendedId(PodcastColumns.PODCAST_URI, id);
 		String title = cursor.getString(cursor.getColumnIndex(PodcastColumns.TITLE));
 		int status = cursor.getInt(cursor.getColumnIndex(PodcastColumns.MEDIA_DOWNLOAD_STATUS));
 		cursor.getLong(cursor.getColumnIndex(PodcastColumns.MEDIA_LENGTH));
 		cursor.getLong(cursor.getColumnIndex(PodcastColumns.MEDIA_DOWNLOAD_LENGTH));
-
 		TextView tv = (TextView) view.findViewById(R.id.podcastTitle);
-		final Button button = (Button) view.findViewById(R.id.downloadButton);
 		tv.setText(title);
-		button.setTag(uri);
+		ImageView statusImage = (ImageView) view.findViewById(R.id.downloadStatusImage);
 		switch (status) {
 		case PodcastColumns.MEDIA_STATUS_DOWNLOADED:
-			button.setEnabled(true);
-			button.setText("CLEAN");
+			statusImage.setImageResource(R.drawable.presence_online);
 			break;
 		case PodcastColumns.MEDIA_STATUS_DOWNLOADING:
-			button.setEnabled(false);
+			statusImage.setImageResource(R.drawable.presence_busy);
 			break;
 		case PodcastColumns.MEDIA_STATUS_DOWNLOADABLE:
+			statusImage.setImageResource(R.drawable.presence_invisible);
+			break;
 		default:
-			button.setEnabled(true);
-			button.setText("DOWNLOAD");
+			statusImage.setImageResource(R.drawable.presence_invisible);
 			break;
 		}
 	}
