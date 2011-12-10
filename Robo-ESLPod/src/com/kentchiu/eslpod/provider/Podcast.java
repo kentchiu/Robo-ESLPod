@@ -42,11 +42,6 @@ public class Podcast {
 		 */
 		public static final String	MEDIA_DOWNLOAD_STATUS		= "media_download_status";
 		/**
-		 * <P>Type: INTEGER</P>
-		 * {@link #STATUS_DOWNLOADABLE} or {@link #STATUS_DOWNLOADING} or {@link #STATUS_DOWNLOADED}
-		 */
-		public static final String	MEDIA_DOWNLOAD_LENGTH		= "media_download_length";
-		/**
 		 * <P>Type: TEXT (Date String)</P>
 		 */
 		public static final String	PUBLISHED					= "published";

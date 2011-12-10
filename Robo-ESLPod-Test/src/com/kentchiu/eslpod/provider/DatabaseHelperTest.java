@@ -14,20 +14,36 @@ public class DatabaseHelperTest extends TestCase {
 		helper.close();
 	}
 
-	public void testDictionaryBankTable() throws Exception {
+	public void testDictionaryTable() throws Exception {
 		Cursor c = db.query(DatabaseHelper.DICTIONARY_TABLE_NAME, null, null, null, null, null, null);
 		assertEquals(4, c.getColumnCount());
 	}
 
 	public void testPodcastTable() throws Exception {
 		Cursor c = db.query(DatabaseHelper.PODCAST_TABLE_NAME, null, null, null, null, null, null);
-		assertEquals(15, c.getColumnCount());
+		assertEquals(14, c.getColumnCount());
+	}
+	
+	public void testWordFetchTable() throws Exception {
+		Cursor c = db.query(DatabaseHelper.WORD_FETCH_TABLE_NAME, null, null, null, null, null, null);
+		assertEquals(5, c.getColumnCount());
 	}
 
-	public void testUniquIndex() throws Exception {
+
+	public void testPodcastUniquIndex() throws Exception {
 		try {
-			db.execSQL("insert into Dictionary(dictionary_id, word) values(1, 'test')");
-			db.execSQL("insert into Dictionary(dictionary_id, word) values(1, 'test')");
+			db.execSQL("insert into dictionary(dictionary_id, word) values(1, 'test')");
+			db.execSQL("insert into dictionary(dictionary_id, word) values(1, 'test')");
+			fail("Shoud throw uniqu constrain exception");
+		} catch (SQLiteConstraintException e) {
+			// do nothing
+		}
+	}
+	
+	public void testWordFetchUniquIndex() throws Exception {
+		try {
+			db.execSQL("insert into word_fetch(dictionary_id, word, podcast_id) values(1, 'test',1)");
+			db.execSQL("insert into word_fetch(dictionary_id, word, podcast_id) values(1, 'test',1)");
 			fail("Shoud throw uniqu constrain exception");
 		} catch (SQLiteConstraintException e) {
 			// do nothing
