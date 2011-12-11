@@ -1,8 +1,5 @@
 package com.kentchiu.eslpod.receiver;
 
-import java.util.Timer;
-
-import roboguice.util.Ln;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;

@@ -1,13 +1,11 @@
 package com.kentchiu.eslpod.service;
 
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.apache.commons.lang3.StringUtils;
 
 import roboguice.util.Ln;
-
 import android.app.Service;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -33,9 +31,8 @@ public class RichScriptFetchService extends Service {
 		executorService.execute(richScriptCmd);
 	}
 
-	
-	private List<AbstractDictionaryCommand> prepareCommands(int podcastId,Iterable<String> words) {
-		List<AbstractDictionaryCommand> results = Lists.newArrayList();
+	private void insertWordStatus(int podcastId, String richScript) {
+		Iterable<String> words = RichScriptCommand.extractWord(richScript);
 		Iterable<String> headword = RichScriptCommand.headword(this, words);
 		for (String phase : headword) {
 			Iterable<String> ws = Splitter.onPattern("(\n| )").trimResults().split(phase);
@@ -43,14 +40,15 @@ public class RichScriptFetchService extends Service {
 				String word = StringUtils.trim(w.replaceAll(",", ""));
 				for (Integer dictId : AbstractDictionaryCommand.allDictionaryId()) {
 					ContentValues cv = new ContentValues();
+					cv.put(WordFetchColumns.PODCAST_ID, podcastId);
+					cv.put(WordFetchColumns.WORD, word);
+					cv.put(WordFetchColumns.DICTIONARY_ID, dictId);
 					cv.put(WordFetchColumns.STATUS, WordFetchColumns.STATUS_DOWNLOADABLE);
-					String where = String.format("%s=? and %s=? and %s=?", WordFetchColumns.WORD, WordFetchColumns.DICTIONARY_ID, WordFetchColumns.PODCAST_ID);
-					Ln.v("Mark word [%s] at dictionary %d as downloaded", word, dictId);
-					getContentResolver().update(WordFetchColumns.WORD_FETCH_URI, cv, where, new String[] { word, Integer.toString(dictId), Long.toString(podcastId) });
+					Ln.v("Mark word [%s] at dictionary %d as downloading", word, dictId);
+					getContentResolver().insert(WordFetchColumns.WORD_FETCH_URI, cv);
 				}
 			}
 		}
-		return results;
 	}
 
 	@Override
@@ -84,6 +82,8 @@ public class RichScriptFetchService extends Service {
 				if (StringUtils.isNotBlank(link)) {
 					fetchScript(c, link);
 				}
+			} else {
+				insertWordStatus(startId, richScript);
 			}
 		}
 		return super.onStartCommand(intent, flags, startId);

@@ -6,11 +6,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import roboguice.activity.RoboListActivity;
-import roboguice.util.Ln;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -104,7 +102,7 @@ public class HomeActivity extends RoboListActivity {
 		}
 		startService(new Intent(this, RichScriptFetchService.class));
 		startService(new Intent(this, AutoFetchService.class));
-		
+
 	}
 
 	@Override

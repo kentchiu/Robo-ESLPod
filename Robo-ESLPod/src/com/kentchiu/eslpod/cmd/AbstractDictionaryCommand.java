@@ -1,7 +1,6 @@
 package com.kentchiu.eslpod.cmd;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -24,6 +23,10 @@ public abstract class AbstractDictionaryCommand implements Runnable {
 
 	// http://i.word.com/
 
+	public static Integer[] allDictionaryId() {
+		return new Integer[] { Dictionary.DICTIONARY_DREYE_DICTIONARY, Dictionary.DICTIONARY_DICTIONARY_DICTIONARY, Dictionary.DICTIONARY_WIKITIONARY };
+	}
+
 	public static AbstractDictionaryCommand newDictionaryCommand(Context context, String word, int dictionaryId) {
 		switch (dictionaryId) {
 		case Dictionary.DICTIONARY_DREYE_DICTIONARY:
@@ -43,7 +46,7 @@ public abstract class AbstractDictionaryCommand implements Runnable {
 		while (c.moveToNext()) {
 			dictIds.add(c.getInt(c.getColumnIndex(DictionaryColumns.DICTIONARY_ID)));
 		}
-		Set<Integer> allDictIds = Sets.newHashSet(allDictionaryId()); 
+		Set<Integer> allDictIds = Sets.newHashSet(allDictionaryId());
 		Iterables.removeAll(allDictIds, dictIds);
 		String word = StringUtils.trim(w);
 		Ln.v("There are %d dictionary need to be update for word [%s]", allDictIds.size(), word);
@@ -53,13 +56,6 @@ public abstract class AbstractDictionaryCommand implements Runnable {
 			cmds.add(cmd);
 		}
 		return cmds;
-	}
-
-	public static Integer[] allDictionaryId() {
-		return new Integer[] {
-		Dictionary.DICTIONARY_DREYE_DICTIONARY,
-		Dictionary.DICTIONARY_DICTIONARY_DICTIONARY,
-		Dictionary.DICTIONARY_WIKITIONARY};
 	}
 
 	public static String toHtml(Context context, String word, String content, int dictId) {

@@ -19,7 +19,6 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.provider.BaseColumns;
-import android.widget.Toast;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
@@ -57,15 +56,7 @@ public class WordFetchService extends RoboService {
 	}
 
 	private void markAsDownloaded(long podcastId, AbstractDictionaryCommand cmd) {
-		updateStatus(podcastId, cmd.getDictionaryId(), cmd.getWord(), WordFetchColumns.STATUS_DOWNLOADED);
-	}
-
-	private void updateStatus(long podcastId, int dictId, String word, int status) {
-		ContentValues cv = new ContentValues();
-		cv.put(WordFetchColumns.STATUS, status);
-		String where = String.format("%s=? and %s=? and %s=?", WordFetchColumns.WORD, WordFetchColumns.DICTIONARY_ID, WordFetchColumns.PODCAST_ID);
-		Ln.v("Mark word [%s] at dictionary %d as downloaded", word, dictId);
-		getContentResolver().update(WordFetchColumns.WORD_FETCH_URI, cv, where, new String[] { word, Integer.toString(dictId), Long.toString(podcastId) });
+		//updateStatus(podcastId, cmd.getDictionaryId(), cmd.getWord(), WordFetchColumns.STATUS_DOWNLOADED);
 	}
 
 	private void markAsDownloading(final long podcastId, final List<AbstractDictionaryCommand> cmds) {
@@ -104,6 +95,7 @@ public class WordFetchService extends RoboService {
 		final List<AbstractDictionaryCommand> fetchCmds = Lists.newArrayList();
 		Uri podcastUri = intent.getData();
 		Cursor c = getContentResolver().query(podcastUri, null, null, null, null);
+
 		if (c.moveToFirst()) {
 			long podcastId = c.getLong(c.getColumnIndex(BaseColumns._ID));
 			String richScript = c.getString(c.getColumnIndex(PodcastColumns.RICH_SCRIPT));
@@ -114,6 +106,7 @@ public class WordFetchService extends RoboService {
 			Ln.v("Add %d new command, total command is %d", Iterables.size(cmds), Iterables.size(fetchCmds));
 			executeWordCommands(podcastId, fetchCmds);
 		}
+
 		return START_REDELIVER_INTENT;
 	}
 
@@ -133,14 +126,22 @@ public class WordFetchService extends RoboService {
 		return results;
 	}
 
-	void showMessage(final String text, final int lengthLong) {
-		handler.post(new Runnable() {
-
-			@Override
-			public void run() {
-				Toast.makeText(WordFetchService.this, text, lengthLong).show();
-			}
-		});
+	private void updateStatus(long podcastId, int dictId, String word, int status) {
+		ContentValues cv = new ContentValues();
+		cv.put(WordFetchColumns.STATUS, status);
+		String where = String.format("%s=? and %s=? and %s=?", WordFetchColumns.WORD, WordFetchColumns.DICTIONARY_ID, WordFetchColumns.PODCAST_ID);
+		Ln.v("Mark word [%s] at dictionary %d as downloaded", word, dictId);
+		getContentResolver().update(WordFetchColumns.WORD_FETCH_URI, cv, where, new String[] { word, Integer.toString(dictId), Long.toString(podcastId) });
 	}
+
+	//	void showMessage(final String text, final int lengthLong) {
+	//		handler.post(new Runnable() {
+	//
+	//			@Override
+	//			public void run() {
+	//				Toast.makeText(WordFetchService.this, text, lengthLong).show();
+	//			}
+	//		});
+	//	}
 
 }
