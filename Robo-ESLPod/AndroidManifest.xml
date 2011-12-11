@@ -39,7 +39,17 @@
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustUnspecified|stateHidden" >
 
+
+
+
+
+
 		    >
+            
+            
+            
+            
+            
             <intent-filter >
                 <action android:name="android.intent.action.VIEW" />
 
@@ -60,6 +70,7 @@
         <service android:name=".service.WordFetchService" />
         <service android:name=".service.MediaService" />
         <service android:name=".service.MediaDownloadService" />
+        <service android:name=".service.AutoFetchService" />
         <service android:name=".service.MusicService" >
             <intent-filter >
                 <action android:name="PLAY" />
@@ -75,10 +86,18 @@
         <provider
             android:authorities="com.kentchiu.eslpod.provider.WordFetch"
             android:name=".provider.WordFetchContentProvider" />
-        </application>
+
+        <receiver android:name=".reciever.BootReciever" >
+            <intent filter="" >
+                <action android:name="android.intent.action.BOOT_COMPLETED" >
+                </action>
+            </intent>
+        </receiver>
+    </application>
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <uses-sdk
         android:minSdkVersion="10"

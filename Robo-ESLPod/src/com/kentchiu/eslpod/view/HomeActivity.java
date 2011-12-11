@@ -6,9 +6,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import roboguice.activity.RoboListActivity;
+import roboguice.util.Ln;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -20,6 +22,8 @@ import android.widget.ListView;
 import com.kentchiu.eslpod.R;
 import com.kentchiu.eslpod.cmd.PodcastCommand;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
+import com.kentchiu.eslpod.service.AutoFetchService;
+import com.kentchiu.eslpod.service.RichScriptFetchService;
 import com.kentchiu.eslpod.view.adapter.PodcastListAdapter;
 
 public class HomeActivity extends RoboListActivity {
@@ -82,19 +86,25 @@ public class HomeActivity extends RoboListActivity {
 	@Override
 	protected void onStart() {
 		super.onStart();
-		managedQuery(PodcastColumns.PODCAST_URI, null, null, null, null);
 		//		if (cursor.getCount() < LOCAL_PODCAST_COUNT) {
 		//			// parse exists podcast xml to db
 		//			importLocal(new ImportHandler());
 		//		} else {
 		try {
-			fetchNewEpisode(new ImportHandler());
+			Cursor cursor = managedQuery(PodcastColumns.PODCAST_URI, null, null, null, null);
+			if (cursor.getCount() < LOCAL_PODCAST_COUNT) {
+				fetchNewEpisode(new ImportHandler());
+			} else {
+				fetchNewEpisode(null);
+			}
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		//		}
+		startService(new Intent(this, RichScriptFetchService.class));
+		startService(new Intent(this, AutoFetchService.class));
+		
 	}
 
 	@Override

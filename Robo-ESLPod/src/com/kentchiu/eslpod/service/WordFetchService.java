@@ -57,11 +57,15 @@ public class WordFetchService extends RoboService {
 	}
 
 	private void markAsDownloaded(long podcastId, AbstractDictionaryCommand cmd) {
+		updateStatus(podcastId, cmd.getDictionaryId(), cmd.getWord(), WordFetchColumns.STATUS_DOWNLOADED);
+	}
+
+	private void updateStatus(long podcastId, int dictId, String word, int status) {
 		ContentValues cv = new ContentValues();
-		cv.put(WordFetchColumns.STATUS, WordFetchColumns.STATUS_DOWNLOADED);
+		cv.put(WordFetchColumns.STATUS, status);
 		String where = String.format("%s=? and %s=? and %s=?", WordFetchColumns.WORD, WordFetchColumns.DICTIONARY_ID, WordFetchColumns.PODCAST_ID);
-		Ln.v("Mark word [%s] at dictionary %d as downloaded", cmd.getWord(), cmd.getDictionaryId());
-		getContentResolver().update(WordFetchColumns.WORD_FETCH_URI, cv, where, new String[] { cmd.getWord(), Integer.toString(cmd.getDictionaryId()), Long.toString(podcastId) });
+		Ln.v("Mark word [%s] at dictionary %d as downloaded", word, dictId);
+		getContentResolver().update(WordFetchColumns.WORD_FETCH_URI, cv, where, new String[] { word, Integer.toString(dictId), Long.toString(podcastId) });
 	}
 
 	private void markAsDownloading(final long podcastId, final List<AbstractDictionaryCommand> cmds) {
@@ -70,13 +74,7 @@ public class WordFetchService extends RoboService {
 			@Override
 			public void run() {
 				for (AbstractDictionaryCommand each : cmds) {
-					ContentValues cv = new ContentValues();
-					cv.put(WordFetchColumns.PODCAST_ID, podcastId);
-					cv.put(WordFetchColumns.WORD, each.getWord());
-					cv.put(WordFetchColumns.DICTIONARY_ID, each.getDictionaryId());
-					cv.put(WordFetchColumns.STATUS, WordFetchColumns.STATUS_DOWNLOADING);
-					Ln.v("Mark word [%s] at dictionary %d as downloading", each.getWord(), each.getDictionaryId());
-					getContentResolver().insert(WordFetchColumns.WORD_FETCH_URI, cv);
+					updateStatus(podcastId, each.getDictionaryId(), each.getWord(), WordFetchColumns.STATUS_DOWNLOADING);
 				}
 			}
 		}).start();

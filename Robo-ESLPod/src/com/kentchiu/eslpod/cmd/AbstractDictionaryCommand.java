@@ -43,10 +43,7 @@ public abstract class AbstractDictionaryCommand implements Runnable {
 		while (c.moveToNext()) {
 			dictIds.add(c.getInt(c.getColumnIndex(DictionaryColumns.DICTIONARY_ID)));
 		}
-		HashSet<Integer> allDictIds = Sets.newHashSet();
-		allDictIds.add(Dictionary.DICTIONARY_DREYE_DICTIONARY);
-		allDictIds.add(Dictionary.DICTIONARY_DICTIONARY_DICTIONARY);
-		allDictIds.add(Dictionary.DICTIONARY_WIKITIONARY);
+		Set<Integer> allDictIds = Sets.newHashSet(allDictionaryId()); 
 		Iterables.removeAll(allDictIds, dictIds);
 		String word = StringUtils.trim(w);
 		Ln.v("There are %d dictionary need to be update for word [%s]", allDictIds.size(), word);
@@ -56,6 +53,13 @@ public abstract class AbstractDictionaryCommand implements Runnable {
 			cmds.add(cmd);
 		}
 		return cmds;
+	}
+
+	public static Integer[] allDictionaryId() {
+		return new Integer[] {
+		Dictionary.DICTIONARY_DREYE_DICTIONARY,
+		Dictionary.DICTIONARY_DICTIONARY_DICTIONARY,
+		Dictionary.DICTIONARY_WIKITIONARY};
 	}
 
 	public static String toHtml(Context context, String word, String content, int dictId) {
