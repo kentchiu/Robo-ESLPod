@@ -120,7 +120,7 @@ public abstract class AbstractDictionaryCommand implements Runnable {
 				content = getContent();
 			}
 
-			Ln.v("End fetch  word [%d] from dictionary ", getDictionaryId());
+			Ln.v("End fetch  word [%s] from dictionary ", word);
 			if (StringUtils.isNotBlank(content)) {
 				ContentValues cv = new ContentValues();
 				cv.put(DictionaryColumns.DICTIONARY_ID, getDictionaryId());
@@ -129,10 +129,11 @@ public abstract class AbstractDictionaryCommand implements Runnable {
 				context.getContentResolver().insert(DictionaryColumns.DICTIONARY_URI, cv);
 				Ln.v("Save word [%s] to dictionary %d", word, getDictionaryId());
 			} else {
-				Ln.w("fetch word [%d] fail form dictionary  %d, url:%s", getDictionaryId(), url);
+				Ln.w("fetch word [%s] fail form dictionary %d, url:%s", word, getDictionaryId(), url);
 			}
 		} catch (Exception e) {
-			Ln.w("fetch word [" + word + "] fail form dictionary " + getDictionaryId() + ", url:" + url, e);
+			Ln.w("fetch word [%s] fail form dictionary %d, url:$s", word, getDictionaryId(), url);
+			Ln.w(e);
 		}
 	}
 }

@@ -25,6 +25,7 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.kentchiu.eslpod.R;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
@@ -64,11 +65,25 @@ public class RichScriptCommand implements Runnable {
 		}
 	}
 
+	public static Iterable<String> excludeBaseWord(Context context, Iterable<String> filter) {
+		Set<String> result = Sets.newLinkedHashSet();
+		for (String each : filter) {
+			for (String word : splitPhaseVerbToWords(each)) {
+				String w = word.replace('?', ' ').replace('.', ' ').replace(',', ' ').trim();
+				if (!isBaseWord(getBaseWords(context), w) && !StringUtils.containsAny(w, "’")) {
+					result.add(w);
+				}
+			}
+		}
+		return result;
+	}
+
 	public static Iterable<String> extractWord(String richScript) {
 		if (StringUtils.isBlank(richScript)) {
 			return ImmutableList.of();
 		}
-		String[] words = StringUtils.substringsBetween(richScript, "<b>", "</b>");
+		String richScript2 = richScript.replaceAll("\n", "");
+		String[] words = StringUtils.substringsBetween(richScript2, "<b>", "</b>");
 		if (ArrayUtils.isEmpty(words)) {
 			return ImmutableList.of();
 		} else {
@@ -88,19 +103,6 @@ public class RichScriptCommand implements Runnable {
 		return baseWordSet;
 	}
 
-	public static Iterable<String> headword(Context context, Iterable<String> filter) {
-		Set<String> result = Sets.newLinkedHashSet();
-		for (String each : filter) {
-			for (String word : splitPhaseVerbToWords(each)) {
-				String w = word.replace('?', ' ').replace('.', ' ').replace(',', ' ').trim();
-				if (!isBaseWord(getBaseWords(context), w) && !StringUtils.containsAny(w, "’")) {
-					result.add(w);
-				}
-			}
-		}
-		return result;
-	}
-
 	protected static boolean isBaseWord(Set<String> baseWords, String word) {
 		for (String each : baseWords) {
 			if (StringUtils.equalsIgnoreCase(each, word)) {
@@ -108,6 +110,18 @@ public class RichScriptCommand implements Runnable {
 			}
 		}
 		return false;
+	}
+
+	public static Iterable<String> preareForDownload(Context context, String richScript) {
+		Iterable<String> wordsOrPhaseVerbs = extractWord(richScript);
+		Iterable<String> headwords = excludeBaseWord(context, wordsOrPhaseVerbs);
+		List<String> results = Lists.newArrayList();
+		for (String headword : headwords) {
+			Ln.v("headword: [%s]", headword);
+			results.add(headword);
+		}
+
+		return results;
 	}
 
 	protected static Iterable<String> splitPhaseVerbToWords(String words) {

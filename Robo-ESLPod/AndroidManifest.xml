@@ -89,8 +89,7 @@
 
         <receiver android:name=".reciever.BootReciever" >
             <intent filter="" >
-                <action android:name="android.intent.action.BOOT_COMPLETED" >
-                </action>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent>
         </receiver>
     </application>

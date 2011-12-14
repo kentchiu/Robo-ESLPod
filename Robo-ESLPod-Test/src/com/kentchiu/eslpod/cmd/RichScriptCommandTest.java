@@ -20,6 +20,7 @@ import android.content.ContentUris;
 import android.database.sqlite.SQLiteDatabase;
 import android.test.AndroidTestCase;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.kentchiu.eslpod.provider.DatabaseHelper;
@@ -89,6 +90,14 @@ public class RichScriptCommandTest extends AndroidTestCase {
 		assertThat(words, hasItems("foo", "baz"));
 		assertThat(words, not(hasItem("bar")));
 	}
+	
+	public void testExtractWords_whole_script() throws Exception {
+		InputStream is = getClass().getResourceAsStream("/script.html");
+		List<String> script = command.extractScript(IOUtils.readLines(is));
+		Iterable<String> words = RichScriptCommand.extractWord(Joiner.on('\n').join(script));
+		assertThat(Iterables.size(words), is(17));
+	}
+	
 
 	public void testFetchScriptWithNonAsciiCode() throws Exception {
 		String scriptUrl = "http://www.eslpod.com/website/show_podcast.php?issue_id=10718756";

@@ -269,7 +269,7 @@ public class PlayerActivity extends RoboListActivity implements MediaPlayerContr
 		Iterable<String> words = RichScriptCommand.extractWord(adapter.getRichScript());
 		Iterable<String> filter = listWordsMatchToMenuItem(words, item);
 		int i = 1;
-		for (String each : RichScriptCommand.headword(PlayerActivity.this, filter)) {
+		for (String each : RichScriptCommand.excludeBaseWord(PlayerActivity.this, filter)) {
 			menu.add(0, i++, 0, each);
 		}
 	}

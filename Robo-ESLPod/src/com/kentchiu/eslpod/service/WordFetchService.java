@@ -3,73 +3,139 @@ package com.kentchiu.eslpod.service;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang3.StringUtils;
-
-import roboguice.service.RoboService;
 import roboguice.util.Ln;
+import android.app.Service;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Handler;
 import android.os.IBinder;
 import android.provider.BaseColumns;
 
-import com.google.common.base.Splitter;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.kentchiu.eslpod.cmd.AbstractDictionaryCommand;
 import com.kentchiu.eslpod.cmd.RichScriptCommand;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
-import com.kentchiu.eslpod.provider.WordFetch.WordFetchColumns;
 
-public class WordFetchService extends RoboService {
+public class WordFetchService extends Service {
 
-	private final int						MAX_TASK	= 500;
-	private final Handler					handler		= new Handler();
-	private ExecutorService					executorService;
-	private ArrayBlockingQueue<Runnable>	commandQueue;
+	private class BatchDownloadCommand implements Runnable {
 
-	private void executeWordCommands(final long podcastId, final List<AbstractDictionaryCommand> fetchCmds) {
-		final int addtion = Iterables.size(fetchCmds);
-		final int total = commandQueue.size() + addtion;
-		Ln.i("Queue size %d(%d)", total, addtion);
-		try {
-			for (final AbstractDictionaryCommand each : fetchCmds) {
-				executorService.execute(new Runnable() {
-					@Override
-					public void run() {
-						each.run();
-						markAsDownloaded(podcastId, each);
-						Ln.v("queue size : %d", commandQueue.size());
-					}
-				});
+		private int					podcastId;
+
+		private Iterable<String>	words;
+
+		private boolean				isDone;
+
+		private String				title;
+
+		public BatchDownloadCommand(int podcastId) {
+			super();
+			this.podcastId = podcastId;
+			Cursor c = getContentResolver().query(ContentUris.withAppendedId(PodcastColumns.PODCAST_URI, podcastId), null, null, null, null);
+			if (c.moveToFirst()) {
+				String richScript = c.getString(c.getColumnIndex(PodcastColumns.RICH_SCRIPT));
+				title = c.getString(c.getColumnIndex(PodcastColumns.TITLE));
+				words = RichScriptCommand.preareForDownload(WordFetchService.this, richScript);
+				isDone = PodcastColumns.STATUS_DOWNLOADED == c.getInt(c.getColumnIndex(PodcastColumns.DICTIONARY_DOWNLOAD_STATUS));
+			} else {
+				title = "";
+				words = ImmutableList.of();
 			}
-		} catch (RejectedExecutionException e) {
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj == null) {
+				return false;
+			}
+			if (getClass() != obj.getClass()) {
+				return false;
+			}
+			BatchDownloadCommand other = (BatchDownloadCommand) obj;
+			if (!getOuterType().equals(other.getOuterType())) {
+				return false;
+			}
+			if (podcastId != other.podcastId) {
+				return false;
+			}
+			return true;
+		}
+
+		private WordFetchService getOuterType() {
+			return WordFetchService.this;
+		}
+
+		public int getPodcastId() {
+			return podcastId;
+
+		}
+
+		public String getTitle() {
+			return title;
+		}
+
+		public Iterable<String> getWords() {
+			return words;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + getOuterType().hashCode();
+			result = prime * result + podcastId;
+			return result;
+		}
+
+		public boolean isDone() {
+			return isDone;
+		}
+
+		@Override
+		public void run() {
+			updateStatus(PodcastColumns.STATUS_DOWNLOADING);
+			Ln.d("Starting download dictionary for episode  %s , %d words need be downloaded ", title, Iterables.size(words));
+			int count = 0;
+			for (String word : words) {
+				List<AbstractDictionaryCommand> cmds = AbstractDictionaryCommand.newDictionaryCommands(WordFetchService.this, word);
+				for (AbstractDictionaryCommand cmd : cmds) {
+					cmd.run();
+					count++;
+				}
+			}
+			updateStatus(PodcastColumns.STATUS_DOWNLOADED);
+			Ln.d("Dictionary download completed for episode  %s, %d entity for %d words entity downloaded", title, count, Iterables.size(words));
+
+		}
+
+		@Override
+		public String toString() {
+			return "BatchDownloadCommand [podcastId=" + podcastId + ", words=" + words + ", title=" + title + "]";
+		}
+
+		private void updateStatus(int status) {
+			ContentValues cv = new ContentValues();
+			cv.put(PodcastColumns.DICTIONARY_DOWNLOAD_STATUS, status);
+			getContentResolver().update(PodcastColumns.PODCAST_URI, cv, BaseColumns._ID + "=?", new String[] { Integer.toString(podcastId) });
 		}
 	}
 
-	private void markAsDownloaded(long podcastId, AbstractDictionaryCommand cmd) {
-		//updateStatus(podcastId, cmd.getDictionaryId(), cmd.getWord(), WordFetchColumns.STATUS_DOWNLOADED);
-	}
+	private final int						MAX_TASK	= 5;
+	private ExecutorService					executorService;
 
-	private void markAsDownloading(final long podcastId, final List<AbstractDictionaryCommand> cmds) {
-		new Thread(new Runnable() {
-
-			@Override
-			public void run() {
-				for (AbstractDictionaryCommand each : cmds) {
-					updateStatus(podcastId, each.getDictionaryId(), each.getWord(), WordFetchColumns.STATUS_DOWNLOADING);
-				}
-			}
-		}).start();
-	}
+	private ArrayBlockingQueue<Runnable>	commandQueue;
 
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -78,13 +144,13 @@ public class WordFetchService extends RoboService {
 
 	@Override
 	public void onCreate() {
+		super.onCreate();
 		ThreadFactoryBuilder builder = new ThreadFactoryBuilder();
 		builder.setPriority(Thread.MIN_PRIORITY);
-		builder.setDaemon(true);
 
 		commandQueue = new ArrayBlockingQueue<Runnable>(MAX_TASK);
-		executorService = new ThreadPoolExecutor(3, // core size
-				3, // max size
+		executorService = new ThreadPoolExecutor(1, // core size
+				1, // max size
 				10 * 60, // idle timeout
 				TimeUnit.SECONDS, commandQueue, builder.build(), new AbortPolicy()); // queue with a size
 
@@ -92,56 +158,26 @@ public class WordFetchService extends RoboService {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		final List<AbstractDictionaryCommand> fetchCmds = Lists.newArrayList();
+		//final List<AbstractDictionaryCommand> fetchCmds = Lists.newArrayList();
 		Uri podcastUri = intent.getData();
-		Cursor c = getContentResolver().query(podcastUri, null, null, null, null);
-
-		if (c.moveToFirst()) {
-			long podcastId = c.getLong(c.getColumnIndex(BaseColumns._ID));
-			String richScript = c.getString(c.getColumnIndex(PodcastColumns.RICH_SCRIPT));
-			Iterable<String> words = RichScriptCommand.extractWord(richScript);
-			List<AbstractDictionaryCommand> cmds = prepareCommands(words);
-			markAsDownloading(podcastId, cmds);
-			fetchCmds.addAll(cmds);
-			Ln.v("Add %d new command, total command is %d", Iterables.size(cmds), Iterables.size(fetchCmds));
-			executeWordCommands(podcastId, fetchCmds);
-		}
-
-		return START_REDELIVER_INTENT;
-	}
-
-	private List<AbstractDictionaryCommand> prepareCommands(Iterable<String> words) {
-		List<AbstractDictionaryCommand> results = Lists.newArrayList();
-		Iterable<String> headword = RichScriptCommand.headword(this, words);
-		for (String phase : headword) {
-			Iterable<String> ws = Splitter.onPattern("(\n| )").trimResults().split(phase);
-			for (String w : ws) {
-				String input = StringUtils.trim(w.replaceAll(",", ""));
-				List<AbstractDictionaryCommand> cmds = AbstractDictionaryCommand.newDictionaryCommands(this, input);
-				for (AbstractDictionaryCommand each : cmds) {
-					results.add(each);
+		Ln.d("intent data: %s", podcastUri);
+		Preconditions.checkNotNull(podcastUri);
+		long id = ContentUris.parseId(podcastUri);
+		BatchDownloadCommand cmd = new BatchDownloadCommand((int) id);
+		try {
+			if (commandQueue.contains(cmd)) {
+				Ln.d("The episode [%s] is already in download queue", cmd.getTitle());
+			} else if (cmd.isDone) {
+				Ln.d("The episode [%s] is already in download completed", cmd.getTitle());
+			} else {
+				Ln.d("Put episode [%s]  in download queue", cmd.getTitle());
+				if (Iterables.size(cmd.getWords()) > 0) {
+					commandQueue.put(cmd);
 				}
+				executorService.execute(cmd);
 			}
+		} catch (InterruptedException e) {
 		}
-		return results;
+		return Service.START_NOT_STICKY;
 	}
-
-	private void updateStatus(long podcastId, int dictId, String word, int status) {
-		ContentValues cv = new ContentValues();
-		cv.put(WordFetchColumns.STATUS, status);
-		String where = String.format("%s=? and %s=? and %s=?", WordFetchColumns.WORD, WordFetchColumns.DICTIONARY_ID, WordFetchColumns.PODCAST_ID);
-		Ln.v("Mark word [%s] at dictionary %d as downloaded", word, dictId);
-		getContentResolver().update(WordFetchColumns.WORD_FETCH_URI, cv, where, new String[] { word, Integer.toString(dictId), Long.toString(podcastId) });
-	}
-
-	//	void showMessage(final String text, final int lengthLong) {
-	//		handler.post(new Runnable() {
-	//
-	//			@Override
-	//			public void run() {
-	//				Toast.makeText(WordFetchService.this, text, lengthLong).show();
-	//			}
-	//		});
-	//	}
-
 }

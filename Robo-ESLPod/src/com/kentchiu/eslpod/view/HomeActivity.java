@@ -45,7 +45,7 @@ public class HomeActivity extends RoboListActivity {
 	}
 
 	private static final int	DIALOG_IMPORT		= 0;
-	public static int			LOCAL_PODCAST_COUNT	= 5;
+	public static int			LOCAL_PODCAST_COUNT	= 10;
 
 	public void fetchNewEpisode(Handler handler) throws MalformedURLException, IOException {
 		InputStream is = new URL(PodcastCommand.RSS_URI).openStream();

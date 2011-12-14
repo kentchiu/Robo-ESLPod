@@ -12,7 +12,7 @@ import com.kentchiu.eslpod.provider.WordFetch.WordFetchColumns;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 	public static String	DATABASE_NAME			= "elspod.db";
-	public static int		DATABASE_VERSION		= 3;
+	public static int		DATABASE_VERSION		= 5;
 	public static String	PODCAST_TABLE_NAME		= "podcast";
 	public static String	DICTIONARY_TABLE_NAME	= "dictionary";
 	public static String	WORD_FETCH_TABLE_NAME	= "word_fetch";
@@ -48,6 +48,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		PodcastColumns.MEDIA_URL_LOCAL + " TEXT UNIQUE, " +
 		PodcastColumns.MEDIA_LENGTH + " INTEGER, " +
 		PodcastColumns.MEDIA_DOWNLOAD_STATUS + " INTEGER, " +
+		PodcastColumns.DICTIONARY_DOWNLOAD_STATUS + " INTEGER, " +
 		PodcastColumns.PUBLISHED+ " TEXT, " +
 		PodcastColumns.LINK  + " TEXT UNIQUE," +
 		PodcastColumns.DURATION  + " TEXT, " +
