@@ -18,7 +18,9 @@ import org.xml.sax.InputSource;
 import roboguice.util.Ln;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 
@@ -33,12 +35,14 @@ import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 public class PodcastCommand implements Runnable {
 
 	public static final String	RSS_URI					= "http://feeds.feedburner.com/EnglishAsASecondLanguagePodcast";
+	public static final String ACTION_NEW_PODCAST = "com.kentchiu.eslpod.NEW";
 	public static final int		START_GET_ITEM_NODES	= 1;
 	public static final int		ADD_ITEM_NODE			= 2;
 	public static final int		END_GET_ITEM_NODES		= 3;
 	public static final int		START_IMPORT			= 4;
 	public static final int		IMPORTING				= 5;
 	public static final int		END_IMPORT				= 6;
+	private static final int	MAX_COUNT	= 10;
 
 	private InputStream			inputStream;
 	private Context				context;
@@ -90,8 +94,8 @@ public class PodcastCommand implements Runnable {
 		sendMessage(START_GET_ITEM_NODES, 0, 0);
 		XPath xpath = XPathFactory.newInstance().newXPath();
 		InputSource inputSource = new InputSource(inputStream);
-		NodeList nodes = (NodeList) xpath.evaluate("//channel/item/title", inputSource, XPathConstants.NODESET);
-		int length = nodes.getLength();
+		NodeList nodes = (NodeList) xpath.evaluate("//channel/item/title", inputSource, XPathConstants.NODESET); // FIXME this will take a long time
+		 int length = nodes.getLength();
 		Ln.d("Count of nodes is %d", length);
 		List<Node> results = Lists.newArrayList();
 		for (int i = 0; i < length; i++) {
@@ -103,11 +107,13 @@ public class PodcastCommand implements Runnable {
 				results.add(item.getParentNode());
 				sendMessage(ADD_ITEM_NODE, i, length);
 			}
+			if (results.size() >= MAX_COUNT) {
+				break;
+			}
 		}
 		sendMessage(END_GET_ITEM_NODES, results.size(), length);
 		return results;
 	}
-
 	@Override
 	public void run() {
 		try {
@@ -121,13 +127,14 @@ public class PodcastCommand implements Runnable {
 			int count = 1;
 			sendMessage(START_IMPORT, 0, nodes.size());
 			for (Node item : nodes) {
-
 				ContentValues cv = convert(item);
 				String title = cv.getAsString(PodcastColumns.TITLE);
 				if (StringUtils.isNotBlank(title) && !titles.contains(title)) {
 					try {
-						context.getContentResolver().insert(PodcastColumns.PODCAST_URI, cv);
+						Uri uri = context.getContentResolver().insert(PodcastColumns.PODCAST_URI, cv);
 						sendMessage(IMPORTING, count, nodes.size());
+						Intent intent = new Intent("com.kentchiu.eslpod.NEW_PODCAST", uri);
+						context.sendBroadcast(intent);
 						count++;
 					} catch (Exception e) {
 						Ln.w("insert podcast fail %s", title);

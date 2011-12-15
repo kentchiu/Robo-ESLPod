@@ -134,7 +134,6 @@ public class WordFetchService extends Service {
 
 	private final int						MAX_TASK	= 5;
 	private ExecutorService					executorService;
-
 	private ArrayBlockingQueue<Runnable>	commandQueue;
 
 	@Override

@@ -77,7 +77,7 @@ public class PlayerActivity extends RoboListActivity implements MediaPlayerContr
 			String richScript = c.getString(c.getColumnIndex(PodcastColumns.RICH_SCRIPT));
 			String link = c.getString(c.getColumnIndex(PodcastColumns.LINK));
 			if (StringUtils.isBlank(richScript)) {
-				new Thread(new RichScriptCommand(this, uri, link)).start();
+				//new Thread(new RichScriptCommand(this, uri, link)).start();
 			}
 			Iterable<String> lines = Splitter.on("\n").trimResults().split(StringUtils.substringBefore(script, "Script by Dr. Lucy Tse"));
 			ImmutableList<String> copyOf = ImmutableList.copyOf(lines);

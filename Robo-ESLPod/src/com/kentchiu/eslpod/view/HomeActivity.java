@@ -8,7 +8,9 @@ import java.net.URL;
 import roboguice.activity.RoboListActivity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.ContentUris;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -20,6 +22,7 @@ import android.widget.ListView;
 import com.kentchiu.eslpod.R;
 import com.kentchiu.eslpod.cmd.PodcastCommand;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
+import com.kentchiu.eslpod.receiver.MyReceiver;
 import com.kentchiu.eslpod.service.AutoFetchService;
 import com.kentchiu.eslpod.service.RichScriptFetchService;
 import com.kentchiu.eslpod.view.adapter.PodcastListAdapter;
@@ -45,7 +48,7 @@ public class HomeActivity extends RoboListActivity {
 	}
 
 	private static final int	DIALOG_IMPORT		= 0;
-	public static int			LOCAL_PODCAST_COUNT	= 10;
+	public static int			LOCAL_PODCAST_COUNT	= 15;
 
 	public void fetchNewEpisode(Handler handler) throws MalformedURLException, IOException {
 		InputStream is = new URL(PodcastCommand.RSS_URI).openStream();
@@ -67,6 +70,7 @@ public class HomeActivity extends RoboListActivity {
 		Cursor cursor = managedQuery(PodcastColumns.PODCAST_URI, null, null, null, PodcastColumns.TITLE + " DESC");
 		PodcastListAdapter adapter = new PodcastListAdapter(HomeActivity.this, R.layout.episode_list_item, cursor, true);
 		setListAdapter(adapter);
+
 	}
 
 	@Override
@@ -84,13 +88,23 @@ public class HomeActivity extends RoboListActivity {
 	@Override
 	protected void onStart() {
 		super.onStart();
+//		Intent intent2 = new Intent();
+//	    intent2.setAction(PodcastCommand.ACTION_NEW_PODCAST);
+//	    intent2.setData(ContentUris.withAppendedId(PodcastColumns.PODCAST_URI, 1));
+//	    sendBroadcast(intent2);
+	    
+//		Intent intent3 = new Intent();
+//	    intent3.setAction(PodcastCommand.ACTION_NEW_PODCAST);
+//		sendBroadcast(intent3);
+		
+		
 		//		if (cursor.getCount() < LOCAL_PODCAST_COUNT) {
 		//			// parse exists podcast xml to db
 		//			importLocal(new ImportHandler());
 		//		} else {
 		try {
 			Cursor cursor = managedQuery(PodcastColumns.PODCAST_URI, null, null, null, null);
-			if (cursor.getCount() < LOCAL_PODCAST_COUNT) {
+			if (cursor.getCount() == 0) {
 				fetchNewEpisode(new ImportHandler());
 			} else {
 				fetchNewEpisode(null);
