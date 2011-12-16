@@ -16,9 +16,9 @@ import com.kentchiu.eslpod.provider.Dictionary;
 
 public class DreyeDictionaryCommand extends AbstractDictionaryCommand {
 
-	protected DreyeDictionaryCommand(Context context, String query) {
-		super(context, query);
-		this.query = query;
+	protected DreyeDictionaryCommand(Context context, String word) {
+		super(context, word);
+		this.word = word;
 	}
 
 	private String applyTemplate(String input) {
@@ -42,7 +42,7 @@ public class DreyeDictionaryCommand extends AbstractDictionaryCommand {
 			String group = m.group();
 			return group;
 		} else {
-			Ln.e("Not match for query : %s", getQueryUrl());
+			Ln.e("Not match for word : %s", getQueryUrl());
 			return input;
 		}
 	}
@@ -54,13 +54,13 @@ public class DreyeDictionaryCommand extends AbstractDictionaryCommand {
 	}
 
 	@Override
-	protected int getDictionaryId() {
+	public int getDictionaryId() {
 		return Dictionary.DICTIONARY_DREYE_DICTIONARY;
 	}
 
 	@Override
 	protected String getQueryUrl() {
-		return "http://www.dreye.com/mws/dict.php?ua=dc_cont&hidden_codepage=01&w=" + query;
+		return "http://www.dreye.com/mws/dict.php?ua=dc_cont&hidden_codepage=01&w=" + word;
 	}
 
 	@Override

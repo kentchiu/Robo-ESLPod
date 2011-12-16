@@ -126,13 +126,6 @@ public class PlayerActivity extends RoboListActivity implements MediaPlayerContr
 		return 0;
 	}
 
-	// @Override
-	// public boolean onTouchEvent(MotionEvent event) {
-	// // the MediaController will hide after 3 seconds - tap the screen to make it appear again
-	// ctrl.show();
-	// return false;
-	// }
-
 	@Override
 	public boolean isPlaying() {
 		if (MusicService.getInstance() != null) {

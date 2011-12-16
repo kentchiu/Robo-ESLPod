@@ -39,10 +39,7 @@
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustUnspecified|stateHidden" >
 
-
 		    >
-            
-            
             <intent-filter >
                 <action android:name="android.intent.action.VIEW" />
 
@@ -75,7 +72,10 @@
         <provider
             android:authorities="com.kentchiu.eslpod.provider.Podcast"
             android:name=".provider.PodcastContentProvider" />
-    </application>
+        <provider
+            android:authorities="com.kentchiu.eslpod.provider.WordFetch"
+            android:name=".provider.WordFetchContentProvider" />
+        </application>
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />

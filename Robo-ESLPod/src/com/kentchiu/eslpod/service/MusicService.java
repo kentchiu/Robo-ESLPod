@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.kentchiu.eslpod.service;
 
 import java.io.IOException;
@@ -18,9 +15,6 @@ import android.os.IBinder;
 import com.kentchiu.eslpod.R;
 import com.kentchiu.eslpod.view.PlayerActivity;
 
-/**
- * @author Sapan
- */
 public class MusicService extends Service implements MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnBufferingUpdateListener {
 
 	public class LocalBinder extends Binder {
@@ -107,7 +101,6 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 		try {
 			mMediaPlayer.setDataSource(mUrl);
 		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IllegalStateException e) {
 			// TODO Workaround for bug: http://code.google.com/p/android/issues/detail?id=957
@@ -115,12 +108,10 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 			try {
 				mMediaPlayer.setDataSource(mUrl);
 			} catch (IOException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -132,7 +123,6 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 			try {
 				mMediaPlayer.setDataSource(mUrl);
 			} catch (IOException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 			mMediaPlayer.prepareAsync();
@@ -178,7 +168,6 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 
 	@Override
 	public boolean onError(MediaPlayer mp, int what, int extra) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 

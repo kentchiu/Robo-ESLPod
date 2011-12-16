@@ -16,8 +16,8 @@ import com.kentchiu.eslpod.provider.Dictionary;
 
 public class DictionaryDictionaryCommand extends AbstractDictionaryCommand {
 
-	protected DictionaryDictionaryCommand(Context context, String query) {
-		super(context, query);
+	protected DictionaryDictionaryCommand(Context context, String word) {
+		super(context, word);
 	}
 
 	private String applyTemplate(String input) {
@@ -39,7 +39,7 @@ public class DictionaryDictionaryCommand extends AbstractDictionaryCommand {
 		if (m.find()) {
 			return m.group();
 		} else {
-			Ln.e("Not match for query : %s", getQueryUrl());
+			Ln.e("Not match for word : %s", getQueryUrl());
 			return input;
 		}
 	}
@@ -50,13 +50,13 @@ public class DictionaryDictionaryCommand extends AbstractDictionaryCommand {
 	}
 
 	@Override
-	protected int getDictionaryId() {
+	public int getDictionaryId() {
 		return Dictionary.DICTIONARY_DICTIONARY_DICTIONARY;
 	}
 
 	@Override
 	protected String getQueryUrl() {
-		return " http://m.dictionary.com/?submit-result-SEARCHD=Search&q=" + query;
+		return " http://m.dictionary.com/?submit-result-SEARCHD=Search&q=" + word;
 	}
 
 	@Override

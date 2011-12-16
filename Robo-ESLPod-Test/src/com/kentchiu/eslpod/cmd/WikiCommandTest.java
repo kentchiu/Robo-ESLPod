@@ -10,6 +10,12 @@ import com.kentchiu.eslpod.provider.Dictionary;
 public class WikiCommandTest extends AndroidTestCase {
 	private WiktionaryCommand	command;
 
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+		command = new WiktionaryCommand(null, "test");
+	}
+
 	public void testGetContent() throws Exception {
 		assertThat(command.getContent(), containsString("test"));
 	}
@@ -20,12 +26,6 @@ public class WikiCommandTest extends AndroidTestCase {
 
 	public void testQueryUri() throws Exception {
 		assertThat(command.getQueryUrl(), is("http://en.wiktionary.org/w/api.php?action=query&prop=revisions&rvprop=content&format=json&rvexpandtemplates=true&alllinks=true&titles=" + "test"));
-	}
-
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-		command = new WiktionaryCommand(null, "test");
 	}
 
 }

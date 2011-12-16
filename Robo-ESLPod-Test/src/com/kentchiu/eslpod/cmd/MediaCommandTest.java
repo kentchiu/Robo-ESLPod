@@ -10,18 +10,18 @@ import android.test.AndroidTestCase;
 
 public class MediaCommandTest extends AndroidTestCase {
 
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+	}
+
 	public void testDownload() throws Exception {
 		URL resource = getClass().getResource("/ESLPod700.mp3");
 		File dir = getContext().getCacheDir();
 		File file = new File(dir, "ESLPod700.mp3");
-		MediaCommand command = new MediaCommand(resource, file);
+		MediaDownloadCommand command = new MediaDownloadCommand(resource, file);
 		command.run();
 		assertThat(file.exists(), is(true));
-	}
-
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
 	}
 
 }

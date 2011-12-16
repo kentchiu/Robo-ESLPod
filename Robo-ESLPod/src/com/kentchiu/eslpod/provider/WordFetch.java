@@ -5,10 +5,10 @@ import android.provider.BaseColumns;
 
 public class WordFetch {
 	public static final class WordFetchColumns implements BaseColumns {
-		public static final Uri		PODCAST_URI				= Uri.parse("content://" + Podcast.AUTHORITY + "/wordFetch");
+		public static final Uri		WORD_FETCH_URI			= Uri.parse("content://" + WordFetch.AUTHORITY + "/wordFetch");
 		public static final String	CONTENT_TYPE_PODCASTS	= "vnd.android.cursor.dir/vnd.eslpod.wordFetch";
 		public static final String	CONTENT_TYPE_PODCAST	= "vnd.android.cursor.item/vnd.eslpod.wordFetch";
-		public static final int		STATUS_DOWNLOADABLE		= 0;	// not yet download
+		public static final int		STATUS_DOWNLOADABLE		= 0;															// not yet download
 		public static final int		STATUS_DOWNLOADED		= 1;
 		public static final int		STATUS_DOWNLOADING		= 2;
 		public static final int		STATUS_DOWNLOAD_FAIL	= 3;
@@ -24,7 +24,7 @@ public class WordFetch {
 		 * <P>Type: INTEGER</P>
 		 * {@link #STATUS_DOWNLOADABLE} or {@link #STATUS_DOWNLOADING} or {@link #STATUS_DOWNLOADED}
 		 */
-		public static final String	STATUS			= "status";
+		public static final String	STATUS					= "status";
 		/**
 		 * <P>Type: INTEGER</P>
 		 */

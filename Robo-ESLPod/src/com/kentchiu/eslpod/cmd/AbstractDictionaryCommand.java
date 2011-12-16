@@ -24,58 +24,63 @@ public abstract class AbstractDictionaryCommand implements Runnable {
 
 	// http://i.word.com/
 
-	public static AbstractDictionaryCommand newDictionaryCommand(Context context, String query, int dictionaryId) {
+	public static AbstractDictionaryCommand newDictionaryCommand(Context context, String word, int dictionaryId) {
 		switch (dictionaryId) {
 		case Dictionary.DICTIONARY_DREYE_DICTIONARY:
-			return new DreyeDictionaryCommand(context, query);
+			return new DreyeDictionaryCommand(context, word);
 		case Dictionary.DICTIONARY_DICTIONARY_DICTIONARY:
-			return new DictionaryDictionaryCommand(context, query);
+			return new DictionaryDictionaryCommand(context, word);
 		case Dictionary.DICTIONARY_WIKITIONARY:
-			return new WiktionaryCommand(context, query);
+			return new WiktionaryCommand(context, word);
 		default:
 			throw new IllegalArgumentException("Unkonw dictionary id : " + dictionaryId);
 		}
 	}
 
 	public static List<AbstractDictionaryCommand> newDictionaryCommands(Context context, String w) {
-		Cursor c2 = context.getContentResolver().query(DictionaryColumns.DICTIONARY_URI, null, DictionaryColumns.WORD + "=?", new String[] { w }, null);
+		Cursor c = context.getContentResolver().query(DictionaryColumns.DICTIONARY_URI, null, DictionaryColumns.WORD + "=?", new String[] { w }, null);
 		Set<Integer> dictIds = Sets.newHashSet();
-		while (c2.moveToNext()) {
-			dictIds.add(c2.getInt(c2.getColumnIndex(DictionaryColumns.DICTIONARY_ID)));
+		while (c.moveToNext()) {
+			dictIds.add(c.getInt(c.getColumnIndex(DictionaryColumns.DICTIONARY_ID)));
 		}
 		HashSet<Integer> allDictIds = Sets.newHashSet();
 		allDictIds.add(Dictionary.DICTIONARY_DREYE_DICTIONARY);
 		allDictIds.add(Dictionary.DICTIONARY_DICTIONARY_DICTIONARY);
 		allDictIds.add(Dictionary.DICTIONARY_WIKITIONARY);
 		Iterables.removeAll(allDictIds, dictIds);
-		String query = StringUtils.trim(w);
-		Ln.v("There are %d dictionary need to be update for word [%s]", allDictIds.size(), query);
+		String word = StringUtils.trim(w);
+		Ln.v("There are %d dictionary need to be update for word [%s]", allDictIds.size(), word);
 		List<AbstractDictionaryCommand> cmds = Lists.newArrayList();
 		for (Integer each : allDictIds) {
-			AbstractDictionaryCommand cmd = newDictionaryCommand(context, query, each);
+			AbstractDictionaryCommand cmd = newDictionaryCommand(context, word, each);
 			cmds.add(cmd);
 		}
 		return cmds;
 	}
 
-	public static String toHtml(Context context, String query, String content, int dictId) {
-		return newDictionaryCommand(context, query, dictId).render(content);
+	public static String toHtml(Context context, String word, String content, int dictId) {
+		return newDictionaryCommand(context, word, dictId).render(content);
 	}
 
 	protected Context	context;
-	protected String	query;
 
-	protected AbstractDictionaryCommand(Context context, String query) {
+	protected String	word;
+
+	protected AbstractDictionaryCommand(Context context, String word) {
 		super();
 		this.context = context;
-		this.query = query;
+		this.word = word;
 	}
 
 	protected abstract String getContent();
 
-	protected abstract int getDictionaryId();
+	public abstract int getDictionaryId();
 
 	protected abstract String getQueryUrl();
+
+	public String getWord() {
+		return word;
+	}
 
 	protected String readAsOneLine(String urlStr, int retried) {
 		int retry = 3;
@@ -108,8 +113,8 @@ public abstract class AbstractDictionaryCommand implements Runnable {
 		String url = getQueryUrl();
 		String content;
 		try {
-			Ln.v("Start fetch  word [%s] from dictionary ", query);
-			if (StringUtils.isBlank(query)) {
+			Ln.v("Start fetch  word [%s] from dictionary ", word);
+			if (StringUtils.isBlank(word)) {
 				content = "";
 			} else {
 				content = getContent();
@@ -119,15 +124,15 @@ public abstract class AbstractDictionaryCommand implements Runnable {
 			if (StringUtils.isNotBlank(content)) {
 				ContentValues cv = new ContentValues();
 				cv.put(DictionaryColumns.DICTIONARY_ID, getDictionaryId());
-				cv.put(DictionaryColumns.WORD, query);
+				cv.put(DictionaryColumns.WORD, word);
 				cv.put(DictionaryColumns.CONTENT, content);
 				context.getContentResolver().insert(DictionaryColumns.DICTIONARY_URI, cv);
-				Ln.v("Save word [%s] to dictionary %d", query, getDictionaryId());
+				Ln.v("Save word [%s] to dictionary %d", word, getDictionaryId());
 			} else {
 				Ln.w("fetch word [%d] fail form dictionary  %d, url:%s", getDictionaryId(), url);
 			}
 		} catch (Exception e) {
-			Ln.w("fetch word [" + query + "] fail form dictionary " + getDictionaryId() + ", url:" + url, e);
+			Ln.w("fetch word [" + word + "] fail form dictionary " + getDictionaryId() + ", url:" + url, e);
 		}
 	}
 }

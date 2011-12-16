@@ -25,7 +25,7 @@ import android.provider.BaseColumns;
 
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.kentchiu.eslpod.cmd.MediaCommand;
+import com.kentchiu.eslpod.cmd.MediaDownloadCommand;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
 public class MediaDownloadService extends Service {
@@ -42,9 +42,9 @@ public class MediaDownloadService extends Service {
 			URL from = new URL(url);
 			String name = StringUtils.substringAfterLast(from.getFile(), "/");
 			File to = new File(getDownloadFolder(), name);
-			MediaCommand cmd = new MediaCommand(from, to, downloadHandler);
+			MediaDownloadCommand cmd = new MediaDownloadCommand(from, to, downloadHandler);
 			// executorService.execute(cmd) will not execute command immediately, we need send download start message as soon as possible when download() invoked.
-			cmd.sendMessage(MediaCommand.DOWNLOAD_START, 0, 0);
+			cmd.sendMessage(MediaDownloadCommand.DOWNLOAD_START, 0, 0);
 			executorService.execute(cmd);
 			Ln.d("add download task, there are %d in queue", commandQueue.size());
 		}

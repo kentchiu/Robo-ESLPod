@@ -17,6 +17,16 @@ public class PodcastContentProviderTest extends ProviderTestCase2<PodcastContent
 		super(PodcastContentProvider.class, PodcastContentProvider.class.getName());
 	}
 
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+		PodcastContentProvider provider = getProvider();
+		db = provider.getDatabaseHelper().getWritableDatabase();
+		db.execSQL("insert into podcast(TITLE) values('title1')");
+		db.execSQL("insert into podcast(TITLE) values('title2')");
+		db.execSQL("insert into podcast(TITLE) values('title3')");
+	}
+
 	public void testGetType() throws Exception {
 		assertEquals("vnd.android.cursor.dir/vnd.eslpod.podcast", getProvider().getType(PODCAST_URI));
 	}
@@ -44,16 +54,6 @@ public class PodcastContentProviderTest extends ProviderTestCase2<PodcastContent
 		c.moveToFirst();
 		assertEquals("test", c.getString(0));
 		assertEquals("bar", c.getString(1));
-	}
-
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-		PodcastContentProvider provider = getProvider();
-		db = provider.getDatabaseHelper().getWritableDatabase();
-		db.execSQL("insert into podcast(TITLE) values('title1')");
-		db.execSQL("insert into podcast(TITLE) values('title2')");
-		db.execSQL("insert into podcast(TITLE) values('title3')");
 	}
 
 }

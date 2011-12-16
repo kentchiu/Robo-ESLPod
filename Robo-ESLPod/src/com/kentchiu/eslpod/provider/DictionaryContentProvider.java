@@ -4,14 +4,10 @@ import roboguice.util.Ln;
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.provider.BaseColumns;
 
 import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
@@ -93,36 +89,4 @@ public class DictionaryContentProvider extends ContentProvider {
 		return 0;
 	}
 
-}
-
-class MyHandler extends Handler {
-
-	private Context	context;
-
-	public MyHandler(Context context) {
-		super();
-		this.context = context;
-	}
-
-	public Context getContext() {
-		return context;
-	}
-
-	@Override
-	public void handleMessage(Message msg) {
-		Bundle b = msg.getData();
-		int dictId = b.getInt(DictionaryColumns.DICTIONARY_ID);
-		String query = b.getString(DictionaryColumns.WORD);
-		String content = b.getString(DictionaryColumns.CONTENT);
-		Ln.v("save word definition of [%s] to dictionary %d", query, dictId);
-		ContentValues cv = new ContentValues();
-		cv.put(DictionaryColumns.DICTIONARY_ID, dictId);
-		cv.put(DictionaryColumns.WORD, query);
-		cv.put(DictionaryColumns.CONTENT, content);
-		getContext().getContentResolver().insert(DictionaryColumns.DICTIONARY_URI, cv);
-	}
-
-	public void setContext(Context context) {
-		this.context = context;
-	}
 }

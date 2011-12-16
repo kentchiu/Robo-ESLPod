@@ -15,7 +15,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 
-public class MediaCommand implements Runnable {
+public class MediaDownloadCommand implements Runnable {
 
 	public static final int	DOWNLOAD_COMPLETED	= 1;
 	public static final int	DOWNLOAD_PROCESSING	= 2;
@@ -24,11 +24,11 @@ public class MediaCommand implements Runnable {
 	private File			to;
 	private Handler			handler;
 
-	public MediaCommand(URL from, File to) {
+	public MediaDownloadCommand(URL from, File to) {
 		this(from, to, null);
 	}
 
-	public MediaCommand(URL from, File to, Handler handler) {
+	public MediaDownloadCommand(URL from, File to, Handler handler) {
 		super();
 		this.from = from;
 		this.to = to;

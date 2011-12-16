@@ -13,6 +13,11 @@ import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
 public class PodcastCommandTest extends AndroidTestCase {
 
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+	}
+
 	public void testCreateContentValue() throws Exception {
 		InputStream inputStream = getClass().getResourceAsStream("/podcast.xml");
 		PodcastCommand h = new PodcastCommand(mContext, inputStream, null);
@@ -39,10 +44,5 @@ public class PodcastCommandTest extends AndroidTestCase {
 		InputStream inputStream = getClass().getResourceAsStream("/podcast.xml");
 		PodcastCommand h = new PodcastCommand(mContext, inputStream, null);
 		h.run();
-	}
-
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
 	}
 }

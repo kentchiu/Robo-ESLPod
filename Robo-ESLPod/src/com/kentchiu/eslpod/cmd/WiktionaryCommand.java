@@ -113,8 +113,8 @@ public class WiktionaryCommand extends AbstractDictionaryCommand {
 
 	}
 
-	protected WiktionaryCommand(Context context, String query) {
-		super(context, query);
+	protected WiktionaryCommand(Context context, String word) {
+		super(context, word);
 	}
 
 	private synchronized String extractContent(String content) {
@@ -141,13 +141,13 @@ public class WiktionaryCommand extends AbstractDictionaryCommand {
 	}
 
 	@Override
-	protected int getDictionaryId() {
+	public int getDictionaryId() {
 		return Dictionary.DICTIONARY_WIKITIONARY;
 	}
 
 	@Override
 	protected String getQueryUrl() {
-		return "http://en.wiktionary.org/w/api.php?action=query&prop=revisions&rvprop=content&format=json&rvexpandtemplates=true&alllinks=true&titles=" + query;
+		return "http://en.wiktionary.org/w/api.php?action=query&prop=revisions&rvprop=content&format=json&rvexpandtemplates=true&alllinks=true&titles=" + word;
 	}
 
 	@Override

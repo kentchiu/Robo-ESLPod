@@ -47,7 +47,7 @@ public class PodcastContentProvider extends ContentProvider {
 		SQLiteDatabase db = databaseHelper.getWritableDatabase();
 		switch (uriMatcher.match(uri)) {
 		case PODCASTS:
-			long rowId = db.insert(DatabaseHelper.PODCAST_TABLE_NAME, null, values);
+			long rowId = db.insertWithOnConflict(DatabaseHelper.PODCAST_TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_IGNORE);
 			Ln.v("insert pocast data as id %d", rowId);
 			Uri result = ContentUris.withAppendedId(PodcastColumns.PODCAST_URI, rowId);
 			getContext().getContentResolver().notifyChange(result, null);

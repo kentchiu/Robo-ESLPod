@@ -10,6 +10,15 @@ public class DatabaseHelperTest extends TestCase {
 	private SQLiteDatabase	db;
 
 	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+		db = SQLiteDatabase.create(null);
+		helper = new DatabaseHelper(null, "podcast.db", null);
+		helper.onOpen(db);
+		helper.onCreate(db);
+	}
+
+	@Override
 	public void tearDown() {
 		helper.close();
 	}
@@ -23,12 +32,6 @@ public class DatabaseHelperTest extends TestCase {
 		Cursor c = db.query(DatabaseHelper.PODCAST_TABLE_NAME, null, null, null, null, null, null);
 		assertEquals(14, c.getColumnCount());
 	}
-	
-	public void testWordFetchTable() throws Exception {
-		Cursor c = db.query(DatabaseHelper.WORD_FETCH_TABLE_NAME, null, null, null, null, null, null);
-		assertEquals(5, c.getColumnCount());
-	}
-
 
 	public void testPodcastUniquIndex() throws Exception {
 		try {
@@ -39,7 +42,12 @@ public class DatabaseHelperTest extends TestCase {
 			// do nothing
 		}
 	}
-	
+
+	public void testWordFetchTable() throws Exception {
+		Cursor c = db.query(DatabaseHelper.WORD_FETCH_TABLE_NAME, null, null, null, null, null, null);
+		assertEquals(5, c.getColumnCount());
+	}
+
 	public void testWordFetchUniquIndex() throws Exception {
 		try {
 			db.execSQL("insert into word_fetch(dictionary_id, word, podcast_id) values(1, 'test',1)");
@@ -48,15 +56,6 @@ public class DatabaseHelperTest extends TestCase {
 		} catch (SQLiteConstraintException e) {
 			// do nothing
 		}
-	}
-
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-		db = SQLiteDatabase.create(null);
-		helper = new DatabaseHelper(null, "podcast.db", null);
-		helper.onOpen(db);
-		helper.onCreate(db);
 	}
 
 }

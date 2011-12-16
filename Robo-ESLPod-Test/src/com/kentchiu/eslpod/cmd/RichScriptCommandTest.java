@@ -41,6 +41,17 @@ public class RichScriptCommandTest extends AndroidTestCase {
 		assertFalse(RichScriptCommand.isBaseWord(baseWords, "Foo"));
 	}
 
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+		URL resource = getClass().getResource("/script.html");
+		DatabaseHelper databaseHelper = new DatabaseHelper(mContext, DatabaseHelper.DATABASE_NAME, null);
+		database = databaseHelper.getWritableDatabase();
+		database.execSQL("delete from podcast");
+		database.execSQL("insert into podcast(_id, link) values(1, '" + resource.toString() + "')");
+		command = new RichScriptCommand(mContext, ContentUris.withAppendedId(PodcastColumns.PODCAST_URI, 1), resource.toString());
+	}
+
 	public void test7_722_issues() throws Exception {
 		//String script722 = "http://www.eslpod.com/website/show_podcast.php?issue_id=10848015";
 		String script722 = "http://feedproxy.google.com/~r/EnglishAsASecondLanguagePodcast/~3/8YqeQY3nJ2U/show_podcast.php";
@@ -99,17 +110,6 @@ public class RichScriptCommandTest extends AndroidTestCase {
 		Iterable<String> foobarbaz = RichScriptCommand.splitPhaseVerbToWords("foo bar baz");
 		assertThat(Iterables.size(foobarbaz), is(3));
 		assertThat(foobarbaz, hasItems("foo", "bar", "baz"));
-	}
-
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-		URL resource = getClass().getResource("/script.html");
-		DatabaseHelper databaseHelper = new DatabaseHelper(mContext, DatabaseHelper.DATABASE_NAME, null);
-		database = databaseHelper.getWritableDatabase();
-		database.execSQL("delete from podcast");
-		database.execSQL("insert into podcast(_id, link) values(1, '" + resource.toString() + "')");
-		command = new RichScriptCommand(mContext, ContentUris.withAppendedId(PodcastColumns.PODCAST_URI, 1), resource.toString());
 	}
 
 }
