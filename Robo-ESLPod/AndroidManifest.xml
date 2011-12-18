@@ -3,7 +3,13 @@
     package="com.kentchiu.eslpod"
     android:versionCode="1"
     android:versionName="1.0" >
-
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-sdk
+        android:minSdkVersion="7"
+        android:targetSdkVersion="10" />
     <application
         android:debuggable="true"
         android:icon="@drawable/ic_launcher"
@@ -88,13 +94,7 @@
 
     </application>
 
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
 
-    <uses-sdk
-        android:minSdkVersion="7"
-        android:targetSdkVersion="10" />
+
 
 </manifest>

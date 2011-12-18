@@ -13,8 +13,6 @@ import com.kentchiu.eslpod.service.AutoFetchService;
 import com.kentchiu.eslpod.service.WordFetchService;
 
 public class MyReceiver extends BroadcastReceiver {
-	
-	
 
 	@Override
 	public void onReceive(Context context, Intent intent) {

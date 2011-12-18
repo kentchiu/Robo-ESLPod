@@ -35,14 +35,14 @@ import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 public class PodcastCommand implements Runnable {
 
 	public static final String	RSS_URI					= "http://feeds.feedburner.com/EnglishAsASecondLanguagePodcast";
-	public static final String ACTION_NEW_PODCAST = "com.kentchiu.eslpod.NEW";
+	public static final String	ACTION_NEW_PODCAST		= "com.kentchiu.eslpod.NEW";
 	public static final int		START_GET_ITEM_NODES	= 1;
 	public static final int		ADD_ITEM_NODE			= 2;
 	public static final int		END_GET_ITEM_NODES		= 3;
 	public static final int		START_IMPORT			= 4;
 	public static final int		IMPORTING				= 5;
 	public static final int		END_IMPORT				= 6;
-	private static final int	MAX_COUNT	= 10;
+	private static final int	MAX_COUNT				= 10;
 
 	private InputStream			inputStream;
 	private Context				context;
@@ -95,7 +95,7 @@ public class PodcastCommand implements Runnable {
 		XPath xpath = XPathFactory.newInstance().newXPath();
 		InputSource inputSource = new InputSource(inputStream);
 		NodeList nodes = (NodeList) xpath.evaluate("//channel/item/title", inputSource, XPathConstants.NODESET); // FIXME this will take a long time
-		 int length = nodes.getLength();
+		int length = nodes.getLength();
 		Ln.d("Count of nodes is %d", length);
 		List<Node> results = Lists.newArrayList();
 		for (int i = 0; i < length; i++) {
@@ -114,6 +114,7 @@ public class PodcastCommand implements Runnable {
 		sendMessage(END_GET_ITEM_NODES, results.size(), length);
 		return results;
 	}
+
 	@Override
 	public void run() {
 		try {

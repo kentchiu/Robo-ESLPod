@@ -1,4 +1,5 @@
 package com.kentchiu.eslpod;
+
 import roboguice.util.Ln;
 import android.content.BroadcastReceiver;
 import android.content.ContentUris;
@@ -14,7 +15,7 @@ public class MyBroadcastReceiver extends BroadcastReceiver {
 		Uri data = intent.getData();
 		if (data != null) {
 			long id = ContentUris.parseId(data);
-			Ln.e("id: %d", id );
+			Ln.e("id: %d", id);
 		}
 	}
 

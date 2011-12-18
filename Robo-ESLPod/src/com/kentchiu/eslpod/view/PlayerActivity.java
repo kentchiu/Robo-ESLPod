@@ -75,7 +75,7 @@ public class PlayerActivity extends RoboListActivity implements MediaPlayerContr
 		if (c.moveToFirst()) {
 			String script = c.getString(c.getColumnIndex(PodcastColumns.SCRIPT));
 			String richScript = c.getString(c.getColumnIndex(PodcastColumns.RICH_SCRIPT));
-			String link = c.getString(c.getColumnIndex(PodcastColumns.LINK));
+			c.getString(c.getColumnIndex(PodcastColumns.LINK));
 			if (StringUtils.isBlank(richScript)) {
 				//new Thread(new RichScriptCommand(this, uri, link)).start();
 			}
