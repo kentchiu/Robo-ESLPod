@@ -26,26 +26,6 @@ public class RichScriptFetchService extends Service {
 		executorService.execute(richScriptCmd);
 	}
 
-	//	private void insertWordStatus(int podcastId, String richScript) {
-	//		Iterable<String> words = RichScriptCommand.extractWord(richScript);
-	//		Iterable<String> headword = RichScriptCommand.headword(this, words);
-	//		for (String phase : headword) {
-	//			Iterable<String> ws = Splitter.onPattern("(\n| )").trimResults().split(phase);
-	//			for (String w : ws) {
-	//				String word = StringUtils.trim(w.replaceAll(",", ""));
-	//				for (Integer dictId : AbstractDictionaryCommand.allDictionaryId()) {
-	//					ContentValues cv = new ContentValues();
-	//					cv.put(WordFetchColumns.PODCAST_ID, podcastId);
-	//					cv.put(WordFetchColumns.WORD, word);
-	//					cv.put(WordFetchColumns.DICTIONARY_ID, dictId);
-	//					cv.put(WordFetchColumns.STATUS, WordFetchColumns.STATUS_DOWNLOADABLE);
-	//					Ln.v("Mark word [%s] at dictionary %d as downloading", word, dictId);
-	//					getContentResolver().insert(WordFetchColumns.WORD_FETCH_URI, cv);
-	//				}
-	//			}
-	//		}
-	//	}
-
 	@Override
 	public IBinder onBind(Intent intent) {
 		return null;
