@@ -111,7 +111,6 @@ public class HomeActivity extends RoboListActivity {
 			e.printStackTrace();
 		}
 		startService(new Intent(this, RichScriptFetchService.class));
-		startService(new Intent(this, AutoFetchService.class));
 
 	}
 

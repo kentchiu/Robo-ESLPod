@@ -58,9 +58,6 @@ public class RichScriptFetchService extends Service {
 					fetchScript(c, link);
 				}
 			}
-			//else {
-			//insertWordStatus(startId, richScript);
-			//}
 		}
 		return super.onStartCommand(intent, flags, startId);
 	}
