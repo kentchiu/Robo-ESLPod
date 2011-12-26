@@ -1,5 +1,9 @@
 package com.kentchiu.eslpod.view;
 
+import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -7,8 +11,10 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 
 import roboguice.activity.RoboListActivity;
+import roboguice.inject.InjectView;
 import roboguice.util.Ln;
 import android.app.SearchManager;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -20,7 +26,9 @@ import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.ImageButton;
 import android.widget.MediaController;
 import android.widget.MediaController.MediaPlayerControl;
 import android.widget.SeekBar;
@@ -30,28 +38,62 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.kentchiu.eslpod.R;
+import com.kentchiu.eslpod.cmd.AbstractDictionaryCommand;
+import com.kentchiu.eslpod.cmd.MediaDownloadCommand;
 import com.kentchiu.eslpod.cmd.RichScriptCommand;
 import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 import com.kentchiu.eslpod.service.MusicService;
-import com.kentchiu.eslpod.service.WordFetchService;
 import com.kentchiu.eslpod.view.adapter.ScriptListAdapter;
 
-/**
- * @author Sapan
- */
 public class PlayerActivity extends RoboListActivity implements MediaPlayerControl, SeekBar.OnSeekBarChangeListener {
 
+	public class PlaybackOnClickListener implements OnClickListener {
+
+		@Override
+		public void onClick(View v) {
+			switch (v.getId()) {
+			case R.id.playButton:
+			case R.id.pauseButton:
+				if (MusicService.getInstance() == null || !MusicService.getInstance().isPlaying()) {
+					start();
+					playButton.setVisibility(View.GONE);
+					pauseButton.setVisibility(View.VISIBLE);
+				} else {
+					pauseButton.setVisibility(View.GONE);
+					playButton.setVisibility(View.VISIBLE);
+					pause();
+				}
+				break;
+			default:
+				break;
+			}
+
+		}
+
+	}
+
 	MediaController		ctrl;
-	//ImageView			songPicture;
 	String				mUrl;
 	Resources			res;
-	//TextView			songNameView;
+	@InjectView(R.id.musicCurrentLoc)
 	TextView			musicCurLoc;
+	@InjectView(R.id.musicDuration)
 	TextView			musicDuration;
+	@InjectView(R.id.musicSeekBar)
 	SeekBar				musicSeekBar;
-	//ToggleButton		playPauseButton;
+	@InjectView(R.id.playButton)
+	ImageButton			playButton;
+	@InjectView(R.id.pauseButton)
+	ImageButton			pauseButton;
+	@InjectView(R.id.reverseButton)
+	ImageButton			reverseButton;
+	@InjectView(R.id.forwardButton)
+	ImageButton			forwardButton;
+	@InjectView(R.id.downloadButton)
+	ImageButton			downloadButton;
 
 	protected boolean	musicThreadFinished	= false;
 
@@ -91,10 +133,37 @@ public class PlayerActivity extends RoboListActivity implements MediaPlayerContr
 		}
 	}
 
-	private void fetchWord(final Uri uri) {
-		Intent intent = new Intent(this, WordFetchService.class);
-		intent.setData(uri);
-		startService(intent);
+	private void fetchWord() {
+		//Intent intent = new Intent(this, WordFetchService.class);
+		//intent.setData(uri);
+		//startService(intent);
+		ThreadFactoryBuilder builder = new ThreadFactoryBuilder();
+		builder.setPriority(Thread.NORM_PRIORITY);
+		ThreadPoolExecutor executorService = new ThreadPoolExecutor(3, // core size
+				6, // max size
+				10 * 60, // idle timeout
+				TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(200), builder.build(), new AbortPolicy()); // queue with a size
+
+		Cursor c = getContentResolver().query(getIntent().getData(), null, null, null, null);
+		if (c.moveToFirst()) {
+			String richScript = c.getString(c.getColumnIndex(PodcastColumns.RICH_SCRIPT));
+			Iterable<String> words = RichScriptCommand.preareForDownload(PlayerActivity.this, richScript);
+			for (String word : words) {
+				List<AbstractDictionaryCommand> cmds = AbstractDictionaryCommand.newDictionaryCommands(PlayerActivity.this, word);
+				for (AbstractDictionaryCommand cmd : cmds) {
+					executorService.execute(cmd);
+				}
+			}
+			executorService.execute(new Runnable() {
+
+				@Override
+				public void run() {
+					ContentValues cv = new ContentValues();
+					cv.put(PodcastColumns.DICTIONARY_DOWNLOAD_STATUS, PodcastColumns.STATUS_DOWNLOADED);
+					getContentResolver().update(getIntent().getData(), cv, null, null);
+				}
+			});
+		}
 	}
 
 	@SuppressWarnings("boxing")
@@ -169,20 +238,27 @@ public class PlayerActivity extends RoboListActivity implements MediaPlayerContr
 				setListAdapter(createAdapter(uri));
 			}
 		});
-		final Cursor c = getContentResolver().query(uri, null, null, null, null);
-		c.moveToFirst();
+		final Cursor c = getContentResolver().query(getIntent().getData(), null, null, null, null);
+		//mUrl = "http://www.vorbis.com/music/Epoq-Lepidoptera.ogg";
+		if (!c.moveToFirst()) {
+			throw new IllegalStateException();
+		}
+		String localUrl = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URL_LOCAL));
+		final String url = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URL));
 		String title = c.getString(c.getColumnIndex(PodcastColumns.TITLE));
+
 		setTitle(title);
 		setListAdapter(createAdapter(uri));
-		fetchWord(uri);
+
+		fetchWord();
 
 		ctrl = new MediaController(this);
 		ctrl.setMediaPlayer(this);
 		//ctrl.setAnchorView(songPicture);
 
-		musicCurLoc = (TextView) findViewById(R.id.musicCurrentLoc);
-		musicDuration = (TextView) findViewById(R.id.musicDuration);
-		musicSeekBar = (SeekBar) findViewById(R.id.musicSeekBar);
+		//		musicCurLoc = (TextView) findViewById(R.id.musicCurrentLoc);
+		//		musicDuration = (TextView) findViewById(R.id.musicDuration);
+		//		musicSeekBar = (SeekBar) findViewById(R.id.musicSeekBar);
 		//playPauseButton = (ToggleButton) findViewById(R.id.playPauseButton);
 		musicSeekBar.setOnSeekBarChangeListener(this);
 
@@ -197,6 +273,18 @@ public class PlayerActivity extends RoboListActivity implements MediaPlayerContr
 		//				}
 		//			}
 		//		});
+		PlaybackOnClickListener playbackOnClickListener = new PlaybackOnClickListener();
+		playButton.setOnClickListener(playbackOnClickListener);
+		pauseButton.setOnClickListener(playbackOnClickListener);
+		downloadButton.setEnabled(StringUtils.isBlank(localUrl));
+		downloadButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				final MediaDownloadCommand cmd = new MediaDownloadCommand(getIntent().getData(), PlayerActivity.this, null);
+				new Thread(cmd).start();
+				downloadButton.setEnabled(false);
+			}
+		});
 
 		new Thread(new Runnable() {
 			@Override
@@ -240,9 +328,6 @@ public class PlayerActivity extends RoboListActivity implements MediaPlayerContr
 			}
 		}).start();
 
-		//mUrl = "http://www.vorbis.com/music/Epoq-Lepidoptera.ogg";
-		String localUrl = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URL_LOCAL));
-		String url = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URL));
 		if (StringUtils.isNotBlank(localUrl)) {
 			mUrl = localUrl;
 		} else {
@@ -254,7 +339,7 @@ public class PlayerActivity extends RoboListActivity implements MediaPlayerContr
 
 			@Override
 			public void run() {
-				startService(new Intent("PLAY"));
+				//startService(new Intent("PLAY"));
 			}
 		}).start();
 
@@ -308,6 +393,8 @@ public class PlayerActivity extends RoboListActivity implements MediaPlayerContr
 	public void start() {
 		if (MusicService.getInstance() != null) {
 			MusicService.getInstance().startMusic();
+		} else {
+			startService(new Intent("PLAY"));
 		}
 	}
 }

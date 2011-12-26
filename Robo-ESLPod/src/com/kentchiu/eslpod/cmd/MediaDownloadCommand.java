@@ -7,32 +7,52 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
+import org.apache.commons.lang3.StringUtils;
+
 import roboguice.util.Ln;
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+
+import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
 public class MediaDownloadCommand implements Runnable {
 
 	public static final int	DOWNLOAD_COMPLETED	= 1;
 	public static final int	DOWNLOAD_PROCESSING	= 2;
 	public static final int	DOWNLOAD_START		= 3;
+
 	private URL				from;
+
 	private File			to;
 	private Handler			handler;
+	private Context			context;
+	private Uri				uri;
 
-	public MediaDownloadCommand(URL from, File to) {
-		this(from, to, null);
-	}
-
-	public MediaDownloadCommand(URL from, File to, Handler handler) {
-		super();
-		this.from = from;
-		this.to = to;
+	public MediaDownloadCommand(Uri uri, Context context, Handler handler) {
+		this.context = context;
+		this.uri = uri;
 		this.handler = handler;
+		final Cursor c = context.getContentResolver().query(uri, null, null, null, null);
+		if (c.moveToFirst()) {
+			final String url = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URL));
+			try {
+				from = new URL(url);
+				String name = StringUtils.substringAfterLast(from.getFile(), "/");
+				to = new File(getDownloadFolder(context), name);
+			} catch (MalformedURLException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	private Bundle createBundle() {
@@ -46,17 +66,16 @@ public class MediaDownloadCommand implements Runnable {
 
 	private void downloadFile() throws IOException, FileNotFoundException {
 		Ln.i("Downloading file from " + from.toString());
-		sendMessage(DOWNLOAD_START, 0, 0);
+		markAsStart();
 
 		URLConnection conn = from.openConnection();
-
 		conn.connect();
 		// this will be useful so that you can show a typical 0-100% progress bar
 		long lenghtOfFile = conn.getContentLength();
 		Ln.v("file length : " + lenghtOfFile);
 		if (to.exists() && to.length() == lenghtOfFile) {
 			Ln.i(to.getAbsolutePath() + " exists");
-			sendMessage(DOWNLOAD_COMPLETED, (int) lenghtOfFile, (int) lenghtOfFile);
+			markAsEnd(lenghtOfFile, lenghtOfFile);
 		} else {
 			// downloading the file
 			InputStream input = new BufferedInputStream(from.openStream());
@@ -77,8 +96,17 @@ public class MediaDownloadCommand implements Runnable {
 			output.flush();
 			output.close();
 			input.close();
-			sendMessage(DOWNLOAD_COMPLETED, cache, (int) lenghtOfFile);
-			Ln.i("Downloaded file " + to.toString() + " completed");
+			markAsEnd(lenghtOfFile, cache);
+		}
+	}
+
+	private File getDownloadFolder(Context context) {
+		String state = Environment.getExternalStorageState();
+		if (StringUtils.equals(Environment.MEDIA_MOUNTED, state)) {
+			return context.getExternalCacheDir();
+		} else {
+			Ln.w("SD card no found, save to internl storage");
+			return context.getCacheDir();
 		}
 	}
 
@@ -92,6 +120,22 @@ public class MediaDownloadCommand implements Runnable {
 
 	public File getTo() {
 		return to;
+	}
+
+	private void markAsEnd(long lenghtOfFile, long cache) {
+		ContentValues cv = new ContentValues();
+		cv.put(PodcastColumns.MEDIA_DOWNLOAD_STATUS, PodcastColumns.STATUS_DOWNLOADED);
+		cv.put(PodcastColumns.MEDIA_URL_LOCAL, to.getAbsolutePath());
+		context.getContentResolver().update(uri, cv, null, null);
+		sendMessage(DOWNLOAD_COMPLETED, cache, (int) lenghtOfFile);
+		Ln.i("Downloaded file " + to.toString() + " completed");
+	}
+
+	private void markAsStart() {
+		sendMessage(DOWNLOAD_START, 0, 0);
+		ContentValues cv = new ContentValues();
+		cv.put(PodcastColumns.MEDIA_DOWNLOAD_STATUS, PodcastColumns.STATUS_DOWNLOADING);
+		context.getContentResolver().update(uri, cv, null, null);
 	}
 
 	@Override

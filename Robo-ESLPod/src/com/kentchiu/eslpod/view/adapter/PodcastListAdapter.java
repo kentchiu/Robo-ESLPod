@@ -1,7 +1,12 @@
 package com.kentchiu.eslpod.view.adapter;
 
+import org.apache.commons.lang3.StringUtils;
+
+import roboguice.util.RoboAsyncTask;
+import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
 import android.provider.BaseColumns;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +15,7 @@ import android.widget.ResourceCursorAdapter;
 import android.widget.TextView;
 
 import com.kentchiu.eslpod.R;
+import com.kentchiu.eslpod.cmd.RichScriptCommand;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
 public class PodcastListAdapter extends ResourceCursorAdapter {
@@ -19,19 +25,30 @@ public class PodcastListAdapter extends ResourceCursorAdapter {
 	}
 
 	@Override
-	public void bindView(View view, Context context, Cursor cursor) {
-		cursor.getInt(cursor.getColumnIndex(BaseColumns._ID));
+	public void bindView(final View view, final Context context, final Cursor cursor) {
+		final int id = cursor.getInt(cursor.getColumnIndex(BaseColumns._ID));
 		String title = cursor.getString(cursor.getColumnIndex(PodcastColumns.TITLE));
-		int status = cursor.getInt(cursor.getColumnIndex(PodcastColumns.MEDIA_DOWNLOAD_STATUS));
 		TextView tv = (TextView) view.findViewById(R.id.podcastTitle);
 		tv.setText(title);
-		cursor.getString(cursor.getColumnIndex(PodcastColumns.RICH_SCRIPT));
-		ImageView mp3StatusImage = (ImageView) view.findViewById(R.id.mp3StatusImage);
-		cursor.getString(cursor.getColumnIndex(PodcastColumns.RICH_SCRIPT));
+		String richScript = cursor.getString(cursor.getColumnIndex(PodcastColumns.RICH_SCRIPT));
+		if (StringUtils.isBlank(richScript)) {
+			new RoboAsyncTask<Void>(context) {
 
-		updateStatus(status, mp3StatusImage);
+				@Override
+				public Void call() throws Exception {
+					Uri uri = ContentUris.withAppendedId(PodcastColumns.PODCAST_URI, id);
+					RichScriptCommand command = new RichScriptCommand(context, uri);
+					command.run();
+					return null;
+				}
+			}.execute();
+		}
 
-		view.findViewById(R.id.dictionaryStatusImage);
+		int mediaStatus = cursor.getInt(cursor.getColumnIndex(PodcastColumns.MEDIA_DOWNLOAD_STATUS));
+		updateStatus(mediaStatus, (ImageView) view.findViewById(R.id.mp3StatusImage));
+		int dictStatus = cursor.getInt(cursor.getColumnIndex(PodcastColumns.DICTIONARY_DOWNLOAD_STATUS));
+		updateStatus(dictStatus, (ImageView) view.findViewById(R.id.dictionaryStatusImage));
+		//view.findViewById(R.id.dictionaryStatusImage);
 	}
 
 	@Override
@@ -39,13 +56,16 @@ public class PodcastListAdapter extends ResourceCursorAdapter {
 		return super.newView(context, cursor, parent);
 	}
 
-	private void updateStatus(int status, ImageView statusImage) {
+	private void updateStatus(int status2, ImageView imgView) {
+		int status = status2;
+		ImageView statusImage = imgView;
+
 		switch (status) {
 		case PodcastColumns.STATUS_DOWNLOADED:
 			statusImage.setImageResource(R.drawable.presence_online);
 			break;
 		case PodcastColumns.STATUS_DOWNLOADING:
-			statusImage.setImageResource(R.drawable.presence_busy);
+			statusImage.setImageResource(R.drawable.presence_away);
 			break;
 		case PodcastColumns.STATUS_DOWNLOADABLE:
 			statusImage.setImageResource(R.drawable.presence_invisible);

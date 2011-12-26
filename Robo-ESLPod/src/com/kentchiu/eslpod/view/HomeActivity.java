@@ -20,8 +20,6 @@ import android.widget.ListView;
 import com.kentchiu.eslpod.R;
 import com.kentchiu.eslpod.cmd.PodcastCommand;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
-import com.kentchiu.eslpod.service.AutoFetchService;
-import com.kentchiu.eslpod.service.RichScriptFetchService;
 import com.kentchiu.eslpod.view.adapter.PodcastListAdapter;
 
 public class HomeActivity extends RoboListActivity {
@@ -44,8 +42,9 @@ public class HomeActivity extends RoboListActivity {
 		}
 	}
 
-	private static final int	DIALOG_IMPORT		= 0;
-	public static int			LOCAL_PODCAST_COUNT	= 15;
+	public final static String	ACTION_SCRIPT_FETCHED	= "com.kentchiu.eslpod.intent.action.SCRIPT_FETCH_COMPLETED";
+	private static final int	DIALOG_IMPORT			= 0;
+	public static int			LOCAL_PODCAST_COUNT		= 15;
 
 	public void fetchNewEpisode(Handler handler) throws MalformedURLException, IOException {
 		InputStream is = new URL(PodcastCommand.RSS_URI).openStream();
@@ -85,19 +84,6 @@ public class HomeActivity extends RoboListActivity {
 	@Override
 	protected void onStart() {
 		super.onStart();
-		//		Intent intent2 = new Intent();
-		//	    intent2.setAction(PodcastCommand.ACTION_NEW_PODCAST);
-		//	    intent2.setData(ContentUris.withAppendedId(PodcastColumns.PODCAST_URI, 1));
-		//	    sendBroadcast(intent2);
-
-		//		Intent intent3 = new Intent();
-		//	    intent3.setAction(PodcastCommand.ACTION_NEW_PODCAST);
-		//		sendBroadcast(intent3);
-
-		//		if (cursor.getCount() < LOCAL_PODCAST_COUNT) {
-		//			// parse exists podcast xml to db
-		//			importLocal(new ImportHandler());
-		//		} else {
 		try {
 			Cursor cursor = managedQuery(PodcastColumns.PODCAST_URI, null, null, null, null);
 			if (cursor.getCount() == 0) {
@@ -110,7 +96,7 @@ public class HomeActivity extends RoboListActivity {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		startService(new Intent(this, RichScriptFetchService.class));
+		//startService(new Intent(this, RichScriptFetchService.class));
 
 	}
 

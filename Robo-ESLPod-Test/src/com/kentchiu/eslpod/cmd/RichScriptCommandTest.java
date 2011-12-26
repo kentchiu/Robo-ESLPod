@@ -50,15 +50,15 @@ public class RichScriptCommandTest extends AndroidTestCase {
 		database = databaseHelper.getWritableDatabase();
 		database.execSQL("delete from podcast");
 		database.execSQL("insert into podcast(_id, link) values(1, '" + resource.toString() + "')");
-		command = new RichScriptCommand(mContext, ContentUris.withAppendedId(PodcastColumns.PODCAST_URI, 1), resource.toString());
+		command = new RichScriptCommand(mContext, ContentUris.withAppendedId(PodcastColumns.PODCAST_URI, 1));
 	}
 
 	public void test7_722_issues() throws Exception {
 		//String script722 = "http://www.eslpod.com/website/show_podcast.php?issue_id=10848015";
 		String script722 = "http://feedproxy.google.com/~r/EnglishAsASecondLanguagePodcast/~3/8YqeQY3nJ2U/show_podcast.php";
 
-		RichScriptCommand cmd = new RichScriptCommand(mContext, null, script722);
-		String script = cmd.fetchScript("722");
+		RichScriptCommand cmd = new RichScriptCommand(mContext, null);
+		String script = cmd.fetchScript(script722,"722");
 		System.out.println(script);
 		//System.out.println(script);
 		// line 2 <u>Madwomen</u>  -> not mark as headword
@@ -101,13 +101,13 @@ public class RichScriptCommandTest extends AndroidTestCase {
 
 	public void testFetchScriptWithNonAsciiCode() throws Exception {
 		String scriptUrl = "http://www.eslpod.com/website/show_podcast.php?issue_id=10718756";
-		RichScriptCommand cmd = new RichScriptCommand(mContext, null, scriptUrl);
-		String script = cmd.fetchScript("test");
+		RichScriptCommand cmd = new RichScriptCommand(mContext, null);
+		String script = cmd.fetchScript(scriptUrl, "test");
 		assertThat(script, containsString("<b>There’s no way around it</b>"));
 	}
 
 	public void testGetScript() throws Exception {
-		String script = command.fetchScript("test");
+		String script = command.fetchScript(null,"test");
 		assertThat(script, startsWith("Cherise:  <b>Rise and shine</b>!"));
 	}
 

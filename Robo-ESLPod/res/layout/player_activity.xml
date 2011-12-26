@@ -73,21 +73,21 @@
                     style="@android:style/MediaButton.Rew"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:onClick="onClick" />
+                   />
 
                 <ImageButton
                     android:id="@+id/playButton"
                     style="@android:style/MediaButton.Play"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:onClick="onClick" />
+                  />
 
                 <ImageButton
                     android:id="@+id/pauseButton"
                     style="@android:style/MediaButton.Pause"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:onClick="onClick"
+                 
                     android:visibility="gone" />
 
                 <ImageButton
@@ -95,7 +95,14 @@
                     style="@android:style/MediaButton.Ffwd"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:onClick="onClick" />
+                  />
+
+                <ImageButton
+                    android:id="@+id/downloadButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@android:drawable/stat_sys_download" />
+
             </LinearLayout>
 
         </RelativeLayout>

@@ -22,7 +22,7 @@ public class RichScriptFetchService extends Service {
 	private ExecutorService	executorService;
 
 	private void fetchScript(Cursor c, String link) {
-		RichScriptCommand richScriptCmd = new RichScriptCommand(this, ContentUris.withAppendedId(PodcastColumns.PODCAST_URI, c.getInt(c.getColumnIndex(BaseColumns._ID))), link);
+		RichScriptCommand richScriptCmd = new RichScriptCommand(this, ContentUris.withAppendedId(PodcastColumns.PODCAST_URI, c.getInt(c.getColumnIndex(BaseColumns._ID))));
 		executorService.execute(richScriptCmd);
 	}
 

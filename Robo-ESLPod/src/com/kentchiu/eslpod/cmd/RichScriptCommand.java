@@ -131,13 +131,14 @@ public class RichScriptCommand implements Runnable {
 
 	private Context	context;
 	private Uri		podcastUri;
-	private String	scriptUrl;
 
-	public RichScriptCommand(Context context, Uri podcastUri, String scriptUrl) {
+	//private String	scriptUrl;
+
+	public RichScriptCommand(Context context, Uri podcastUri) {
 		super();
 		setContext(context);
 		this.podcastUri = podcastUri;
-		this.scriptUrl = scriptUrl;
+		//this.scriptUrl = scriptUrl;
 	}
 
 	public synchronized List<String> extractScript(List<String> lines) {
@@ -157,9 +158,8 @@ public class RichScriptCommand implements Runnable {
 		}
 	}
 
-	protected String fetchScript(String title) {
+	protected String fetchScript(String scriptUrl, String title) {
 		List<String> lines = ImmutableList.of();
-
 		try {
 			Ln.d("Start fetching script of %s form : ", scriptUrl);
 			// ===== The ascii 146 issues ====
@@ -204,7 +204,7 @@ public class RichScriptCommand implements Runnable {
 
 	@Override
 	public void run() {
-		Cursor c = context.getContentResolver().query(PodcastColumns.PODCAST_URI, null, PodcastColumns.LINK + "=?", new String[] { scriptUrl.toString() }, null);
+		Cursor c = context.getContentResolver().query(podcastUri, null, null, null, null);
 		String richScript = "";
 		String link = "";
 		String title = "";
@@ -215,13 +215,13 @@ public class RichScriptCommand implements Runnable {
 		}
 		if (StringUtils.isBlank(richScript)) {
 			if (StringUtils.isNotBlank(link)) {
-				String script = fetchScript(title);
+				String script = fetchScript(link, title);
 				if (StringUtils.isNotBlank(script)) {
 					updateDatabase(script);
 				}
 			}
 		} else {
-			Ln.v("rich script for url [%s] already exists", scriptUrl);
+			Ln.v("rich script for url [%s] already exists", link);
 		}
 	}
 

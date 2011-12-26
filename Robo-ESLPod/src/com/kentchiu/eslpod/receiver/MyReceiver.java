@@ -17,8 +17,7 @@ public class MyReceiver extends BroadcastReceiver {
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		if (StringUtils.equals(Intent.ACTION_BOOT_COMPLETED, intent.getAction())) {
-			Intent service = new Intent(context, AutoFetchService.class);
-			context.startService(service);
+			new Intent(context, AutoFetchService.class);
 		}
 		if (StringUtils.equals(PodcastCommand.ACTION_NEW_PODCAST, intent.getAction())) {
 			Intent service = new Intent(context, WordFetchService.class);
@@ -27,7 +26,7 @@ public class MyReceiver extends BroadcastReceiver {
 				long id = ContentUris.parseId(data);
 				if (id > 0) {
 					service.setData(data);
-					context.startService(service);
+					//context.startService(service);
 				}
 			}
 		}
