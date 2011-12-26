@@ -148,12 +148,24 @@ public class PlayerActivity extends RoboListActivity implements MediaPlayerContr
 		if (c.moveToFirst()) {
 			String richScript = c.getString(c.getColumnIndex(PodcastColumns.RICH_SCRIPT));
 			Iterable<String> words = RichScriptCommand.preareForDownload(PlayerActivity.this, richScript);
+			// mark as starting
+			executorService.execute(new Runnable() {
+
+				@Override
+				public void run() {
+					ContentValues cv = new ContentValues();
+					cv.put(PodcastColumns.DICTIONARY_DOWNLOAD_STATUS, PodcastColumns.STATUS_DOWNLOADING);
+					getContentResolver().update(getIntent().getData(), cv, null, null);
+				}
+			});
+
 			for (String word : words) {
 				List<AbstractDictionaryCommand> cmds = AbstractDictionaryCommand.newDictionaryCommands(PlayerActivity.this, word);
 				for (AbstractDictionaryCommand cmd : cmds) {
 					executorService.execute(cmd);
 				}
 			}
+			// mark as end
 			executorService.execute(new Runnable() {
 
 				@Override

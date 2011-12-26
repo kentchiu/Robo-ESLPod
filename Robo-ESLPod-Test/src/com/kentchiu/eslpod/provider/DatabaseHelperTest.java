@@ -43,11 +43,6 @@ public class DatabaseHelperTest extends TestCase {
 		}
 	}
 
-	public void testWordFetchTable() throws Exception {
-		Cursor c = db.query(DatabaseHelper.WORD_FETCH_TABLE_NAME, null, null, null, null, null, null);
-		assertEquals(5, c.getColumnCount());
-	}
-
 	public void testWordFetchUniquIndex() throws Exception {
 		try {
 			db.execSQL("insert into word_fetch(dictionary_id, word, podcast_id) values(1, 'test',1)");

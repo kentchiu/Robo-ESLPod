@@ -62,16 +62,7 @@
             </intent-filter>
         </activity>
 
-		<receiver android:name=".MyBroadcastReceiver" >
-		    <intent-filter>
-		        <action android:name="com.kentchiu.eslpod.NEW"/>
-		    </intent-filter>
-		    <intent-filter>
-		        <action android:name="com.android.my.action"></action>
-		    </intent-filter>
-		</receiver>  
         <service android:name=".service.RichScriptFetchService" />
-        <service android:name=".service.WordFetchService" />
         <service android:name=".service.MediaService" />
         <service android:name=".service.MediaDownloadService" />
         <service android:name=".service.AutoFetchService" />
@@ -87,11 +78,6 @@
         <provider
             android:authorities="com.kentchiu.eslpod.provider.Podcast"
             android:name=".provider.PodcastContentProvider" />
-        <provider
-            android:authorities="com.kentchiu.eslpod.provider.WordFetch"
-            android:name=".provider.WordFetchContentProvider" />
-
-
     </application>
 
 

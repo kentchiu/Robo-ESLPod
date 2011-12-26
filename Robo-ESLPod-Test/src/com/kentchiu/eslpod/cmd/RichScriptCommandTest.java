@@ -58,7 +58,7 @@ public class RichScriptCommandTest extends AndroidTestCase {
 		String script722 = "http://feedproxy.google.com/~r/EnglishAsASecondLanguagePodcast/~3/8YqeQY3nJ2U/show_podcast.php";
 
 		RichScriptCommand cmd = new RichScriptCommand(mContext, null);
-		String script = cmd.fetchScript(script722,"722");
+		String script = cmd.fetchScript(script722, "722");
 		System.out.println(script);
 		//System.out.println(script);
 		// line 2 <u>Madwomen</u>  -> not mark as headword
@@ -90,14 +90,13 @@ public class RichScriptCommandTest extends AndroidTestCase {
 		assertThat(words, hasItems("foo", "baz"));
 		assertThat(words, not(hasItem("bar")));
 	}
-	
+
 	public void testExtractWords_whole_script() throws Exception {
 		InputStream is = getClass().getResourceAsStream("/script.html");
 		List<String> script = command.extractScript(IOUtils.readLines(is));
 		Iterable<String> words = RichScriptCommand.extractWord(Joiner.on('\n').join(script));
 		assertThat(Iterables.size(words), is(17));
 	}
-	
 
 	public void testFetchScriptWithNonAsciiCode() throws Exception {
 		String scriptUrl = "http://www.eslpod.com/website/show_podcast.php?issue_id=10718756";
@@ -107,7 +106,7 @@ public class RichScriptCommandTest extends AndroidTestCase {
 	}
 
 	public void testGetScript() throws Exception {
-		String script = command.fetchScript(null,"test");
+		String script = command.fetchScript(null, "test");
 		assertThat(script, startsWith("Cherise:  <b>Rise and shine</b>!"));
 	}
 

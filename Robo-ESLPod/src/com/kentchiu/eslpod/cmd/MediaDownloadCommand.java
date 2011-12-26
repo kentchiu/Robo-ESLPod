@@ -32,7 +32,6 @@ public class MediaDownloadCommand implements Runnable {
 	public static final int	DOWNLOAD_START		= 3;
 
 	private URL				from;
-
 	private File			to;
 	private Handler			handler;
 	private Context			context;
@@ -159,16 +158,8 @@ public class MediaDownloadCommand implements Runnable {
 		}
 	}
 
-	public void setFrom(URL from) {
-		this.from = from;
-	}
-
 	public void setHandler(Handler handler) {
 		this.handler = handler;
-	}
-
-	public void setTo(File to) {
-		this.to = to;
 	}
 
 }

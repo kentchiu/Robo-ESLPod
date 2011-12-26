@@ -131,14 +131,13 @@ public class RichScriptCommand implements Runnable {
 
 	private Context	context;
 	private Uri		podcastUri;
-
-	//private String	scriptUrl;
+	private String	scriptUrl;
+	private String	title;
 
 	public RichScriptCommand(Context context, Uri podcastUri) {
 		super();
 		setContext(context);
 		this.podcastUri = podcastUri;
-		//this.scriptUrl = scriptUrl;
 	}
 
 	public synchronized List<String> extractScript(List<String> lines) {
@@ -206,22 +205,20 @@ public class RichScriptCommand implements Runnable {
 	public void run() {
 		Cursor c = context.getContentResolver().query(podcastUri, null, null, null, null);
 		String richScript = "";
-		String link = "";
-		String title = "";
 		if (c.moveToFirst()) {
 			richScript = c.getString(c.getColumnIndex(PodcastColumns.RICH_SCRIPT));
-			link = c.getString(c.getColumnIndex(PodcastColumns.LINK));
+			scriptUrl = c.getString(c.getColumnIndex(PodcastColumns.LINK));
 			title = c.getString(c.getColumnIndex(PodcastColumns.TITLE));
 		}
 		if (StringUtils.isBlank(richScript)) {
-			if (StringUtils.isNotBlank(link)) {
-				String script = fetchScript(link, title);
+			if (StringUtils.isNotBlank(scriptUrl)) {
+				String script = fetchScript(scriptUrl, title);
 				if (StringUtils.isNotBlank(script)) {
 					updateDatabase(script);
 				}
 			}
 		} else {
-			Ln.v("rich script for url [%s] already exists", link);
+			Ln.v("rich script for url [%s] already exists", scriptUrl);
 		}
 	}
 
