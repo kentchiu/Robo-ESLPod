@@ -14,16 +14,38 @@ import android.database.Cursor;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
-public class BatchWordCommand implements Runnable {
-
-	private Context	context;
-
-	private Intent	intent;
+public class BatchWordCommand extends AbstractCommand {
 
 	public BatchWordCommand(Context context, Intent intent) {
-		super();
-		this.context = context;
-		this.intent = intent;
+		super(context, intent);
+	}
+
+	@Override
+	protected boolean execute() {
+		ThreadFactoryBuilder builder = new ThreadFactoryBuilder();
+		builder.setPriority(Thread.NORM_PRIORITY);
+		ThreadPoolExecutor executorService = new ThreadPoolExecutor(3, // core size
+				6, // max size
+				10 * 60, // idle timeout
+				TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(200), builder.build(), new AbortPolicy()); // queue with a size
+
+		Cursor c = context.getContentResolver().query(intent.getData(), null, null, null, null);
+		if (c.moveToFirst()) {
+			String richScript = c.getString(c.getColumnIndex(PodcastColumns.RICH_SCRIPT));
+			Iterable<String> words = RichScriptCommand.preareForDownload(context, richScript);
+			markAsBatchStarting(executorService);
+
+			for (String word : words) {
+				List<AbstractDictionaryCommand> cmds = AbstractDictionaryCommand.newDictionaryCommands(context, word);
+				for (AbstractDictionaryCommand cmd : cmds) {
+					executorService.execute(cmd);
+				}
+			}
+			markAsBatchEnding(executorService);
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	private void markAsBatchEnding(ThreadPoolExecutor executorService) {
@@ -48,30 +70,5 @@ public class BatchWordCommand implements Runnable {
 				context.getContentResolver().update(intent.getData(), cv, null, null);
 			}
 		});
-	}
-
-	@Override
-	public void run() {
-		ThreadFactoryBuilder builder = new ThreadFactoryBuilder();
-		builder.setPriority(Thread.NORM_PRIORITY);
-		ThreadPoolExecutor executorService = new ThreadPoolExecutor(3, // core size
-				6, // max size
-				10 * 60, // idle timeout
-				TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(200), builder.build(), new AbortPolicy()); // queue with a size
-
-		Cursor c = context.getContentResolver().query(intent.getData(), null, null, null, null);
-		if (c.moveToFirst()) {
-			String richScript = c.getString(c.getColumnIndex(PodcastColumns.RICH_SCRIPT));
-			Iterable<String> words = RichScriptCommand.preareForDownload(context, richScript);
-			markAsBatchStarting(executorService);
-
-			for (String word : words) {
-				List<AbstractDictionaryCommand> cmds = AbstractDictionaryCommand.newDictionaryCommands(context, word);
-				for (AbstractDictionaryCommand cmd : cmds) {
-					executorService.execute(cmd);
-				}
-			}
-			markAsBatchEnding(executorService);
-		}
 	}
 }

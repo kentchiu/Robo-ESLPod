@@ -12,6 +12,7 @@ import org.json.JSONObject;
 
 import roboguice.util.Ln;
 import android.content.Context;
+import android.content.Intent;
 import android.text.TextUtils;
 
 import com.kentchiu.eslpod.provider.Dictionary;
@@ -113,8 +114,8 @@ public class WiktionaryCommand extends AbstractDictionaryCommand {
 
 	}
 
-	protected WiktionaryCommand(Context context, String word) {
-		super(context, word);
+	public WiktionaryCommand(Context context, Intent intent) {
+		super(context, intent);
 	}
 
 	private synchronized String extractContent(String content) {
@@ -147,7 +148,7 @@ public class WiktionaryCommand extends AbstractDictionaryCommand {
 
 	@Override
 	protected String getQueryUrl() {
-		return "http://en.wiktionary.org/w/api.php?action=query&prop=revisions&rvprop=content&format=json&rvexpandtemplates=true&alllinks=true&titles=" + word;
+		return "http://en.wiktionary.org/w/api.php?action=query&prop=revisions&rvprop=content&format=json&rvexpandtemplates=true&alllinks=true&titles=" + intent.getExtras().getString(WORD);
 	}
 
 	@Override

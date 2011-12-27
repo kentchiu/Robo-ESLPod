@@ -10,14 +10,15 @@ import org.apache.commons.io.IOUtils;
 
 import roboguice.util.Ln;
 import android.content.Context;
+import android.content.Intent;
 
 import com.google.common.base.Joiner;
 import com.kentchiu.eslpod.provider.Dictionary;
 
 public class DictionaryDictionaryCommand extends AbstractDictionaryCommand {
 
-	protected DictionaryDictionaryCommand(Context context, String word) {
-		super(context, word);
+	public DictionaryDictionaryCommand(Context context, Intent intent) {
+		super(context, intent);
 	}
 
 	private String applyTemplate(String input) {
@@ -56,7 +57,7 @@ public class DictionaryDictionaryCommand extends AbstractDictionaryCommand {
 
 	@Override
 	protected String getQueryUrl() {
-		return " http://m.dictionary.com/?submit-result-SEARCHD=Search&q=" + word;
+		return " http://m.dictionary.com/?submit-result-SEARCHD=Search&q=" + intent.getExtras().getString(WORD);
 	}
 
 	@Override

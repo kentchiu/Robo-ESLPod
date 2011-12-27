@@ -10,15 +10,15 @@ import org.apache.commons.io.IOUtils;
 
 import roboguice.util.Ln;
 import android.content.Context;
+import android.content.Intent;
 
 import com.google.common.base.Joiner;
 import com.kentchiu.eslpod.provider.Dictionary;
 
 public class DreyeDictionaryCommand extends AbstractDictionaryCommand {
 
-	protected DreyeDictionaryCommand(Context context, String word) {
-		super(context, word);
-		this.word = word;
+	public DreyeDictionaryCommand(Context context, Intent intent) {
+		super(context, intent);
 	}
 
 	private String applyTemplate(String input) {
@@ -60,7 +60,7 @@ public class DreyeDictionaryCommand extends AbstractDictionaryCommand {
 
 	@Override
 	protected String getQueryUrl() {
-		return "http://www.dreye.com/mws/dict.php?ua=dc_cont&hidden_codepage=01&w=" + word;
+		return "http://www.dreye.com/mws/dict.php?ua=dc_cont&hidden_codepage=01&w=" + intent.getExtras().getString(WORD);
 	}
 
 	@Override

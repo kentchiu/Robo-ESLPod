@@ -11,7 +11,9 @@ import org.apache.http.client.methods.HttpGet;
 import roboguice.util.Ln;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
+import android.os.Handler;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -19,22 +21,24 @@ import com.google.common.collect.Sets;
 import com.kentchiu.eslpod.provider.Dictionary;
 import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
 
-public abstract class AbstractDictionaryCommand implements Runnable {
+public abstract class AbstractDictionaryCommand extends AbstractCommand {
 
-	// http://i.word.com/
+	public static final String	WORD	= "word";
 
 	public static Integer[] allDictionaryId() {
 		return new Integer[] { Dictionary.DICTIONARY_DREYE_DICTIONARY, Dictionary.DICTIONARY_DICTIONARY_DICTIONARY, Dictionary.DICTIONARY_WIKITIONARY };
 	}
 
 	public static AbstractDictionaryCommand newDictionaryCommand(Context context, String word, int dictionaryId) {
+		Intent intent = new Intent();
+		intent.putExtra(WORD, word);
 		switch (dictionaryId) {
 		case Dictionary.DICTIONARY_DREYE_DICTIONARY:
-			return new DreyeDictionaryCommand(context, word);
+			return new DreyeDictionaryCommand(context, intent);
 		case Dictionary.DICTIONARY_DICTIONARY_DICTIONARY:
-			return new DictionaryDictionaryCommand(context, word);
+			return new DictionaryDictionaryCommand(context, intent);
 		case Dictionary.DICTIONARY_WIKITIONARY:
-			return new WiktionaryCommand(context, word);
+			return new WiktionaryCommand(context, intent);
 		default:
 			throw new IllegalArgumentException("Unkonw dictionary id : " + dictionaryId);
 		}
@@ -62,14 +66,44 @@ public abstract class AbstractDictionaryCommand implements Runnable {
 		return newDictionaryCommand(context, word, dictId).render(content);
 	}
 
-	protected Context	context;
+	public AbstractDictionaryCommand(Context context, Intent intent) {
+		this(context, intent, null);
+	}
 
-	protected String	word;
+	public AbstractDictionaryCommand(Context context, Intent intent, Handler handler) {
+		super(context, intent, handler);
+	}
 
-	protected AbstractDictionaryCommand(Context context, String word) {
-		super();
-		this.context = context;
-		this.word = word;
+	@Override
+	protected boolean execute() {
+		String url = getQueryUrl();
+		String word = intent.getExtras().getString(WORD);
+		String content;
+		try {
+			Ln.v("Start fetch  word [%s] from dictionary ", word);
+			if (StringUtils.isBlank(word)) {
+				content = "";
+			} else {
+				content = getContent();
+			}
+
+			Ln.v("End fetch  word [%s] from dictionary ", word);
+			if (StringUtils.isNotBlank(content)) {
+				ContentValues cv = new ContentValues();
+				cv.put(DictionaryColumns.DICTIONARY_ID, getDictionaryId());
+				cv.put(DictionaryColumns.WORD, word);
+				cv.put(DictionaryColumns.CONTENT, content);
+				context.getContentResolver().insert(DictionaryColumns.DICTIONARY_URI, cv);
+				Ln.v("Save word [%s] to dictionary %d", word, getDictionaryId());
+			} else {
+				Ln.w("fetch word [%s] fail form dictionary %d, url:%s", word, getDictionaryId(), url);
+			}
+			return true;
+		} catch (Exception e) {
+			Ln.w("fetch word [%s] fail form dictionary %d, url:$s", word, getDictionaryId(), url);
+			Ln.w(e);
+			return false;
+		}
 	}
 
 	protected abstract String getContent();
@@ -77,10 +111,6 @@ public abstract class AbstractDictionaryCommand implements Runnable {
 	public abstract int getDictionaryId();
 
 	protected abstract String getQueryUrl();
-
-	public String getWord() {
-		return word;
-	}
 
 	protected String readAsOneLine(String urlStr, int retried) {
 		int retry = 3;
@@ -106,34 +136,5 @@ public abstract class AbstractDictionaryCommand implements Runnable {
 
 	protected String render(String input) {
 		return input;
-	}
-
-	@Override
-	public void run() {
-		String url = getQueryUrl();
-		String content;
-		try {
-			Ln.v("Start fetch  word [%s] from dictionary ", word);
-			if (StringUtils.isBlank(word)) {
-				content = "";
-			} else {
-				content = getContent();
-			}
-
-			Ln.v("End fetch  word [%s] from dictionary ", word);
-			if (StringUtils.isNotBlank(content)) {
-				ContentValues cv = new ContentValues();
-				cv.put(DictionaryColumns.DICTIONARY_ID, getDictionaryId());
-				cv.put(DictionaryColumns.WORD, word);
-				cv.put(DictionaryColumns.CONTENT, content);
-				context.getContentResolver().insert(DictionaryColumns.DICTIONARY_URI, cv);
-				Ln.v("Save word [%s] to dictionary %d", word, getDictionaryId());
-			} else {
-				Ln.w("fetch word [%s] fail form dictionary %d, url:%s", word, getDictionaryId(), url);
-			}
-		} catch (Exception e) {
-			Ln.w("fetch word [%s] fail form dictionary %d, url:$s", word, getDictionaryId(), url);
-			Ln.w(e);
-		}
 	}
 }

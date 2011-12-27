@@ -3,6 +3,7 @@ package com.kentchiu.eslpod.cmd;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
+import android.content.Intent;
 import android.test.AndroidTestCase;
 
 import com.kentchiu.eslpod.provider.Dictionary;
@@ -13,7 +14,9 @@ public class WikiCommandTest extends AndroidTestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		command = new WiktionaryCommand(null, "test");
+Intent intent = new Intent();
+intent.putExtra("word", "test");
+		command = new WiktionaryCommand(null, intent);
 	}
 
 	public void testGetContent() throws Exception {
