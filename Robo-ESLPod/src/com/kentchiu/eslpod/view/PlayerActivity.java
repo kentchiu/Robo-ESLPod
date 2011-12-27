@@ -1,9 +1,5 @@
 package com.kentchiu.eslpod.view;
 
-import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -14,7 +10,6 @@ import roboguice.activity.RoboListActivity;
 import roboguice.inject.InjectView;
 import roboguice.util.Ln;
 import android.app.SearchManager;
-import android.content.ContentValues;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -38,9 +33,8 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.kentchiu.eslpod.R;
-import com.kentchiu.eslpod.cmd.AbstractDictionaryCommand;
+import com.kentchiu.eslpod.cmd.BatchWordCommand;
 import com.kentchiu.eslpod.cmd.MediaDownloadCommand;
 import com.kentchiu.eslpod.cmd.RichScriptCommand;
 import com.kentchiu.eslpod.provider.Dictionary.DictionaryColumns;
@@ -133,51 +127,6 @@ public class PlayerActivity extends RoboListActivity implements MediaPlayerContr
 		}
 	}
 
-	private void fetchWord() {
-		//Intent intent = new Intent(this, WordFetchService.class);
-		//intent.setData(uri);
-		//startService(intent);
-		ThreadFactoryBuilder builder = new ThreadFactoryBuilder();
-		builder.setPriority(Thread.NORM_PRIORITY);
-		ThreadPoolExecutor executorService = new ThreadPoolExecutor(3, // core size
-				6, // max size
-				10 * 60, // idle timeout
-				TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(200), builder.build(), new AbortPolicy()); // queue with a size
-
-		Cursor c = getContentResolver().query(getIntent().getData(), null, null, null, null);
-		if (c.moveToFirst()) {
-			String richScript = c.getString(c.getColumnIndex(PodcastColumns.RICH_SCRIPT));
-			Iterable<String> words = RichScriptCommand.preareForDownload(PlayerActivity.this, richScript);
-			// mark as starting
-			executorService.execute(new Runnable() {
-
-				@Override
-				public void run() {
-					ContentValues cv = new ContentValues();
-					cv.put(PodcastColumns.DICTIONARY_DOWNLOAD_STATUS, PodcastColumns.STATUS_DOWNLOADING);
-					getContentResolver().update(getIntent().getData(), cv, null, null);
-				}
-			});
-
-			for (String word : words) {
-				List<AbstractDictionaryCommand> cmds = AbstractDictionaryCommand.newDictionaryCommands(PlayerActivity.this, word);
-				for (AbstractDictionaryCommand cmd : cmds) {
-					executorService.execute(cmd);
-				}
-			}
-			// mark as end
-			executorService.execute(new Runnable() {
-
-				@Override
-				public void run() {
-					ContentValues cv = new ContentValues();
-					cv.put(PodcastColumns.DICTIONARY_DOWNLOAD_STATUS, PodcastColumns.STATUS_DOWNLOADED);
-					getContentResolver().update(getIntent().getData(), cv, null, null);
-				}
-			});
-		}
-	}
-
 	@SuppressWarnings("boxing")
 	protected String getAsTime(int t) {
 		return String.format("%02d:%02d", TimeUnit.MILLISECONDS.toSeconds(t) / 60, TimeUnit.MILLISECONDS.toSeconds(t) - TimeUnit.MILLISECONDS.toSeconds(t) / 60 * 60);
@@ -262,7 +211,7 @@ public class PlayerActivity extends RoboListActivity implements MediaPlayerContr
 		setTitle(title);
 		setListAdapter(createAdapter(uri));
 
-		fetchWord();
+		new BatchWordCommand(this, getIntent()).run();
 
 		ctrl = new MediaController(this);
 		ctrl.setMediaPlayer(this);

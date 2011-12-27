@@ -3,11 +3,11 @@ package com.kentchiu.eslpod.cmd;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.startsWith;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -106,8 +106,9 @@ public class RichScriptCommandTest extends AndroidTestCase {
 	}
 
 	public void testGetScript() throws Exception {
-		String script = command.fetchScript(null, "test");
-		assertThat(script, startsWith("Cherise:  <b>Rise and shine</b>!"));
+		String scriptUrl = "http://www.eslpod.com/website/show_podcast.php?issue_id=10718756";
+		String script = command.fetchScript(scriptUrl, null);
+		assertThat(script, notNullValue());
 	}
 
 	public void testSplitPhaseVerbToWords() throws Exception {

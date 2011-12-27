@@ -30,23 +30,13 @@ public class DatabaseHelperTest extends TestCase {
 
 	public void testPodcastTable() throws Exception {
 		Cursor c = db.query(DatabaseHelper.PODCAST_TABLE_NAME, null, null, null, null, null, null);
-		assertEquals(14, c.getColumnCount());
+		assertEquals(15, c.getColumnCount());
 	}
 
 	public void testPodcastUniquIndex() throws Exception {
 		try {
 			db.execSQL("insert into dictionary(dictionary_id, word) values(1, 'test')");
 			db.execSQL("insert into dictionary(dictionary_id, word) values(1, 'test')");
-			fail("Shoud throw uniqu constrain exception");
-		} catch (SQLiteConstraintException e) {
-			// do nothing
-		}
-	}
-
-	public void testWordFetchUniquIndex() throws Exception {
-		try {
-			db.execSQL("insert into word_fetch(dictionary_id, word, podcast_id) values(1, 'test',1)");
-			db.execSQL("insert into word_fetch(dictionary_id, word, podcast_id) values(1, 'test',1)");
 			fail("Shoud throw uniqu constrain exception");
 		} catch (SQLiteConstraintException e) {
 			// do nothing

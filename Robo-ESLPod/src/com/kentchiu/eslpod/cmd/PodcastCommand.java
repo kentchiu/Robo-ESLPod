@@ -1,6 +1,9 @@
 package com.kentchiu.eslpod.cmd;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 import java.util.Set;
 
@@ -22,7 +25,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Handler;
-import android.os.Message;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
@@ -32,27 +34,21 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
-public class PodcastCommand implements Runnable {
+public class PodcastCommand extends AbstractCommand {
 
-	public static final String	RSS_URI					= "http://feeds.feedburner.com/EnglishAsASecondLanguagePodcast";
-	public static final String	ACTION_NEW_PODCAST		= "com.kentchiu.eslpod.NEW";
-	public static final int		START_GET_ITEM_NODES	= 1;
-	public static final int		ADD_ITEM_NODE			= 2;
-	public static final int		END_GET_ITEM_NODES		= 3;
-	public static final int		START_IMPORT			= 4;
-	public static final int		IMPORTING				= 5;
-	public static final int		END_IMPORT				= 6;
-	private static final int	MAX_COUNT				= 10;
+	public static final String	RSS_URL		= "http://feeds.feedburner.com/EnglishAsASecondLanguagePodcast";
+
+	public static final int		MAX_COUNT	= 10;
 
 	private InputStream			inputStream;
-	private Context				context;
-	private Handler				handler;
 
-	public PodcastCommand(Context context, InputStream inputStream, Handler handler) {
-		super();
-		this.context = context;
-		this.inputStream = inputStream;
-		this.handler = handler;
+	public PodcastCommand(Context context, Intent intent) throws MalformedURLException, IOException {
+		this(context, intent, null);
+	}
+
+	public PodcastCommand(Context context, Intent intent, Handler handler) throws MalformedURLException, IOException {
+		super(context, intent, handler);
+		inputStream = new URL(PodcastCommand.RSS_URL).openStream();
 	}
 
 	ContentValues convert(Node item) {
@@ -90,8 +86,45 @@ public class PodcastCommand implements Runnable {
 		return result;
 	}
 
+	@Override
+	public boolean execute() {
+		try {
+			Cursor c = context.getContentResolver().query(PodcastColumns.PODCAST_URI, new String[] { PodcastColumns.TITLE }, null, null, null);
+			Set<String> titles = Sets.newHashSet();
+			while (c.moveToNext()) {
+				titles.add(c.getString(c.getColumnIndex(PodcastColumns.TITLE)));
+			}
+			List<Node> nodes = getItemNodes();
+			Ln.d("%d need to be saved", nodes.size());
+			int count = 1;
+			for (Node item : nodes) {
+				ContentValues cv = convert(item);
+				String title = cv.getAsString(PodcastColumns.TITLE);
+				if (StringUtils.isNotBlank(title) && !titles.contains(title)) {
+					try {
+						Uri uri = context.getContentResolver().insert(PodcastColumns.PODCAST_URI, cv);
+						//sendMessage(IMPORTING, count, nodes.size());
+						Intent intent = new Intent("com.kentchiu.eslpod.NEW_PODCAST", uri);
+						context.sendBroadcast(intent);
+						count++;
+					} catch (Exception e) {
+						Ln.w("insert podcast fail %s", title);
+					}
+				}
+			}
+
+			Ln.i(count + " podcast saved");
+		} catch (XPathExpressionException e) {
+			Ln.w("rss parse fail", e);
+			return false;
+		} catch (IllegalStateException e) {
+			Ln.w("get podcast rss fail", e);
+			return false;
+		}
+		return true;
+	}
+
 	public List<Node> getItemNodes() throws XPathExpressionException {
-		sendMessage(START_GET_ITEM_NODES, 0, 0);
 		XPath xpath = XPathFactory.newInstance().newXPath();
 		InputSource inputSource = new InputSource(inputStream);
 		NodeList nodes = (NodeList) xpath.evaluate("//channel/item/title", inputSource, XPathConstants.NODESET); // FIXME this will take a long time
@@ -105,58 +138,12 @@ public class PodcastCommand implements Runnable {
 			if (content.matches(titlePattern)) {
 				Preconditions.checkNotNull(item.getParentNode());
 				results.add(item.getParentNode());
-				sendMessage(ADD_ITEM_NODE, i, length);
 			}
 			if (results.size() >= MAX_COUNT) {
 				break;
 			}
 		}
-		sendMessage(END_GET_ITEM_NODES, results.size(), length);
 		return results;
-	}
-
-	@Override
-	public void run() {
-		try {
-			Cursor c = context.getContentResolver().query(PodcastColumns.PODCAST_URI, new String[] { PodcastColumns.TITLE }, null, null, null);
-			Set<String> titles = Sets.newHashSet();
-			while (c.moveToNext()) {
-				titles.add(c.getString(c.getColumnIndex(PodcastColumns.TITLE)));
-			}
-			List<Node> nodes = getItemNodes();
-			Ln.d("%d need to be saved", nodes.size());
-			int count = 1;
-			sendMessage(START_IMPORT, 0, nodes.size());
-			for (Node item : nodes) {
-				ContentValues cv = convert(item);
-				String title = cv.getAsString(PodcastColumns.TITLE);
-				if (StringUtils.isNotBlank(title) && !titles.contains(title)) {
-					try {
-						Uri uri = context.getContentResolver().insert(PodcastColumns.PODCAST_URI, cv);
-						sendMessage(IMPORTING, count, nodes.size());
-						Intent intent = new Intent("com.kentchiu.eslpod.NEW_PODCAST", uri);
-						context.sendBroadcast(intent);
-						count++;
-					} catch (Exception e) {
-						Ln.w("insert podcast fail %s", title);
-					}
-				}
-			}
-			sendMessage(END_IMPORT, count, nodes.size());
-
-			Ln.i(count + " podcast saved");
-		} catch (XPathExpressionException e) {
-			Ln.w("rss parse fail", e);
-		} catch (IllegalStateException e) {
-			Ln.w("get podcast rss fail", e);
-		}
-	}
-
-	private void sendMessage(int what, int arg1, int arg2) {
-		if (handler != null) {
-			Message m = handler.obtainMessage(what, arg1, arg2);
-			handler.sendMessage(m);
-		}
 	}
 
 }

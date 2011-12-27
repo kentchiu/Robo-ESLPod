@@ -1,9 +1,7 @@
 package com.kentchiu.eslpod.view;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.URL;
 
 import roboguice.activity.RoboListActivity;
 import android.app.Dialog;
@@ -18,6 +16,7 @@ import android.view.View;
 import android.widget.ListView;
 
 import com.kentchiu.eslpod.R;
+import com.kentchiu.eslpod.cmd.AbstractCommand;
 import com.kentchiu.eslpod.cmd.PodcastCommand;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 import com.kentchiu.eslpod.view.adapter.PodcastListAdapter;
@@ -28,10 +27,10 @@ public class HomeActivity extends RoboListActivity {
 		@Override
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
-			case PodcastCommand.START_GET_ITEM_NODES:
+			case AbstractCommand.START:
 				showDialog(DIALOG_IMPORT);
 				break;
-			case PodcastCommand.END_IMPORT:
+			case AbstractCommand.END:
 				dismissDialog(DIALOG_IMPORT);
 				PodcastListAdapter adapter = (PodcastListAdapter) getListAdapter();
 				Cursor newCursor = managedQuery(PodcastColumns.PODCAST_URI, null, null, null, PodcastColumns.TITLE + " DESC");
@@ -47,18 +46,19 @@ public class HomeActivity extends RoboListActivity {
 	public static int			LOCAL_PODCAST_COUNT		= 15;
 
 	public void fetchNewEpisode(Handler handler) throws MalformedURLException, IOException {
-		InputStream is = new URL(PodcastCommand.RSS_URI).openStream();
-		PodcastCommand podcastCommand = new PodcastCommand(HomeActivity.this, is, handler);
+		Intent intent = new Intent();
+		intent.putExtra("RSS_URL", PodcastCommand.RSS_URL);
+		PodcastCommand podcastCommand = new PodcastCommand(HomeActivity.this, intent, handler);
 		Thread t = new Thread(podcastCommand);
 		t.start();
 	}
 
-	public void importLocal(Handler handler) {
-		InputStream is = getResources().openRawResource(R.raw.podcast_680_685);
-		PodcastCommand podcastCommand = new PodcastCommand(HomeActivity.this, is, handler);
-		Thread t = new Thread(podcastCommand);
-		t.start();
-	}
+	//	public void importLocal(Handler handler) {
+	//		InputStream is = getResources().openRawResource(R.raw.podcast_680_685);
+	//		PodcastCommand podcastCommand = new PodcastCommand(HomeActivity.this, is, handler);
+	//		Thread t = new Thread(podcastCommand);
+	//		t.start();
+	//	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
