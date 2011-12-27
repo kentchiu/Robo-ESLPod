@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import roboguice.util.RoboAsyncTask;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.BaseColumns;
@@ -37,7 +38,9 @@ public class PodcastListAdapter extends ResourceCursorAdapter {
 				@Override
 				public Void call() throws Exception {
 					Uri uri = ContentUris.withAppendedId(PodcastColumns.PODCAST_URI, id);
-					RichScriptCommand command = new RichScriptCommand(context, uri);
+					Intent intent = new Intent();
+					intent.setData(uri);
+					RichScriptCommand command = new RichScriptCommand(context, intent);
 					command.run();
 					return null;
 				}

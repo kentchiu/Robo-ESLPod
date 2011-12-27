@@ -17,6 +17,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.MenuItem;
@@ -28,12 +29,14 @@ import android.widget.MediaController;
 import android.widget.MediaController.MediaPlayerControl;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.kentchiu.eslpod.R;
+import com.kentchiu.eslpod.cmd.AbstractCommand;
 import com.kentchiu.eslpod.cmd.BatchWordCommand;
 import com.kentchiu.eslpod.cmd.MediaDownloadCommand;
 import com.kentchiu.eslpod.cmd.RichScriptCommand;
@@ -43,6 +46,22 @@ import com.kentchiu.eslpod.service.MusicService;
 import com.kentchiu.eslpod.view.adapter.ScriptListAdapter;
 
 public class PlayerActivity extends RoboListActivity implements MediaPlayerControl, SeekBar.OnSeekBarChangeListener {
+
+	public class MediaDownloadHandler extends Handler {
+		@Override
+		public void handleMessage(Message msg) {
+			switch (msg.what) {
+			case AbstractCommand.START:
+				Toast.makeText(PlayerActivity.this, "Starting download MP3", Toast.LENGTH_SHORT).show();
+				break;
+			case AbstractCommand.END:
+				Toast.makeText(PlayerActivity.this, "MP3 Download Completed", Toast.LENGTH_SHORT).show();
+				break;
+			default:
+				break;
+			}
+		}
+	}
 
 	public class PlaybackOnClickListener implements OnClickListener {
 
@@ -241,7 +260,7 @@ public class PlayerActivity extends RoboListActivity implements MediaPlayerContr
 		downloadButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				final MediaDownloadCommand cmd = new MediaDownloadCommand(getIntent().getData(), PlayerActivity.this, null);
+				final MediaDownloadCommand cmd = new MediaDownloadCommand(PlayerActivity.this, getIntent(), new MediaDownloadHandler());
 				new Thread(cmd).start();
 				downloadButton.setEnabled(false);
 			}

@@ -17,6 +17,7 @@ import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matchers;
 
 import android.content.ContentUris;
+import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.test.AndroidTestCase;
 
@@ -50,24 +51,9 @@ public class RichScriptCommandTest extends AndroidTestCase {
 		database = databaseHelper.getWritableDatabase();
 		database.execSQL("delete from podcast");
 		database.execSQL("insert into podcast(_id, link) values(1, '" + resource.toString() + "')");
-		command = new RichScriptCommand(mContext, ContentUris.withAppendedId(PodcastColumns.PODCAST_URI, 1));
-	}
-
-	public void test7_722_issues() throws Exception {
-		//String script722 = "http://www.eslpod.com/website/show_podcast.php?issue_id=10848015";
-		String script722 = "http://feedproxy.google.com/~r/EnglishAsASecondLanguagePodcast/~3/8YqeQY3nJ2U/show_podcast.php";
-
-		RichScriptCommand cmd = new RichScriptCommand(mContext, null);
-		String script = cmd.fetchScript(script722, "722");
-		System.out.println(script);
-		//System.out.println(script);
-		// line 2 <u>Madwomen</u>  -> not mark as headword
-		// line 4 cancelled -> not show in  headword list
-		// line 5 cliffhanger! -> not show in headword list  (cause by '!'?)
-		// line 6 episodes,  -> not show in headword list  (cause by '!'?)
-		// line <u>Reviver</u>   -> not mark as headword
-		// last line <img src=..... with="1"/> -> this line should not in script
-
+		Intent intent = new Intent();
+		intent.setData(ContentUris.withAppendedId(PodcastColumns.PODCAST_URI, 1));
+		command = new RichScriptCommand(mContext, intent);
 	}
 
 	public void testExtractScript() throws Exception {

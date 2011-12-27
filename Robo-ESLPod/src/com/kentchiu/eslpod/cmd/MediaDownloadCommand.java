@@ -16,32 +16,25 @@ import org.apache.commons.lang3.StringUtils;
 import roboguice.util.Ln;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
-import android.net.Uri;
-import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.Message;
 
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
-public class MediaDownloadCommand implements Runnable {
+public class MediaDownloadCommand extends AbstractCommand {
 
-	public static final int	DOWNLOAD_COMPLETED	= 1;
-	public static final int	DOWNLOAD_PROCESSING	= 2;
-	public static final int	DOWNLOAD_START		= 3;
+	//	public static final int	DOWNLOAD_COMPLETED	= 1;
+	//	public static final int	DOWNLOAD_PROCESSING	= 2;
+	//	public static final int	DOWNLOAD_START		= 3;
 
-	private URL				from;
-	private File			to;
-	private Handler			handler;
-	private Context			context;
-	private Uri				uri;
+	private URL		from;
+	private File	to;
 
-	public MediaDownloadCommand(Uri uri, Context context, Handler handler) {
-		this.context = context;
-		this.uri = uri;
-		this.handler = handler;
-		final Cursor c = context.getContentResolver().query(uri, null, null, null, null);
+	public MediaDownloadCommand(Context context, Intent intent, Handler handler) {
+		super(context, intent, handler);
+		final Cursor c = context.getContentResolver().query(intent.getData(), null, null, null, null);
 		if (c.moveToFirst()) {
 			final String url = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URL));
 			try {
@@ -54,14 +47,14 @@ public class MediaDownloadCommand implements Runnable {
 		}
 	}
 
-	private Bundle createBundle() {
-		String f = from.toString();
-		String t = to.toString();
-		Bundle data = new Bundle();
-		data.putString("from", f);
-		data.putString("to", t);
-		return data;
-	}
+	//	private Bundle createBundle() {
+	//		String f = from.toString();
+	//		String t = to.toString();
+	//		Bundle data = new Bundle();
+	//		data.putString("from", f);
+	//		data.putString("to", t);
+	//		return data;
+	//	}
 
 	private void downloadFile() throws IOException, FileNotFoundException {
 		Ln.i("Downloading file from " + from.toString());
@@ -99,6 +92,18 @@ public class MediaDownloadCommand implements Runnable {
 		}
 	}
 
+	@Override
+	protected boolean execute() {
+		try {
+			downloadFile();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return true;
+	}
+
 	private File getDownloadFolder(Context context) {
 		String state = Environment.getExternalStorageState();
 		if (StringUtils.equals(Environment.MEDIA_MOUNTED, state)) {
@@ -125,41 +130,26 @@ public class MediaDownloadCommand implements Runnable {
 		ContentValues cv = new ContentValues();
 		cv.put(PodcastColumns.MEDIA_DOWNLOAD_STATUS, PodcastColumns.STATUS_DOWNLOADED);
 		cv.put(PodcastColumns.MEDIA_URL_LOCAL, to.getAbsolutePath());
-		context.getContentResolver().update(uri, cv, null, null);
-		sendMessage(DOWNLOAD_COMPLETED, cache, (int) lenghtOfFile);
+		context.getContentResolver().update(intent.getData(), cv, null, null);
+		//sendMessage(DOWNLOAD_COMPLETED, cache, (int) lenghtOfFile);
 		Ln.i("Downloaded file " + to.toString() + " completed");
 	}
 
 	private void markAsStart() {
-		sendMessage(DOWNLOAD_START, 0, 0);
+		//sendMessage(DOWNLOAD_START, 0, 0);
 		ContentValues cv = new ContentValues();
 		cv.put(PodcastColumns.MEDIA_DOWNLOAD_STATUS, PodcastColumns.STATUS_DOWNLOADING);
-		context.getContentResolver().update(uri, cv, null, null);
+		context.getContentResolver().update(intent.getData(), cv, null, null);
 	}
 
-	@Override
-	public void run() {
-		try {
-			downloadFile();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public void sendMessage(int what, long process, long total) {
-		if (handler != null) {
-			Message m = handler.obtainMessage(what, (int) process, (int) total);
-			m.setData(createBundle());
-			m.sendToTarget();
-		} else {
-			Ln.w("try to sending but handler is null");
-		}
-	}
-
-	public void setHandler(Handler handler) {
-		this.handler = handler;
-	}
+	//	public void sendMessage(int what, long process, long total) {
+	//		if (handler != null) {
+	//			Message m = handler.obtainMessage(what, (int) process, (int) total);
+	//			m.setData(createBundle());
+	//			m.sendToTarget();
+	//		} else {
+	//			Ln.w("try to sending but handler is null");
+	//		}
+	//	}
 
 }
