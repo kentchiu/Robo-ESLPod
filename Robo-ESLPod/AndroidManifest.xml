@@ -66,12 +66,7 @@
         <service android:name=".service.MediaService" />
         <service android:name=".service.MediaDownloadService" />
         <service android:name=".service.AutoFetchService" />
-        <service android:name=".service.MusicService" >
-            <intent-filter >
-                <action android:name="PLAY" />
-            </intent-filter>
-        </service>
-
+        <service android:name=".service.MusicService" />
         <provider
             android:authorities="com.kentchiu.eslpod.provider.Dictionary"
             android:name=".provider.DictionaryContentProvider" />

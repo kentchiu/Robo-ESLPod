@@ -48,23 +48,18 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 	}
 
 	NotificationManager			mNotificationManager;
-
 	Notification				mNotification	= null;
-
 	// The ID we use for the notification (the onscreen alert that appears at the notification
 	// area at the top of the screen as an icon -- and as text as well if the user expands the
 	// notification area).
 	final int					NOTIFICATION_ID	= 1;
-
 	private static MusicService	mInstance		= null;
-
-	// The Media Player
 	MediaPlayer					mMediaPlayer	= null;					;
-
 	private final IBinder		mBinder			= new LocalBinder();
 	State						mState			= State.Retrieving;
 	private int					mBufferPosition;
 	private static String		mSongTitle;
+	private Intent				intent;
 
 	//private static String		mSongPicUrl;
 
@@ -181,6 +176,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
+		this.intent = intent;
 		if (intent.getAction().equals(ACTION_PLAY)) {
 			mMediaPlayer = new MediaPlayer(); // initialize it here
 			mMediaPlayer.setOnPreparedListener(this);
@@ -242,7 +238,9 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 
 	/** Updates the notification. */
 	void updateNotification(String text) {
-		PendingIntent pi = PendingIntent.getActivity(getApplicationContext(), 0, new Intent(getApplicationContext(), PlayerActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
+		Intent intent2 = new Intent(getApplicationContext(), PlayerActivity.class);
+		intent2.setData(intent.getData());
+		PendingIntent pi = PendingIntent.getActivity(getApplicationContext(), 0, intent2, PendingIntent.FLAG_UPDATE_CURRENT);
 		mNotification.setLatestEventInfo(getApplicationContext(), getResources().getString(R.string.app_name), text, pi);
 		mNotificationManager.notify(NOTIFICATION_ID, mNotification);
 	}

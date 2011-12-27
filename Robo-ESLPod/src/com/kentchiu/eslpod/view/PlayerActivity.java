@@ -31,6 +31,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
@@ -210,6 +211,7 @@ public class PlayerActivity extends RoboListActivity implements MediaPlayerContr
 
 		registerForContextMenu(getListView());
 		final Uri uri = getIntent().getData();
+		Preconditions.checkNotNull(uri);
 		Ln.i("working uri:" + uri);
 		getContentResolver().registerContentObserver(uri, false, new ContentObserver(new Handler()) {
 			@Override
@@ -219,7 +221,6 @@ public class PlayerActivity extends RoboListActivity implements MediaPlayerContr
 			}
 		});
 		final Cursor c = getContentResolver().query(getIntent().getData(), null, null, null, null);
-		//mUrl = "http://www.vorbis.com/music/Epoq-Lepidoptera.ogg";
 		if (!c.moveToFirst()) {
 			throw new IllegalStateException();
 		}
@@ -374,7 +375,7 @@ public class PlayerActivity extends RoboListActivity implements MediaPlayerContr
 		if (MusicService.getInstance() != null) {
 			MusicService.getInstance().startMusic();
 		} else {
-			startService(new Intent("PLAY"));
+			startService(new Intent("PLAY", getIntent().getData(), PlayerActivity.this, MusicService.class));
 		}
 	}
 }
