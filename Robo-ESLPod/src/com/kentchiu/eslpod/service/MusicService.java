@@ -13,6 +13,7 @@ import android.os.Binder;
 import android.os.IBinder;
 
 import com.kentchiu.eslpod.R;
+import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 import com.kentchiu.eslpod.view.PlayerActivity;
 
 public class MusicService extends Service implements MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnBufferingUpdateListener {
@@ -36,16 +37,17 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 	}
 
 	private static final String	ACTION_PLAY	= "PLAY";
-	private static String		mUrl;
+
+	//	private static String		mUrl;
 
 	public static MusicService getInstance() {
 		return mInstance;
 	}
 
-	public static void setSong(String url, String title) {
-		mUrl = url;
-		mSongTitle = title;
-	}
+	//	public static void setSong(String url, String title) {
+	//		mUrl = url;
+	//		mSongTitle = title;
+	//	}
 
 	NotificationManager			mNotificationManager;
 	Notification				mNotification	= null;
@@ -58,23 +60,27 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 	private final IBinder		mBinder			= new LocalBinder();
 	State						mState			= State.Retrieving;
 	private int					mBufferPosition;
-	private static String		mSongTitle;
+	//private static String		mSongTitle;
 	private Intent				intent;
-
-	//private static String		mSongPicUrl;
 
 	public int getBufferPercentage() {
 		// if (mState.equals(State.Preparing)) {
 		return mBufferPosition;
 		// }
 		// return getMusicDuration();
-	}
+	};
+
+	//private static String		mSongPicUrl;
 
 	public int getCurrentPosition() {
 		if (!mState.equals(State.Preparing) && !mState.equals(State.Retrieving)) {
 			return mMediaPlayer.getCurrentPosition();
 		}
 		return 0;
+	}
+
+	public Intent getIntent() {
+		return intent;
 	}
 
 	public MediaPlayer getMediaPlayer() {
@@ -88,20 +94,20 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 		return 0;
 	}
 
-	public String getSongTitle() {
-		return mSongTitle;
-	}
+	//	public String getSongTitle() {
+	//		return mSongTitle;
+	//	}
 
 	private void initMediaPlayer() {
 		try {
-			mMediaPlayer.setDataSource(mUrl);
+			mMediaPlayer.setDataSource(intent.getExtras().getString(PodcastColumns.MEDIA_URL));
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
 		} catch (IllegalStateException e) {
 			// TODO Workaround for bug: http://code.google.com/p/android/issues/detail?id=957
 			mMediaPlayer.reset();
 			try {
-				mMediaPlayer.setDataSource(mUrl);
+				mMediaPlayer.setDataSource(PodcastColumns.MEDIA_URL);
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
@@ -116,14 +122,14 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 			// TODO Workaround for bug: http://code.google.com/p/android/issues/detail?id=957
 			mMediaPlayer.reset();
 			try {
-				mMediaPlayer.setDataSource(mUrl);
+				mMediaPlayer.setDataSource(PodcastColumns.MEDIA_URL);
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
 			mMediaPlayer.prepareAsync();
 		}
 		mState = State.Preparing;
-		setUpAsForeground(mSongTitle + " (loading)");
+		setUpAsForeground(intent.getExtras().getString(PodcastColumns.TITLE) + " (loading)");
 	}
 
 	public boolean isPlaying() {
@@ -171,7 +177,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 	public void onPrepared(MediaPlayer player) {
 		mState = State.Playing;
 		mMediaPlayer.start();
-		setUpAsForeground(mSongTitle + " (playing)");
+		setUpAsForeground(intent.getExtras().getString(PodcastColumns.TITLE) + " (playing)");
 	}
 
 	@Override
@@ -192,7 +198,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 		if (mState.equals(State.Playing)) {
 			mMediaPlayer.pause();
 			mState = State.Paused;
-			updateNotification(mSongTitle + " (paused)");
+			updateNotification(intent.getExtras().getString(PodcastColumns.TITLE) + " (paused)");
 		}
 	}
 
@@ -232,7 +238,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 		if (!mState.equals(State.Preparing) && !mState.equals(State.Retrieving)) {
 			mMediaPlayer.start();
 			mState = State.Playing;
-			updateNotification(mSongTitle + " (playing)");
+			updateNotification(intent.getExtras().getString(PodcastColumns.TITLE) + " (playing)");
 		}
 	}
 

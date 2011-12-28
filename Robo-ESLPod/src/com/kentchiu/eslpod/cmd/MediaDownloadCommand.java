@@ -25,10 +25,6 @@ import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 
 public class MediaDownloadCommand extends AbstractCommand {
 
-	//	public static final int	DOWNLOAD_COMPLETED	= 1;
-	//	public static final int	DOWNLOAD_PROCESSING	= 2;
-	//	public static final int	DOWNLOAD_START		= 3;
-
 	private URL		from;
 	private File	to;
 
@@ -46,15 +42,6 @@ public class MediaDownloadCommand extends AbstractCommand {
 			}
 		}
 	}
-
-	//	private Bundle createBundle() {
-	//		String f = from.toString();
-	//		String t = to.toString();
-	//		Bundle data = new Bundle();
-	//		data.putString("from", f);
-	//		data.putString("to", t);
-	//		return data;
-	//	}
 
 	private void downloadFile() throws IOException, FileNotFoundException {
 		Ln.i("Downloading file from " + from.toString());
@@ -131,25 +118,12 @@ public class MediaDownloadCommand extends AbstractCommand {
 		cv.put(PodcastColumns.MEDIA_DOWNLOAD_STATUS, PodcastColumns.STATUS_DOWNLOADED);
 		cv.put(PodcastColumns.MEDIA_URL_LOCAL, to.getAbsolutePath());
 		context.getContentResolver().update(intent.getData(), cv, null, null);
-		//sendMessage(DOWNLOAD_COMPLETED, cache, (int) lenghtOfFile);
 		Ln.i("Downloaded file " + to.toString() + " completed");
 	}
 
 	private void markAsStart() {
-		//sendMessage(DOWNLOAD_START, 0, 0);
 		ContentValues cv = new ContentValues();
 		cv.put(PodcastColumns.MEDIA_DOWNLOAD_STATUS, PodcastColumns.STATUS_DOWNLOADING);
 		context.getContentResolver().update(intent.getData(), cv, null, null);
 	}
-
-	//	public void sendMessage(int what, long process, long total) {
-	//		if (handler != null) {
-	//			Message m = handler.obtainMessage(what, (int) process, (int) total);
-	//			m.setData(createBundle());
-	//			m.sendToTarget();
-	//		} else {
-	//			Ln.w("try to sending but handler is null");
-	//		}
-	//	}
-
 }

@@ -235,25 +235,9 @@ public class PlayerActivity extends RoboListActivity implements MediaPlayerContr
 
 		ctrl = new MediaController(this);
 		ctrl.setMediaPlayer(this);
-		//ctrl.setAnchorView(songPicture);
 
-		//		musicCurLoc = (TextView) findViewById(R.id.musicCurrentLoc);
-		//		musicDuration = (TextView) findViewById(R.id.musicDuration);
-		//		musicSeekBar = (SeekBar) findViewById(R.id.musicSeekBar);
-		//playPauseButton = (ToggleButton) findViewById(R.id.playPauseButton);
 		musicSeekBar.setOnSeekBarChangeListener(this);
 
-		//		playPauseButton.setOnClickListener(new OnClickListener() {
-		//			@Override
-		//			public void onClick(View v) {
-		//				// Perform action on clicks
-		//				if (playPauseButton.isChecked()) { // Checked -> Pause icon visible
-		//					start();
-		//				} else { // Unchecked -> Play icon visible
-		//					pause();
-		//				}
-		//			}
-		//		});
 		PlaybackOnClickListener playbackOnClickListener = new PlaybackOnClickListener();
 		playButton.setOnClickListener(playbackOnClickListener);
 		pauseButton.setOnClickListener(playbackOnClickListener);
@@ -291,15 +275,6 @@ public class PlayerActivity extends RoboListActivity implements MediaPlayerContr
 					runOnUiThread(new Runnable() {
 						@Override
 						public void run() {
-							//							if (isPlaying()) {
-							//								if (!playPauseButton.isChecked()) {
-							//									playPauseButton.setChecked(true);
-							//								}
-							//							} else {
-							//								if (playPauseButton.isChecked()) {
-							//									playPauseButton.setChecked(false);
-							//								}
-							//							}
 							musicDuration.setText(totalTime);
 							musicCurLoc.setText(curTime);
 						}
@@ -314,7 +289,7 @@ public class PlayerActivity extends RoboListActivity implements MediaPlayerContr
 		} else {
 			mUrl = url;
 		}
-		MusicService.setSong(mUrl, "Temp Song");
+		//MusicService.setSong(mUrl, title);
 
 		new Thread(new Runnable() {
 
@@ -375,7 +350,19 @@ public class PlayerActivity extends RoboListActivity implements MediaPlayerContr
 		if (MusicService.getInstance() != null) {
 			MusicService.getInstance().startMusic();
 		} else {
-			startService(new Intent("PLAY", getIntent().getData(), PlayerActivity.this, MusicService.class));
+			Intent newIntent = new Intent("PLAY", getIntent().getData(), PlayerActivity.this, MusicService.class);
+			final Cursor c = getContentResolver().query(getIntent().getData(), null, null, null, null);
+			if (!c.moveToFirst()) {
+				throw new IllegalStateException();
+			}
+			String localUrl = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URL_LOCAL));
+			final String url = c.getString(c.getColumnIndex(PodcastColumns.MEDIA_URL));
+			String title = c.getString(c.getColumnIndex(PodcastColumns.TITLE));
+			newIntent.putExtra(PodcastColumns.TITLE, title);
+			newIntent.putExtra(PodcastColumns.MEDIA_URL, url);
+			newIntent.putExtra(PodcastColumns.MEDIA_URL_LOCAL, localUrl);
+
+			startService(newIntent);
 		}
 	}
 }

@@ -103,7 +103,6 @@ public class PodcastCommand extends AbstractCommand {
 				if (StringUtils.isNotBlank(title) && !titles.contains(title)) {
 					try {
 						Uri uri = context.getContentResolver().insert(PodcastColumns.PODCAST_URI, cv);
-						//sendMessage(IMPORTING, count, nodes.size());
 						Intent intent = new Intent("com.kentchiu.eslpod.NEW_PODCAST", uri);
 						context.sendBroadcast(intent);
 						count++;

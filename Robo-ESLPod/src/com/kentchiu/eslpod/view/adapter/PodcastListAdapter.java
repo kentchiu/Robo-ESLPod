@@ -51,7 +51,6 @@ public class PodcastListAdapter extends ResourceCursorAdapter {
 		updateStatus(mediaStatus, (ImageView) view.findViewById(R.id.mp3StatusImage));
 		int dictStatus = cursor.getInt(cursor.getColumnIndex(PodcastColumns.DICTIONARY_DOWNLOAD_STATUS));
 		updateStatus(dictStatus, (ImageView) view.findViewById(R.id.dictionaryStatusImage));
-		//view.findViewById(R.id.dictionaryStatusImage);
 	}
 
 	@Override
