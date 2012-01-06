@@ -6,10 +6,10 @@
 	<classpathentry exported="true" kind="lib" path="lib/aopalliance-1.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-io-2.0.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-lang3-3.0.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/guava-r09.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/guice-3.0-no_aop.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/javax.inject.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/android-support-v13.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/roboguice-2.0b3.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/guava-11.0.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>
