@@ -9,7 +9,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/guice-3.0-no_aop.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/javax.inject.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/android-support-v13.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/roboguice-2.0b3.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/roboguice-2.0b3.jar" sourcepath="C:/Users/Kent/.m2/repository/org/roboguice/roboguice/2.0b3/roboguice-2.0b3-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/guava-11.0.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

@@ -2,10 +2,13 @@ package com.kentchiu.eslpod.service;
 
 import java.io.IOException;
 
+import roboguice.service.RoboService;
+
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.media.AudioManager;
@@ -14,12 +17,13 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 
+import com.google.inject.Inject;
 import com.kentchiu.eslpod.R;
 import com.kentchiu.eslpod.provider.Podcast.PodcastColumns;
 import com.kentchiu.eslpod.view.PlayerActivity;
 
-public class MusicService extends Service implements MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnBufferingUpdateListener {
-
+public class MusicService extends RoboService implements MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnBufferingUpdateListener {
+	
 	public class LocalBinder extends Binder {
 		MusicService getService() {
 			return MusicService.this;
@@ -40,16 +44,9 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 
 	public static final String	ACTION_PLAY	= "PLAY";
 
-	//	private static String		mUrl;
-
 	public static MusicService getInstance() {
 		return mInstance;
 	}
-
-	//	public static void setSong(String url, String title) {
-	//		mUrl = url;
-	//		mSongTitle = title;
-	//	}
 
 	NotificationManager			mNotificationManager;
 	Notification				mNotification	= null;
@@ -95,10 +92,6 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 		}
 		return 0;
 	}
-
-	//	public String getSongTitle() {
-	//		return mSongTitle;
-	//	}
 
 	private void initMediaPlayer() {
 		Uri uri = getIntent().getData();
@@ -235,7 +228,9 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 	 * the notification here.
 	 */
 	void setUpAsForeground(String text) {
-		PendingIntent pi = PendingIntent.getActivity(getApplicationContext(), 0, new Intent(getApplicationContext(), PlayerActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
+		Intent intent2 = new Intent(getApplicationContext(), PlayerActivity.class);
+		intent2.setData(getIntent().getData());
+		PendingIntent pi = PendingIntent.getActivity(getApplicationContext(), 0, intent2, PendingIntent.FLAG_UPDATE_CURRENT);
 		mNotification = new Notification();
 		mNotification.tickerText = text;
 		mNotification.icon = R.drawable.ic_launcher;

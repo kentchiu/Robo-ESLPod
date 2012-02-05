@@ -291,13 +291,7 @@ public class PlayerActivity extends RoboListActivity implements MediaPlayerContr
 		}
 		//MusicService.setSong(mUrl, title);
 
-		new Thread(new Runnable() {
 
-			@Override
-			public void run() {
-				//startService(new Intent("PLAY"));
-			}
-		}).start();
 
 	}
 
